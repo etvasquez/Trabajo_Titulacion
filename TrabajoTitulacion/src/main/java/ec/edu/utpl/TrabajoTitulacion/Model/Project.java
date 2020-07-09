@@ -1,10 +1,11 @@
-package ec.edu.utpl.TrabajoTitulacion.Models;
+package ec.edu.utpl.TrabajoTitulacion.Model;
 
 public class Project {
     private String identificador;
+    private String rol_proyecto;
+    /*
     private String fecha_fin_participacion;
     private String fecha_inicio_participacion;
-    private String rol_proyecto;
     private String area_conocimiento;
     private String area_conocimiento_especifica;
     private String avance;
@@ -31,10 +32,15 @@ public class Project {
     private String titulo;
     private String tipo_proyecto;
     private String tipo_participante;
-
+*/
     public Project() {
     }
 
+    public Project(String identificador, String rol_proyecto) {
+        this.identificador = identificador;
+        this.rol_proyecto = rol_proyecto;
+    }
+/*
     public Project(String identificador, String fecha_fin_participacion, String fecha_inicio_participacion, String rol_proyecto, String area_conocimiento, String area_conocimiento_especifica, String avance, String cobertura, String codigo_proyecto, String descripcion, String estado_validacion, String fecha_inicio, String fecha_fin, String fondo_externo, String fondo_utpl, String incluye_estudiantes, String incluye_financiamiento_externo, String linea_investigacion, String moneda, String objetivos, String presupuesto, String programa, String reprogramado, String smarland, String sub_area_conocimiento, String tipo_convocatoria, String total_general, String titulo, String tipo_proyecto, String tipo_participante) {
         this.identificador = identificador;
         this.fecha_fin_participacion = fecha_fin_participacion;
@@ -67,7 +73,7 @@ public class Project {
         this.tipo_proyecto = tipo_proyecto;
         this.tipo_participante = tipo_participante;
     }
-
+*/
     public String getIdentificador() {
         return identificador;
     }
@@ -76,6 +82,14 @@ public class Project {
         this.identificador = identificador;
     }
 
+    public String getRol_proyecto() {
+        return rol_proyecto;
+    }
+
+    public void setRol_proyecto(String rol_proyecto) {
+        this.rol_proyecto = rol_proyecto;
+    }
+/*
     public String getFecha_fin_participacion() {
         return fecha_fin_participacion;
     }
@@ -92,13 +106,7 @@ public class Project {
         this.fecha_inicio_participacion = fecha_inicio_participacion;
     }
 
-    public String getRol_proyecto() {
-        return rol_proyecto;
-    }
 
-    public void setRol_proyecto(String rol_proyecto) {
-        this.rol_proyecto = rol_proyecto;
-    }
 
     public String getArea_conocimiento() {
         return area_conocimiento;
@@ -306,5 +314,5 @@ public class Project {
 
     public void setTipo_participante(String tipo_participante) {
         this.tipo_participante = tipo_participante;
-    }
+    }*/
 }

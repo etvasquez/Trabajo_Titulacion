@@ -1,4 +1,7 @@
-package ec.edu.utpl.TrabajoTitulacion.Models;
+package ec.edu.utpl.TrabajoTitulacion.Model;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class Person {
     private String identificador;
@@ -17,6 +20,7 @@ public class Person {
     private String nacionalidad;
     private String modalidad;
     private String departamento;
+    private Set<Project> project = new HashSet<>();
 
     public Person() {
     }
@@ -166,5 +170,13 @@ public class Person {
 
     public void setDepartamento(String departamento) {
         this.departamento = departamento;
+    }
+
+    public Set<Project> getProject() {
+        return project;
+    }
+
+    public void setProject(Set<Project> project) {
+        this.project = project;
     }
 }
