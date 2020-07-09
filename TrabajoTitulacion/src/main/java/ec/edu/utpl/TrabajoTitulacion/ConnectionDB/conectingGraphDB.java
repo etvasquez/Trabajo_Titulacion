@@ -20,9 +20,8 @@ public class conectingGraphDB {
     private static final String GRAPHDB_SERVER =
             "http://localhost:7200/";
     private static final String REPOSITORY_ID = "OntologyProjects";
-    private static String strInsert;
-    private static String strQuery;
-
+    //private static String strInsert;
+/*
     static {
         strInsert =
                 "INSERT DATA {"
@@ -37,63 +36,14 @@ public class conectingGraphDB {
                         + "<http://dbpedia.org/resource/Grace_Hopper> <http://xmlns.com/foaf/0.1/name> \"Grace Hopper\" ."
                         + "<http://dbpedia.org/resource/Grace_Hopper> <http://xmlns.com/foaf/0.1/surname> \"Hopper\" ."
                         + "}";
-        strQuery ="PREFIX schema: <http://schema.org/> " +
-                "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
-                "SELECT ?rol ?nombre ?descripcion "+
-                "WHERE {"+
-                "?s j.2:title 'IDEL 2008: Primer Taller Presencial de Implementación y desarrollo E-Learning' . "+
-                "?id schema:idProject ?s ."+
-                "?id schema:rolProyecto ?rollabel ."+
-                "?rollabel rdfs:label ?rol ."+
-                "?project j.2:currentProject ?id."+
-                "?project j.2:lastName ?nombre."+
-                "?project j.2:firstName ?apellido."+
-                "?project j.2:mbox ?email."+
-                "?s schema:descripcion ?descripcion."+
-                "} ";
     }
-
-    private static RepositoryConnection getRepositoryConnection() {
+*/
+    public RepositoryConnection getRepositoryConnection() {
         Repository repository = new HTTPRepository(
                 GRAPHDB_SERVER, REPOSITORY_ID);
         repository.initialize();
         RepositoryConnection repositoryConnection =
                 repository.getConnection();
         return repositoryConnection;
-    }
-    private static void query(
-            RepositoryConnection repositoryConnection) {
-        TupleQuery tupleQuery = repositoryConnection
-                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
-            while (result.hasNext()) {
-                BindingSet bindingSet = result.next();
-                SimpleLiteral name =
-                        (SimpleLiteral)bindingSet.getValue("nombre");
-                logger.trace("nombre = " + name.stringValue());
-                System.out.println(name.toString());
-            }
-        }
-        catch (QueryEvaluationException qee) {
-            logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
-        }
-    }
-    public static void main(String[] args) {
-        RepositoryConnection repositoryConnection = null;
-        try {
-            repositoryConnection = getRepositoryConnection();
-            //insert(repositoryConnection);
-            query(repositoryConnection);
-        } catch (Throwable t) {
-            logger.error(WTF_MARKER, t.getMessage(), t);
-        } finally {
-            repositoryConnection.close();
-        }
     }
 }
