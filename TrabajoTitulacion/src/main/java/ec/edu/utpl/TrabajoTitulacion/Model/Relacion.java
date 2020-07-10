@@ -4,6 +4,11 @@ public class Relacion {
     private String target;
     private String source;
 
+    public Relacion(String target, String source) {
+        this.target = target;
+        this.source = source;
+    }
+
     public String getTarget() {
         return target;
     }

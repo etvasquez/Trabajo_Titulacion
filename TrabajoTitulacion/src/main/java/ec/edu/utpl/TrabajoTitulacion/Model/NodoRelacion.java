@@ -6,6 +6,11 @@ public class NodoRelacion {
     private ArrayList<Nodo> nodes = new ArrayList<>();
     private ArrayList<Relacion> likes = new ArrayList<>();
 
+    public NodoRelacion(ArrayList<Nodo> nodes, ArrayList<Relacion> likes) {
+        this.nodes = nodes;
+        this.likes = likes;
+    }
+
     public ArrayList<Nodo> getNodes() {
         return nodes;
     }
