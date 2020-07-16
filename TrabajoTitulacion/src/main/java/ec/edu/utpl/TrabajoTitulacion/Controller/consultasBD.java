@@ -1,6 +1,7 @@
 package ec.edu.utpl.TrabajoTitulacion.Controller;
 
 import ec.edu.utpl.TrabajoTitulacion.ConnectionDB.conectingGraphDB;
+import ec.edu.utpl.TrabajoTitulacion.Interfaces.IGraph;
 import ec.edu.utpl.TrabajoTitulacion.Model.*;
 import org.eclipse.rdf4j.model.impl.SimpleLiteral;
 import org.eclipse.rdf4j.query.*;
@@ -11,22 +12,26 @@ import org.slf4j.MarkerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
-public class consultasBD {
+@Service
+public class consultasBD implements IGraph {
 
     private static Logger logger = LoggerFactory.getLogger(conectingGraphDB.class);
     private static final Marker WTF_MARKER = MarkerFactory.getMarker("WTF");
 
     conectingGraphDB con = new conectingGraphDB();
 
-    public void query(String var) {
+    @Override
+    public String getGrapg() {
         ArrayList<Nodo> listNodos = new ArrayList<>();
         ArrayList<Relacion> listRelacion = new ArrayList<>();
         ArrayList<NodoRelacion> nodoRelacion = new ArrayList<>();
+        String json="";
         // Create ObjectMapper object.
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -67,7 +72,7 @@ public class consultasBD {
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
                 "SELECT ?idpersona ?nombre ?apellido ?id_project ?titulo " +
                 "WHERE {"+
-                "?s j.2:title '"+var+"' . "+
+                "?s j.2:title 'IDEL 2008: Primer Taller Presencial de Implementación y desarrollo E-Learning' . "+
                 "?id schema:idProject ?s . "+
                 "?s schema:ide_project ?id_project . "+
                 "?project j.2:currentProject ?id. " +
@@ -103,7 +108,7 @@ public class consultasBD {
             }
             NodoRelacion nr = new NodoRelacion(listNodos,listRelacion);
             nodoRelacion.add(nr);
-            String json = mapper.writeValueAsString(nodoRelacion.get(0));
+            json = mapper.writeValueAsString(nodoRelacion.get(0));
             System.out.println(json);
         }
         catch (QueryEvaluationException | JsonProcessingException qee) {
@@ -112,5 +117,7 @@ public class consultasBD {
         } finally {
             result.close();
         }
+        return json;
     }
+
 }
