@@ -3,11 +3,15 @@ package ec.edu.utpl.TrabajoTitulacion.Model;
 public class Nodo {
 
     private String id;
-    private String name;
+    private String label;
+    private String group;
+    private String title;
 
-    public Nodo(String id, String name) {
+    public Nodo(String id, String label, String group, String title) {
         this.id = id;
-        this.name = name;
+        this.label = label;
+        this.group = group;
+        this.title = title;
     }
 
     public String getId() {
@@ -18,11 +22,27 @@ public class Nodo {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getLabel() {
+        return label;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

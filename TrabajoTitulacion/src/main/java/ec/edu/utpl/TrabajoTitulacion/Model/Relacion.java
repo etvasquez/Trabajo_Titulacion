@@ -1,27 +1,27 @@
 package ec.edu.utpl.TrabajoTitulacion.Model;
 
 public class Relacion {
-    private String target;
-    private String source;
+    private String from;
+    private String to;
 
-    public Relacion(String target, String source) {
-        this.target = target;
-        this.source = source;
+    public Relacion(String from, String to) {
+        this.from = from;
+        this.to = to;
     }
 
-    public String getTarget() {
-        return target;
+    public String getFrom() {
+        return from;
     }
 
-    public void setTarget(String target) {
-        this.target = target;
+    public void setFrom(String from) {
+        this.from = from;
     }
 
-    public String getSource() {
-        return source;
+    public String getTo() {
+        return to;
     }
 
-    public void setSource(String source) {
-        this.source = source;
+    public void setTo(String to) {
+        this.to = to;
     }
 }

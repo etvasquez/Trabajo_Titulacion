@@ -1,7 +1,6 @@
 package ec.edu.utpl.TrabajoTitulacion.Controller;
 
 import ec.edu.utpl.TrabajoTitulacion.ConnectionDB.conectingGraphDB;
-import ec.edu.utpl.TrabajoTitulacion.Interfaces.IGraph;
 import ec.edu.utpl.TrabajoTitulacion.Model.*;
 import org.eclipse.rdf4j.model.impl.SimpleLiteral;
 import org.eclipse.rdf4j.query.*;
@@ -12,26 +11,22 @@ import org.slf4j.MarkerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 
-@Service
-public class consultasBD implements IGraph {
+public class consultasBD{
 
     private static Logger logger = LoggerFactory.getLogger(conectingGraphDB.class);
     private static final Marker WTF_MARKER = MarkerFactory.getMarker("WTF");
 
     conectingGraphDB con = new conectingGraphDB();
 
-    @Override
     public String getGrapg() {
         ArrayList<Nodo> listNodos = new ArrayList<>();
         ArrayList<Relacion> listRelacion = new ArrayList<>();
         ArrayList<NodoRelacion> nodoRelacion = new ArrayList<>();
         String json="";
+        boolean contiene = false;
         // Create ObjectMapper object.
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -70,14 +65,22 @@ public class consultasBD implements IGraph {
                 "} ";*/
         String strQuery ="PREFIX schema: <http://schema.org/> " +
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
-                "SELECT ?idpersona ?nombre ?apellido ?id_project ?titulo " +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
+                "SELECT ?idpersona ?nombre ?apellido ?id_project ?titulo ?rol ?correo ?area ?tipo " +
                 "WHERE {"+
                 "?s j.2:title 'IDEL 2008: Primer Taller Presencial de Implementación y desarrollo E-Learning' . "+
                 "?id schema:idProject ?s . "+
+                "?id schema:rolProyecto ?labelrol . "+
+                "?labelrol rdfs:label ?rol . "+
                 "?s schema:ide_project ?id_project . "+
-                "?project j.2:currentProject ?id. " +
+                "?s schema:tipoproyecto ?labeltipo ." +
+                "?labeltipo rdfs:label ?tipo ."+
+                "?project j.2:currentProject ?id. "+
                 "?project j.2:lastName ?nombre. "+
                 "?project j.2:firstName ?apellido. "+
+                "?project j.2:mbox ?correo . "+
+                "?project schema:areaPerson ?labelarea . "+
+                "?labelarea rdfs:label ?area . "+
                 "?project schema:id_person ?idpersona ."+
                 " ?s j.2:title ?titulo . " +
                 "} ";
@@ -94,17 +97,28 @@ public class consultasBD implements IGraph {
                         (SimpleLiteral)bindingSet.getValue("nombre");
                 SimpleLiteral apellido =
                         (SimpleLiteral)bindingSet.getValue("apellido");
+                SimpleLiteral rol =
+                        (SimpleLiteral)bindingSet.getValue("rol");
+                SimpleLiteral correo =
+                        (SimpleLiteral)bindingSet.getValue("correo");
+                SimpleLiteral area =
+                        (SimpleLiteral)bindingSet.getValue("area");
                 SimpleLiteral idProyecto =
                         (SimpleLiteral)bindingSet.getValue("id_project");
                 SimpleLiteral titulo =
                         (SimpleLiteral)bindingSet.getValue("titulo");
-                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat(apellido.stringValue()));
-                Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),titulo.stringValue());
+                SimpleLiteral tipo =
+                        (SimpleLiteral)bindingSet.getValue("tipo");
+                String rolP =(rol.stringValue().equalsIgnoreCase("Participación"))?"participante":"director";
+                String titlePersona = nombre.stringValue().concat(" ").concat(apellido.stringValue()).concat("\n")
+                        .concat(correo.stringValue()).concat("\n").concat(area.stringValue());
+                String titleProyecto = titulo.stringValue().concat("\n").concat(tipo.stringValue());
+                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat(" ").concat(apellido.stringValue()),rolP,titlePersona);
+                Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),titulo.stringValue(),"projects",titleProyecto);
                 Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue());
                 listNodos.add(nodoPersona);
-                listNodos.add(nodoProyecto);
+                listNodos.set(0,nodoProyecto);
                 listRelacion.add(relacion);
-                //logger.trace("idpersona = " + name.stringValue());
             }
             NodoRelacion nr = new NodoRelacion(listNodos,listRelacion);
             nodoRelacion.add(nr);

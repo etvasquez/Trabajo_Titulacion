@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 public class NodoRelacion {
     private ArrayList<Nodo> nodes = new ArrayList<>();
-    private ArrayList<Relacion> likes = new ArrayList<>();
+    private ArrayList<Relacion> edges = new ArrayList<>();
 
-    public NodoRelacion(ArrayList<Nodo> nodes, ArrayList<Relacion> likes) {
+    public NodoRelacion(ArrayList<Nodo> nodes, ArrayList<Relacion> edges) {
         this.nodes = nodes;
-        this.likes = likes;
+        this.edges = edges;
     }
 
     public ArrayList<Nodo> getNodes() {
@@ -19,11 +19,11 @@ public class NodoRelacion {
         this.nodes = nodes;
     }
 
-    public ArrayList<Relacion> getLikes() {
-        return likes;
+    public ArrayList<Relacion> getEdges() {
+        return edges;
     }
 
-    public void setLikes(ArrayList<Relacion> likes) {
-        this.likes = likes;
+    public void setEdges(ArrayList<Relacion> edges) {
+        this.edges = edges;
     }
 }

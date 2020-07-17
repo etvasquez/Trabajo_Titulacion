@@ -1,0 +1,76 @@
+<!doctype html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <Title></Title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
+    <style type="text/css">
+        #mynetwork {
+            /* width: 600px; */
+            margin-left: 20%;
+            margin-right: 5%;
+            width: 75%;
+            height: 500px;
+            border: 2px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+<p style="visibility: hidden" id="json" th:text="${appName}"></p>
+<div id="mynetwork"></div>
+<!-- Add an invisible <div> element to the document, to hold the JSON data: -->
+<div id="networkJSON-results" class="results" style="display:none"></div>
+<script type="text/javascript">
+    var options = {
+        interaction: { hover: true },
+        groups: {
+            participante: {
+                shape: "icon",
+                icon: {
+                    face: "'Font Awesome 5 Free'",
+                    weight: "bold", // Font Awesome 5 doesn't work properly unless bold.
+                    code: "\uf007",
+                    size: 50,
+                    color: "#40AACD"
+                }
+            },
+            director: {
+                shape: "icon",
+                icon: {
+                    face: "'Font Awesome 5 Free'",
+                    weight: "bold", // Font Awesome 5 doesn't work properly unless bold.
+                    code: "\uf007",
+                    size: 50,
+                    color: "#5EE312"
+                }
+            },
+            projects:{
+                shape: "icon",
+                icon: {
+                    face: "'Font Awesome 5 Free'",
+                    weight: "bold", // Font Awesome 5 doesn't work properly unless bold.
+                    code: "\uf15c",
+                    size: 50,
+                    color: "#f0a30a"
+                }
+            }
+        }
+    };
+    var data = JSON.parse(document.getElementById('json').innerHTML)
+    var container = document.getElementById('mynetwork');
+    var data = {
+        nodes: data.nodes,
+        edges: data.edges
+    };
+    var network = new vis.Network(container, data, options);
+    network.on("click", function(params) {
+        alert(
+            "ID: " + this.getNodeAt(params.pointer.DOM)
+        );
+    });
+</script>
+</body>
+</html>
