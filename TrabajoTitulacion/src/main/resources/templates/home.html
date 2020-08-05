@@ -1,71 +1,75 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
-
-<!-- Load d3.js -->
-<script src="https://d3js.org/d3.v4.js"></script>
-
-<!-- Create a div where the graph will take place -->
-<div id="my_dataviz"></div>
-
-<script>
-
-    // set the dimensions and margins of the graph
-    var margin = {top: 10, right: 30, bottom: 30, left: 40},
-        width = 400 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
-
-    // append the svg object to the body of the page
-    var svg = d3.select("#my_dataviz")
-        .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
-
-    d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_network.json", function( data) {
-
-        // Initialize the links
-        var link = svg
-            .selectAll("line")
-            .data(data.links)
-            .enter()
-            .append("line")
-            .style("stroke", "#aaa")
-
-        // Initialize the nodes
-        var node = svg
-            .selectAll("circle")
-            .data(data.nodes)
-            .enter()
-            .append("circle")
-            .attr("r", 20)
-            .style("fill", "#69b3a2")
-
-        // Let's list the force we wanna apply on the network
-        var simulation = d3.forceSimulation(data.nodes)                 // Force algorithm is applied to data.nodes
-            .force("link", d3.forceLink()                               // This force provides links between nodes
-                .id(function(d) { return d.id; })                     // This provide  the id of a node
-                .links(data.links)                                    // and this the list of links
-            )
-            .force("charge", d3.forceManyBody().strength(-400))         // This adds repulsion between nodes. Play with the -400 for the repulsion strength
-            .force("center", d3.forceCenter(width / 2, height / 2))     // This force attracts nodes to the center of the svg area
-            .on("end", ticked);
-
-        // This function is run at each iteration of the force algorithm, updating the nodes position.
-        function ticked() {
-            link
-                .attr("x1", function(d) { return d.source.x; })
-                .attr("y1", function(d) { return d.source.y; })
-                .attr("x2", function(d) { return d.target.x; })
-                .attr("y2", function(d) { return d.target.y; });
-
-            node
-                .attr("cx", function (d) { return d.x+6; })
-                .attr("cy", function(d) { return d.y-6; });
-        }
-
-    });
-
-
-</script>
+<!doctype html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <Title></Title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- Load icon library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="js/script.js"></script>
+    <link href="css/estilos.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">Plataforma Semántica UTPL</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Inicio</a></li>
+            <li><a href="#">Estadísticas</a></li>
+            <li><a href="#">Repositorio</a></li>
+            <li><a href="#">Nosotros</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+        </ul>
+    </div>
+</nav>
+<br>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="form-group">
+                <label for="sel1">BUSCAR POR </label>
+                <select class="form-control" id="sel1">
+                    <option selected>Elija...</option>
+                    <option value="Nombre">Nombre</option>
+                    <option value="Proyecto">Proyecto</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <form style="display: none" id="con">
+                <div class="form-group">
+                    <br>
+                    <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Search ...">
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-1">
+            <form style="display: none" id="con1">
+                <div class="form-group">
+                    <br>
+                    <button type="button" class="btn btn-primary mb-2" onclick="cargarGrafo()"><i class="fa fa-search"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<br>
+<p style="display: none" id="json" th:text="${appName}"></p>
+<div id="mynetwork"></div>
+<!-- Add an invisible <div> element to the document, to hold the JSON data: -->
+<div id="networkJSON-results" class="results" style="display:none"></div>
+</body>
+</html>
