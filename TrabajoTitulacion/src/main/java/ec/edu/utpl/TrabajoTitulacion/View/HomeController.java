@@ -14,11 +14,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class HomeController {
 
     String appName;
+    String appName1;
     consultasBD consultas = new consultasBD();
     @GetMapping("/")
     public String homePage(Model model) {
-        //appName = consultas.getGrapPerson();
-        //model.addAttribute("appName", appName);
         return "home";
     }
 
@@ -32,5 +31,11 @@ public class HomeController {
     public ResponseEntity<String> busquedaProyecto(@PathVariable(value="id") String id) throws JsonProcessingException {
         appName = consultas.getGrapProject(id);
         return new ResponseEntity<String>(appName, HttpStatus.OK);
+    }
+
+    @GetMapping("/projectID/{id}")
+    public ResponseEntity<String> busquedaProyectoID(@PathVariable(value="id") String id) throws JsonProcessingException {
+        appName1 = consultas.getGrapProjectID(id);
+        return new ResponseEntity<String>(appName1, HttpStatus.OK);
     }
 }
