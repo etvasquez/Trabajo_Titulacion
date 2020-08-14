@@ -1,3 +1,11 @@
 * {
     box-sizing: border-box;
 }
+.dropdown {
+    margin: 20px;
+}
+
+.dropdown-menu {
+    max-height: 20rem;
+    overflow-y: auto;
+}

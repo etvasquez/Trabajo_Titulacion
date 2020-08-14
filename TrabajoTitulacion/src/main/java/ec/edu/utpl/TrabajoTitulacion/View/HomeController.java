@@ -2,7 +2,6 @@ package ec.edu.utpl.TrabajoTitulacion.View;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ec.edu.utpl.TrabajoTitulacion.Controller.consultasBD;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class HomeController {
-
     String appName;
     String appName1;
     consultasBD consultas = new consultasBD();
@@ -27,6 +25,18 @@ public class HomeController {
         return new ResponseEntity<String>(appName, HttpStatus.OK);
     }
 
+    @GetMapping("/listaBusquedaPersona/{id}")
+    public ResponseEntity<String> ObtenerPersonas(@PathVariable(value="id") String id) throws JsonProcessingException {
+        appName = consultas.BusquedaPorNombre(id);
+        return new ResponseEntity<String> (appName, HttpStatus.OK);
+    }
+
+    @GetMapping("/listaBusquedaProyecto/{id}")
+    public ResponseEntity<String> Obtenerroyectos(@PathVariable(value="id") String id) throws JsonProcessingException {
+        appName = consultas.BusquedaPorProyecto(id);
+        return new ResponseEntity<String> (appName, HttpStatus.OK);
+    }
+
     @GetMapping("/project/{id}")
     public ResponseEntity<String> busquedaProyecto(@PathVariable(value="id") String id) throws JsonProcessingException {
         appName = consultas.getGrapProject(id);
@@ -37,5 +47,11 @@ public class HomeController {
     public ResponseEntity<String> busquedaProyectoID(@PathVariable(value="id") String id) throws JsonProcessingException {
         appName1 = consultas.getGrapProjectID(id);
         return new ResponseEntity<String>(appName1, HttpStatus.OK);
+    }
+
+    @GetMapping("/personID/{id}")
+    public ResponseEntity<String> busquedaPersonaID(@PathVariable(value="id") String id) throws JsonProcessingException {
+        String idPerson = consultas.getIDPerson(id);
+        return new ResponseEntity<String>(idPerson, HttpStatus.OK);
     }
 }

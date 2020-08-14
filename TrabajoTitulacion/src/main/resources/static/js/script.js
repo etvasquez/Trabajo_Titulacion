@@ -1,148 +1,244 @@
 var selected = 'Nombre';
-var mostrar = false;
+var listaNodoAbierto = [];
+var tipo = '';
 $(document).ready(function(){
+    $('.js-example-basic-single').select2({
+        width:'100%',
+        minimumInputLength:3,
+        allowClear:true,
+        placeholder:"Seleccione una opción ...",
+        ajax: {
+            url: function (params){
+                var busqueda = params.term.toUpperCase();
+                busqueda = busqueda.replace('Á', 'A');
+                busqueda = busqueda.replace('É', 'E');
+                busqueda = busqueda.replace('Í', 'I');
+                busqueda = busqueda.replace('Ó', 'O');
+                busqueda = busqueda.replace('Ú', 'U');
+                if(selected=="Nombre"){
+                    ruta = "http://localhost:8888/listaBusquedaPersona/"+ busqueda;
+                }else{
+                    ruta = "http://localhost:8888/listaBusquedaProyecto/"+ busqueda;
+                }
+                return ruta;
+            },
+            dataType: "json",
+            type: "GET",
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                       return {
+                            text: item.nombre,
+                            id: item.id
+                        }
+                    })
+                };
+            }
+        }
+    });
     $("select.form-control").change(function(){
         selected = $(this).children("option:selected").val();
-        mostrar = false;
+        $('#listaBusqueda').empty();
+        listaNodoAbierto = [];
+    });
+    $("select.js-example-basic-single").change(function(){
+        tipo = $('#listaBusqueda').val();
+        var urlBase = "http://localhost:8888/";
+        if(selected=='Proyecto'){
+            var rutaProject = urlBase + "project/"+tipo;
+            $.get(rutaProject,
+                function (res) {
+                    $("#json1").empty();
+                    $("#json1").append(res);
+                    $("#json").empty();
+                    $("#json").append(res);
+                    armarGrafo();
+                    //armarGrafoProyecto();
+                });
+        }else if(selected=='Nombre'){
+            var rutaPerson = urlBase + "person/"+tipo;
+            $.get(rutaPerson,
+                function (res) {
+                    $("#json1").empty();
+                    $("#json1").append(res);
+                    $("#json").empty();
+                    $("#json").append(res);
+                    armarGrafo();
+                });
+        }
+        var heigth=$(window).height();
+        $('#mynetwork').height(heigth);
+        $('#mynetwork').css('border','1px solid lightgray');
+        var heigth1=$(window).height();
+        $('#myleyenda').height(heigth1);
+        $('#myleyenda').css('border','1px solid lightgray');
     });
 });
-var input = document.getElementById("formGroupExampleInput");
-input.addEventListener("keyup", function(event) {
-    if (event.keyCode === 13) {
-        event.preventDefault();
-        alert("hola")
-        document.getElementById("myBtn").onclick();
-    }
-});
-function cargarGrafo() {
-    var tipo = $('#formGroupExampleInput').val();
-    var urlBase = "http://localhost:8888/";
-    if(selected=='Proyecto'){
-        var rutaProject = urlBase + "project/"+tipo;
-        $.get(rutaProject,
-            function (res) {
-                console.log(Object.keys(res));
-                $("#json").empty();
-                $("#json").append(res);
-                armarGrafoProyecto();
-            });
-    }else if(selected=='Nombre'){
-        var rutaPerson = urlBase + "person/"+tipo;
-        $.get(rutaPerson,
-            function (res) {
-                console.log(Object.keys(res));
-                $("#json").empty();
-                $("#json").append(res);
-                armarGrafoPersona();
-            });
-    }
-    var heigth=$(window).height();
-    $('#mynetwork').height(heigth);
-    $('#mynetwork').css('border','1px solid lightgray');
-}
 
-function cargarGrafoID(idProject) {
+function eliminarNodosRepetidos(arrayNodos) {
+    var hash = {};
+    var nodossinRepetir = arrayNodos.nodes.filter(function(current) {
+        var exists = !hash[current.id];
+        hash[current.id] = true;
+        return exists;
+    });
+    return nodossinRepetir;
+}
+function eliminarEdgesRepetidos(arrayEdges) {
+    var edgessinRepetir = [];
+    for(var j = 0; j < arrayEdges.edges.length; j ++){
+        var contador = 0;
+        if(j==0){
+            edgessinRepetir.push(arrayEdges.edges[j]);
+        }
+        for(var k = 0 ; k<edgessinRepetir.length;k++){
+            if(JSON.stringify(arrayEdges.edges[j])!=JSON.stringify(edgessinRepetir[k])){
+                contador++;
+                if(contador==edgessinRepetir.length){
+                    edgessinRepetir.push(arrayEdges.edges[j]);
+                }
+            }
+        }
+    }
+    return edgessinRepetir;
+}
+function agrandarGrafo(idProject) {
     var urlBase = "http://localhost:8888/";
     var rutaProject = urlBase + "projectID/"+idProject;
-    var data = JSON.parse(document.getElementById('json').innerHTML);
+    var dataRepetidos = JSON.parse(document.getElementById('json').innerHTML);
     $.get(rutaProject,
         function (res) {
-            var data1 = JSON.parse(res);
+            var data = JSON.parse(res);
             console.log(Object.keys(res));
-            var node1 = data.nodes.concat(data1.nodes);
-            var hash = {};
-            node1 = node1.filter(function(current) {
-                var exists = !hash[current.id];
-                hash[current.id] = true;
-                return exists;
-            });
-            var edges1 = data1.edges;
-            var edgesunico =[];
-            for (var i = 0; i < edges1.length; i ++){
-                var count = 0;
-                for(var j = 0; j < data.edges.length; j ++){
-                    if(JSON.stringify(edges1[i])!=JSON.stringify(data.edges[j])){
-                        count++;
-                        if(count==data.edges.length){
-                            console.log("Edges: "+JSON.stringify(edges1[i]));
-                            edgesunico.push(edges1[i]);
-                        }
-
-                    }
-                }
-
+            dataRepetidos = {
+                nodes : dataRepetidos.nodes.concat(data.nodes),
+                edges : dataRepetidos.edges.concat(data.edges)
             }
-            data = {
-                nodes: node1,
-                edges: data.edges.concat(edgesunico)
-            };
-            console.log(JSON.stringify(data))
             $("#json").empty();
-            $("#json").append(JSON.stringify(data));
-            armarGrafoPersona();
+            $("#json").append(JSON.stringify(dataRepetidos));
+            var datapresentar = {
+                nodes: eliminarNodosRepetidos(dataRepetidos),
+                edges: eliminarEdgesRepetidos(dataRepetidos)
+            };
+            console.log(JSON.stringify(datapresentar))
+            $("#json1").empty();
+            $("#json1").append(JSON.stringify(datapresentar));
+            armarGrafo();
         });
 }
-
+function EliminarNodos(data, dataRepetidos) {
+    var nodosEliminados =[];
+    var nodos = [];
+    for (var i = 0; i < dataRepetidos.nodes.length; i ++){
+        var acumulador = 0;
+        for(var j = 0; j < data.nodes.length; j ++){
+            if(JSON.stringify(dataRepetidos.nodes[i])!=JSON.stringify(data.nodes[j])){
+                acumulador++;
+                if(acumulador==data.nodes.length){
+                    nodos.push(dataRepetidos.nodes[i]);
+                }
+            }else{
+                if(nodosEliminados.length==0){
+                    nodosEliminados.push(dataRepetidos.nodes[i]);
+                    break;
+                }
+                var acumulador2 = 0;
+                for(var k = 0; k<nodosEliminados.length; k++){
+                    if(JSON.stringify(dataRepetidos.nodes[i])!=JSON.stringify(nodosEliminados[k])){
+                        acumulador2++;
+                    }
+                }
+                if(acumulador2==nodosEliminados.length){
+                    nodosEliminados.push(dataRepetidos.nodes[i]);
+                }else {
+                    nodos.push(dataRepetidos.nodes[i]);
+                }
+            }
+        }
+    }
+    return nodos;
+}
+function EliminarEdges(data, dataRepetidos) {
+    var edgesEliminados =[];
+    var edges = [];
+    for (var i = 0; i < dataRepetidos.edges.length; i ++){
+        var acumulador = 0;
+        for(var j = 0; j < data.edges.length; j ++){
+            if(JSON.stringify(dataRepetidos.edges[i])!=JSON.stringify(data.edges[j])){
+                acumulador++;
+                if(acumulador==data.edges.length){
+                    edges.push(dataRepetidos.edges[i]);
+                }
+            }else{
+                if(edgesEliminados.length==0){
+                    edgesEliminados.push(dataRepetidos.edges[i]);
+                    break;
+                }
+                var acumulador2 = 0;
+                for(var k = 0; k<edgesEliminados.length; k++){
+                    if(JSON.stringify(dataRepetidos.edges[i])!=JSON.stringify(edgesEliminados[k])){
+                        acumulador2++;
+                    }
+                }
+                if(acumulador2==edgesEliminados.length){
+                    edgesEliminados.push(dataRepetidos.edges[i]);
+                }else {
+                    edges.push(dataRepetidos.edges[i]);
+                }
+            }
+        }
+    }
+    return edges;
+}
+var respuesta = "";
+function getidPerson(idperson) {
+    var urlBase = "http://localhost:8888/";
+    var rutaProject = urlBase + "personID/"+idperson;
+    $.get(rutaProject,
+        function (res) {
+            respuesta = res;
+        });
+    return respuesta;
+}
 function reducirGrafo(idProject) {
     var urlBase = "http://localhost:8888/";
     var rutaProject = urlBase + "projectID/"+idProject;
-    var data = JSON.parse(document.getElementById('json').innerHTML);
+    var dataRepetidos = JSON.parse(document.getElementById('json').innerHTML);
     $.get(rutaProject,
         function (res) {
-            var data1 = JSON.parse(res);
-            var nodos =[];
-            var edges =[];
-            console.log(Object.keys(res));
-            var nodepequenio = data1.nodes;
-            var edgespequenio = data1.edges;
-            for (var i = 0; i < data.nodes.length; i ++){
-                var acumulador = 0;
-                for(var j = 0; j < nodepequenio.length; j ++){
-                    if((JSON.stringify(data.nodes[i])==JSON.stringify(nodepequenio[j]))){
-                        nodos.push(data.nodes[i]);
-                        break;
-                    }
-                    if(JSON.stringify(data.nodes[i])!=JSON.stringify(nodepequenio[j])){
-                        acumulador++;
-                        if(acumulador==nodepequenio.length){
-                            nodos.push(data.nodes[i]);
-                        }
-                    }
-                }
+            var data = JSON.parse(res);
+            var datares = {
+                nodes: EliminarNodos(data, dataRepetidos),
+                edges: EliminarEdges(data, dataRepetidos)
             }
-            for (var i = 0; i < data.edges.length; i ++){
-                var acumulador = 0;
-                for(var j = 0; j < edgespequenio.length; j ++){
-                    if((JSON.stringify(data.edges[i])==JSON.stringify(edgespequenio[j]))){
-                        edges.push(data.edges[i]);
-                        break;
-                    }
-                    if(JSON.stringify(data.edges[i])!=JSON.stringify(edgespequenio[j])){
-                        acumulador++;
-                        if(acumulador==edgespequenio.length){
-                            edges.push(data.edges[i]);
-                        }
-                    }
-                }
-            }
-            data = {
-                nodes: nodos,
-                edges: edges
-            };
-            console.log(JSON.stringify(data))
             $("#json").empty();
-            $("#json").append(JSON.stringify(data));
-            armarGrafoPersona();
+            $("#json").append(JSON.stringify(datares));
+            var datapresentar = {
+                nodes: eliminarNodosRepetidos(datares),
+                edges: eliminarEdgesRepetidos(datares)
+            };
+            console.log(JSON.stringify(datares))
+            console.log(JSON.stringify(datapresentar))
+            $("#json1").empty();
+            $("#json1").append(JSON.stringify(datapresentar));
+            armarGrafo();
         });
 }
-
-function armarGrafoPersona() {
+function armarGrafo() {
     var options = {
         interaction: { hover: true, html:true },
         groups: {
+            participante: {
+                shape: "circularImage",
+                image: "../img/participante.png",
+                color: {
+                    border: "lightgray",
+                    background: "#FFFFFF",
+                }
+            },
             director: {
                 shape: "circularImage",
-                image: "../img/user.jpeg",
+                image: "../img/user.png",
                 borderWidth: 4,
                 color: {
                     border: "lightgray",
@@ -213,15 +309,14 @@ function armarGrafoPersona() {
                     background: "#FFFFFF",
                 }
             }
-        },
-        edges: {
-            color: "#666666",
         }
     };
-    var data = JSON.parse(document.getElementById('json').innerHTML)
+    var data = JSON.parse(document.getElementById('json1').innerHTML);
+    console.log(JSON.stringify(data));
     var container = document.getElementById('mynetwork');
-    var x = -mynetwork.clientWidth / 2 + 10;
-    var y = -mynetwork.clientHeight / 2 + 10;
+    var leyenda = document.getElementById('myleyenda');
+    var x = -leyenda.clientWidth/4 + 50;
+    var y = -leyenda.clientHeight/2 + 50;
     var totalExtension = 0;
     var totalInvestigacion = 0;
     var totalInvestigacionDocente = 0;
@@ -229,6 +324,8 @@ function armarGrafoPersona() {
     var totalImplementacion = 0;
     var totalInnovacion = 0;
     var totalPropuesta = 0;
+    var totalDirector = 0;
+    var totalParticipante = 0;
     var acumulador=1;
     var arrayLegend = [];
     var step = 80;
@@ -236,16 +333,7 @@ function armarGrafoPersona() {
         nodes: data.nodes,
         edges: data.edges
     };
-    data.nodes.push({
-        id: 1000,
-        x: x,
-        y: y,
-        label: "Director",
-        group: "director",
-        value: 1,
-        fixed: true,
-        physics: false,
-    });
+    var dataleyenda =  [];
     for(var j = 0; j < data.nodes.length; j ++){
         switch (data.nodes[j].group) {
             case 'investigacion':
@@ -269,16 +357,39 @@ function armarGrafoPersona() {
             case 'propuesta':
                 totalPropuesta++;
                 break;
+            case 'director':
+                totalDirector++;
+                break;
+            case 'participante':
+                totalParticipante++;
+                break;
         }
     }
+    var svg =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="390" height="65">' +
+        '<rect x="0" y="0" width="100%" height="100%" fill="#7890A7" stroke-width="20" stroke="#ffffff" ></rect>' +
+        '<foreignObject x="15" y="10" width="100%" height="100%">' +
+        '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:40px">' +
+        " <em>I</em> am" +
+        '<span style="color:white; text-shadow:0 0 20px #000000;">' +
+        " HTML in SVG!</span>" +
+        "</div>" +
+        "</foreignObject>" +
+        "</svg>";
+    var url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    //data.nodes.push({ id: 1, label: "Hola\nBla", image: url, shape: "image" });
     for (var i = 0; i < data.nodes.length; i ++){
+        var yacumulador = y + acumulador+step;
+        if(i!=0){
+            yacumulador = y + acumulador*step;
+        }
         switch (data.nodes[i].group) {
             case 'investigacion':
                 if(arrayLegend.indexOf(1001)==-1){
-                    data.nodes.push({
+                    dataleyenda.push({
                         id: 1001,
                         x: x,
-                        y: y + acumulador+step,
+                        y: yacumulador,
                         label: "Investigación (" +totalInvestigacion+")",
                         group: "investigacion",
                         value: 1,
@@ -291,10 +402,10 @@ function armarGrafoPersona() {
                 break;
             case 'extension':
                 if(arrayLegend.indexOf(1002)==-1){
-                    data.nodes.push({
+                    dataleyenda.push({
                         id: 1002,
                         x: x,
-                        y: y + acumulador * step,
+                        y: yacumulador,
                         label: "Extensión ("+totalExtension+")",
                         group: "extension",
                         value: 1,
@@ -307,10 +418,10 @@ function armarGrafoPersona() {
                 break;
             case 'investigacion_docente':
                 if(arrayLegend.indexOf(1003)==-1){
-                    data.nodes.push({
+                    dataleyenda.push({
                         id: 1003,
                         x: x,
-                        y: y + acumulador * step,
+                        y: yacumulador,
                         label: "Investigación Docente ("+totalInvestigacionDocente+")",
                         group: "investigacion_docente",
                         value: 1,
@@ -323,10 +434,10 @@ function armarGrafoPersona() {
                 break;
             case 'consultoria':
                 if(arrayLegend.indexOf(1004)==-1){
-                    data.nodes.push({
+                    dataleyenda.push({
                         id: 1004,
                         x: x,
-                        y: y + acumulador * step,
+                        y: yacumulador,
                         label: "Consultoría ("+totalConsultoria+")",
                         group: "consultoria",
                         value: 1,
@@ -339,10 +450,10 @@ function armarGrafoPersona() {
                 break;
             case 'implementacion':
                 if(arrayLegend.indexOf(1005)==-1){
-                    data.nodes.push({
+                    dataleyenda.push({
                         id: 1005,
                         x: x,
-                        y: y + acumulador * step,
+                        y: yacumulador,
                         label: "Implementación ("+totalImplementacion+")",
                         group: "implementacion",
                         value: 1,
@@ -355,10 +466,10 @@ function armarGrafoPersona() {
                 break;
             case 'innovacion':
                 if(arrayLegend.indexOf(1006)==-1){
-                    data.nodes.push({
+                    dataleyenda.push({
                         id: 1006,
                         x: x,
-                        y: y + acumulador * step,
+                        y: yacumulador,
                         label: "Innovación ("+totalInnovacion+")",
                         group: "innovacion",
                         value: 1,
@@ -371,10 +482,10 @@ function armarGrafoPersona() {
                 break;
             case 'propuesta':
                 if(arrayLegend.indexOf(1007)==-1){
-                    data.nodes.push({
+                    dataleyenda.push({
                         id: 1007,
                         x: x,
-                        y: y + acumulador * step,
+                        y: yacumulador,
                         label: "Propuesta Enviada ("+totalPropuesta+")",
                         group: "propuesta",
                         value: 1,
@@ -385,80 +496,88 @@ function armarGrafoPersona() {
                     acumulador++;
                 }
                 break;
+            case 'participante':
+                if(arrayLegend.indexOf(1008)==-1){
+                    if(selected=="Nombre"){
+                        dataleyenda.push({
+                            id: 1008,
+                            x: x,
+                            y: yacumulador,
+                            label: "Participante",
+                            group: "participante",
+                            value: 1,
+                            fixed: true,
+                            physics: false,
+                        });
+                        arrayLegend.push(1008);
+                        acumulador++;
+                    }else{
+                        dataleyenda.push({
+                            id: 1008,
+                            x: x,
+                            y: yacumulador,
+                            label: "Participante ("+totalParticipante+")",
+                            group: "participante",
+                            value: 1,
+                            fixed: true,
+                            physics: false,
+                        });
+                        arrayLegend.push(1008);
+                        acumulador++;
+                    }
+
+                }
+                break;
+            case 'director':
+                if(arrayLegend.indexOf(1009)==-1){
+                    dataleyenda.push({
+                        id: 1009,
+                        x: x,
+                        y: y + acumulador * step,
+                        label: "Director ("+totalDirector+")",
+                        group: "director",
+                        value: 1,
+                        fixed: true,
+                        physics: false,
+                    });
+                    arrayLegend.push(1009);
+                    acumulador++;
+                }
+                break;
         }
     }
-    totalProyectos = totalExtension+totalPropuesta+totalInnovacion+totalImplementacion+totalConsultoria+totalInvestigacionDocente+totalInvestigacion;
-    data.nodes.push({
-        id: 1008,
-        x: x,
-        y: y + acumulador * step,
-        label: "Total proyectos ("+totalProyectos+")",
-        group: "total",
-        value: 1,
-        fixed: true,
-        physics: false,
-    });
+    totalProyectos = totalExtension+totalPropuesta+totalInnovacion+totalImplementacion+totalConsultoria+
+        totalInvestigacionDocente+totalInvestigacion;
+    if(selected=="Nombre"){
+        dataleyenda.push({
+            id: 1010,
+            x: x,
+            y: y + acumulador * step,
+            label: "Total proyectos ("+totalProyectos+")",
+            group: "total",
+            value: 1,
+            fixed: true,
+            physics: false,
+        });
+    }
+    var leyendaData = {
+        nodes:dataleyenda
+    }
     var network = new vis.Network(container, data, options);
+    var networkleyenda = new vis.Network(leyenda, leyendaData, options);
     network.on("click", function(params) {
-        console.log("bandera"+mostrar);
-        if(!mostrar) {
-            console.log("si llega mostrar");
-            cargarGrafoID(String(this.getNodeAt(params.pointer.DOM)));
-            mostrar=true;
-        }else{
-            console.log("si llega reducir");
-            reducirGrafo(String(this.getNodeAt(params.pointer.DOM)));
-            mostrar=false;
+        var idNodo = this.getNodeAt(params.pointer.DOM);
+        var idperson = getidPerson(tipo);
+        if(idNodo!=idperson){
+            if(listaNodoAbierto.indexOf(idNodo)==-1){
+                agrandarGrafo(idNodo);
+                listaNodoAbierto.push(idNodo);
+            }else{
+                reducirGrafo(idNodo);
+                var index = listaNodoAbierto.indexOf(idNodo);
+                listaNodoAbierto.splice(index, 1);
+            }
         }
     });
 }
 
-function armarGrafoProyecto() {
-    var options = {
-        interaction: { hover: true, html:true },
-        groups: {
-            participante: {
-                shape: "icon",
-                icon: {
-                    face: "'Font Awesome 5 Free'",
-                    weight: "bold", // Font Awesome 5 doesn't work properly unless bold.
-                    code: "\uf007",
-                    size: 50,
-                    color: "#40AACD"
-                }
-            },
-            director: {
-                shape: "icon",
-                icon: {
-                    face: "'Font Awesome 5 Free'",
-                    weight: "bold", // Font Awesome 5 doesn't work properly unless bold.
-                    code: "\uf007",
-                    size: 50,
-                    color: "#5EE312"
-                }
-            },
-            projects:{
-                shape: "icon",
-                icon: {
-                    face: "'Font Awesome 5 Free'",
-                    weight: "bold", // Font Awesome 5 doesn't work properly unless bold.
-                    code: "\uf15c",
-                    size: 50,
-                    color: "#f0a30a"
-                }
-            }
-        }
-    };
-    var data = JSON.parse(document.getElementById('json').innerHTML)
-    var container = document.getElementById('mynetwork');
-    var data = {
-        nodes: data.nodes,
-        edges: data.edges
-    };
-    var network = new vis.Network(container, data, options);
-    network.on("click", function(params) {
-        alert(
-            "ID: " + this.getNodeAt(params.pointer.DOM)
-        );
-    });
-}
