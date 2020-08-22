@@ -9,3 +9,33 @@
     max-height: 20rem;
     overflow-y: auto;
 }
+
+#titulo{
+    margin-bottom: 5%;
+    margin-top: 5%;
+    text-align: center;
+    font-family: arial, sans-serif;
+}
+
+#divtitulo{
+    background: #f7f7f7;
+    margin-bottom: 1%;
+    margin-top: 1%;
+}
+#tipo_proyecto{
+    border-radius: 20px;
+    margin-left:15px;
+    padding: 10px 10px 10px 10px;
+    color: #fff;
+    font-size: small;
+    font-weight: bolder;
+}
+
+#inicio,#fin{
+    font-size: small;
+    margin-left: 15px;
+}
+#img{
+    height:10%;
+    width: 10%;
+}

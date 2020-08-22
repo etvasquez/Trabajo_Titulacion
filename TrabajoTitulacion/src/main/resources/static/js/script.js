@@ -1,7 +1,11 @@
 var selected = 'Nombre';
-var listaNodoAbierto = [];
-var tipo = '';
+var listaNodoAbierto = []; //Almacenar nodos abierto para cerrar conforme seleccione
+var idnodobase = ''; //nodo principal del grafo
+var rutaBase='http://localhost:8888/'; //ruta base para consultas
+var idseleccionado; //nodo que da click
+var grafoinicial; //primer resultado del grafo
 $(document).ready(function(){
+    //Inicializacion de lista para busqueda
     $('.js-example-basic-single').select2({
         width:'100%',
         minimumInputLength:3,
@@ -16,9 +20,9 @@ $(document).ready(function(){
                 busqueda = busqueda.replace('Ó', 'O');
                 busqueda = busqueda.replace('Ú', 'U');
                 if(selected=="Nombre"){
-                    ruta = "http://localhost:8888/listaBusquedaPersona/"+ busqueda;
+                    ruta = rutaBase+"listaBusquedaPersona/"+ busqueda;
                 }else{
-                    ruta = "http://localhost:8888/listaBusquedaProyecto/"+ busqueda;
+                    ruta = rutaBase+"listaBusquedaProyecto/"+ busqueda;
                 }
                 return ruta;
             },
@@ -36,34 +40,33 @@ $(document).ready(function(){
             }
         }
     });
+    //Metodo de Busqueda
     $("select.form-control").change(function(){
         selected = $(this).children("option:selected").val();
         $('#listaBusqueda').empty();
         listaNodoAbierto = [];
+        idseleccionado = 0;
+        grafoinicial = '';
     });
+    //Metodo de busqueda al seleccioanr un elemento de la lista
     $("select.js-example-basic-single").change(function(){
-        tipo = $('#listaBusqueda').val();
-        var urlBase = "http://localhost:8888/";
+        idnodobase = $('#listaBusqueda').val();
+        idseleccionado = idnodobase;
         if(selected=='Proyecto'){
-            var rutaProject = urlBase + "project/"+tipo;
+            var rutaProject = rutaBase + "project/"+idnodobase;
             $.get(rutaProject,
                 function (res) {
-                    $("#json1").empty();
-                    $("#json1").append(res);
-                    $("#json").empty();
-                    $("#json").append(res);
+                    actualizarJSONHTML(res,res);
                     armarGrafo();
-                    //armarGrafoProyecto();
+                    grafoinicial = res;
                 });
         }else if(selected=='Nombre'){
-            var rutaPerson = urlBase + "person/"+tipo;
+            var rutaPerson = rutaBase + "person/"+idnodobase;
             $.get(rutaPerson,
                 function (res) {
-                    $("#json1").empty();
-                    $("#json1").append(res);
-                    $("#json").empty();
-                    $("#json").append(res);
+                    actualizarJSONHTML(res,res);
                     armarGrafo();
+                    grafoinicial = res;
                 });
         }
         var heigth=$(window).height();
@@ -74,7 +77,12 @@ $(document).ready(function(){
         $('#myleyenda').css('border','1px solid lightgray');
     });
 });
-
+function actualizarJSONHTML(stringJSON1, stringJSON) {
+    $("#json1").empty(); //JSON 1 PARA GRAFICAR, NO TIENE NODOS NI EDGES REPETIDOS
+    $("#json1").append(stringJSON1);
+    $("#json").empty(); // JSON PARA AGRANDAR Y REDUCIR GRAFO
+    $("#json").append(stringJSON);
+}
 function eliminarNodosRepetidos(arrayNodos) {
     var hash = {};
     var nodossinRepetir = arrayNodos.nodes.filter(function(current) {
@@ -103,27 +111,25 @@ function eliminarEdgesRepetidos(arrayEdges) {
     return edgessinRepetir;
 }
 function agrandarGrafo(idProject) {
-    var urlBase = "http://localhost:8888/";
-    var rutaProject = urlBase + "projectID/"+idProject;
+    var rutaProject = rutaBase + "projectID/"+idProject;
     var dataRepetidos = JSON.parse(document.getElementById('json').innerHTML);
     $.get(rutaProject,
         function (res) {
             var data = JSON.parse(res);
-            console.log(Object.keys(res));
-            dataRepetidos = {
-                nodes : dataRepetidos.nodes.concat(data.nodes),
-                edges : dataRepetidos.edges.concat(data.edges)
+            if(data.edges.length>1){
+                dataRepetidos = {
+                    nodes : dataRepetidos.nodes.concat(data.nodes),
+                    edges : dataRepetidos.edges.concat(data.edges)
+                };
+                var datapresentar = {
+                    nodes: eliminarNodosRepetidos(dataRepetidos),
+                    edges: eliminarEdgesRepetidos(dataRepetidos)
+                };
+                actualizarJSONHTML(JSON.stringify(datapresentar),JSON.stringify(dataRepetidos));
+                armarGrafo();
+            }else{
+                console.log("No contiene participantes");
             }
-            $("#json").empty();
-            $("#json").append(JSON.stringify(dataRepetidos));
-            var datapresentar = {
-                nodes: eliminarNodosRepetidos(dataRepetidos),
-                edges: eliminarEdgesRepetidos(dataRepetidos)
-            };
-            console.log(JSON.stringify(datapresentar))
-            $("#json1").empty();
-            $("#json1").append(JSON.stringify(datapresentar));
-            armarGrafo();
         });
 }
 function EliminarNodos(data, dataRepetidos) {
@@ -190,43 +196,31 @@ function EliminarEdges(data, dataRepetidos) {
     }
     return edges;
 }
-var respuesta = "";
-function getidPerson(idperson) {
-    var urlBase = "http://localhost:8888/";
-    var rutaProject = urlBase + "personID/"+idperson;
-    $.get(rutaProject,
-        function (res) {
-            respuesta = res;
-        });
-    return respuesta;
-}
 function reducirGrafo(idProject) {
-    var urlBase = "http://localhost:8888/";
-    var rutaProject = urlBase + "projectID/"+idProject;
+    var rutaProject = rutaBase + "projectID/"+idProject;
     var dataRepetidos = JSON.parse(document.getElementById('json').innerHTML);
     $.get(rutaProject,
         function (res) {
             var data = JSON.parse(res);
-            var datares = {
-                nodes: EliminarNodos(data, dataRepetidos),
-                edges: EliminarEdges(data, dataRepetidos)
+            if(data.edges.length>1){
+                var datares = {
+                    nodes: EliminarNodos(data, dataRepetidos),
+                    edges: EliminarEdges(data, dataRepetidos)
+                };
+                var datapresentar = {
+                    nodes: eliminarNodosRepetidos(datares),
+                    edges: eliminarEdgesRepetidos(datares)
+                };
+                actualizarJSONHTML(JSON.stringify(datapresentar),JSON.stringify(datares));
+                armarGrafo();
+            }else{
+                console.log('No contiene participantes');
             }
-            $("#json").empty();
-            $("#json").append(JSON.stringify(datares));
-            var datapresentar = {
-                nodes: eliminarNodosRepetidos(datares),
-                edges: eliminarEdgesRepetidos(datares)
-            };
-            console.log(JSON.stringify(datares))
-            console.log(JSON.stringify(datapresentar))
-            $("#json1").empty();
-            $("#json1").append(JSON.stringify(datapresentar));
-            armarGrafo();
         });
 }
 function armarGrafo() {
     var options = {
-        interaction: { hover: true, html:true },
+        interaction: { hover: true},
         groups: {
             participante: {
                 shape: "circularImage",
@@ -250,6 +244,14 @@ function armarGrafo() {
                 image: "../img/file1.png",
                 color: {
                     border: "#FFFFFF",
+                    background: "#FFFFFF",
+                }
+            },
+            buscado:{
+                shape: "circularImage",
+                image: "../img/usersearch.png",
+                color: {
+                    border: "lightgray",
                     background: "#FFFFFF",
                 }
             },
@@ -312,7 +314,6 @@ function armarGrafo() {
         }
     };
     var data = JSON.parse(document.getElementById('json1').innerHTML);
-    console.log(JSON.stringify(data));
     var container = document.getElementById('mynetwork');
     var leyenda = document.getElementById('myleyenda');
     var x = -leyenda.clientWidth/4 + 50;
@@ -365,25 +366,28 @@ function armarGrafo() {
                 break;
         }
     }
-    var svg =
-        '<svg xmlns="http://www.w3.org/2000/svg" width="390" height="65">' +
-        '<rect x="0" y="0" width="100%" height="100%" fill="#7890A7" stroke-width="20" stroke="#ffffff" ></rect>' +
-        '<foreignObject x="15" y="10" width="100%" height="100%">' +
-        '<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:40px">' +
-        " <em>I</em> am" +
-        '<span style="color:white; text-shadow:0 0 20px #000000;">' +
-        " HTML in SVG!</span>" +
-        "</div>" +
-        "</foreignObject>" +
-        "</svg>";
-    var url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-    //data.nodes.push({ id: 1, label: "Hola\nBla", image: url, shape: "image" });
     for (var i = 0; i < data.nodes.length; i ++){
         var yacumulador = y + acumulador+step;
         if(i!=0){
             yacumulador = y + acumulador*step;
         }
         switch (data.nodes[i].group) {
+            case 'buscado':
+                if(arrayLegend.indexOf(1011)==-1){
+                    dataleyenda.push({
+                        id: 1011,
+                        x: x,
+                        y: yacumulador,
+                        label: "Persona Buscada",
+                        group: "buscado",
+                        value: 1,
+                        fixed: true,
+                        physics: false,
+                    });
+                    arrayLegend.push(1011);
+                    acumulador++;
+                }
+                break;
             case 'investigacion':
                 if(arrayLegend.indexOf(1001)==-1){
                     dataleyenda.push({
@@ -565,18 +569,53 @@ function armarGrafo() {
     }
     var network = new vis.Network(container, data, options);
     var networkleyenda = new vis.Network(leyenda, leyendaData, options);
+    var doubleClickTime = 0;
+    var threshold = 200;
     network.on("click", function(params) {
-        var idNodo = this.getNodeAt(params.pointer.DOM);
-        var idperson = getidPerson(tipo);
-        if(idNodo!=idperson){
-            if(listaNodoAbierto.indexOf(idNodo)==-1){
-                agrandarGrafo(idNodo);
-                listaNodoAbierto.push(idNodo);
-            }else{
-                reducirGrafo(idNodo);
-                var index = listaNodoAbierto.indexOf(idNodo);
-                listaNodoAbierto.splice(index, 1);
-            }
+        var t0 = new Date();
+        var identificador = this.getNodeAt(params.pointer.DOM);
+        idseleccionado = this.getNodeAt(params.pointer.DOM);
+        if (t0 - doubleClickTime > threshold) {
+            setTimeout(function () {
+                if (t0 - doubleClickTime > threshold) {
+                    var arrayEdges = network.getConnectedNodes(identificador,'from');
+                    var idNodo = identificador;
+                    if(idNodo!=idnodobase){
+                        if(arrayEdges!=undefined && arrayEdges!=null && arrayEdges!='') {
+                            if (listaNodoAbierto.indexOf(idNodo) == -1) {
+                                agrandarGrafo(idNodo);
+                                listaNodoAbierto.push(idNodo);
+                            } else {
+                                reducirGrafo(idNodo);
+                                var index = listaNodoAbierto.indexOf(idNodo);
+                                listaNodoAbierto.splice(index, 1);
+                            }
+                        }
+                    }else{
+                        actualizarJSONHTML(grafoinicial,grafoinicial);
+                        armarGrafo();
+                    }
+                }
+            },threshold);
+        }
+    });
+    network.on('doubleClick', function(params) {
+        doubleClickTime = new Date();
+        var id = this.getNodeAt(params.pointer.DOM);
+        window.location.href="/resultados/"+id;
+    });
+    network.on("afterDrawing", function (ctx) {
+        try{
+            var nodeId = idseleccionado;
+            var nodePosition = network.getPositions([nodeId]);
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.fillStyle = "rgba(0,0,0,0)";
+            ctx.circle(nodePosition[nodeId].x, nodePosition[nodeId].y,28);
+            ctx.fill();
+            ctx.stroke();
+        }catch (e) {
+
         }
     });
 }

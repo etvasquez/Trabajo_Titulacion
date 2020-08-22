@@ -31,21 +31,14 @@ public class consultasBD{
         String strQuery ="PREFIX schema: <http://schema.org/> " +
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
-                "SELECT ?idpersona ?nombre ?apellido ?id_project ?titulo ?rol ?correo ?area ?tipo " +
+                "SELECT ?idpersona ?nombre ?apellido ?id_project ?titulo " +
                 "WHERE {"+
                 "?s schema:ide_project '"+idProject+"' . "+
                 "?id schema:idProject ?s . "+
                 "?s schema:ide_project ?id_project ."+
-                "?id schema:rolProyecto ?labelrol . "+
-                "?labelrol rdfs:label ?rol . "+
-                "?s schema:tipoproyecto ?labeltipo ." +
-                "?labeltipo rdfs:label ?tipo ."+
                 "?project j.2:currentProject ?id. "+
                 "?project j.2:lastName ?nombre. "+
                 "?project j.2:firstName ?apellido. "+
-                "?project j.2:mbox ?correo . "+
-                "?project schema:areaPerson ?labelarea . "+
-                "?labelarea rdfs:label ?area . "+
                 "?project schema:id_person ?idpersona ."+
                 " ?s j.2:title ?titulo . " +
                 "} ";
@@ -63,18 +56,10 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("nombre");
                 SimpleLiteral apellido =
                         (SimpleLiteral)bindingSet.getValue("apellido");
-                SimpleLiteral rol =
-                        (SimpleLiteral)bindingSet.getValue("rol");
-                SimpleLiteral correo =
-                        (SimpleLiteral)bindingSet.getValue("correo");
-                SimpleLiteral area =
-                        (SimpleLiteral)bindingSet.getValue("area");
                 SimpleLiteral idProyecto =
                         (SimpleLiteral)bindingSet.getValue("id_project");
                 SimpleLiteral titulo =
                         (SimpleLiteral)bindingSet.getValue("titulo");
-                SimpleLiteral tipo =
-                        (SimpleLiteral)bindingSet.getValue("tipo");
                 String titlePersona = nombre.stringValue().concat(" ").concat(apellido.stringValue());
                 Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"participante",titlePersona);
                 Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),titulo.stringValue(),"projects",titulo.stringValue());
@@ -100,6 +85,150 @@ public class consultasBD{
         return json;
     }
 
+    public String InformacionInvolucrados(String idProject) {
+        ArrayList<Persona> listapersona = new ArrayList<>();
+        Persona persona = new Persona();
+        String json="";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        String strQuery ="PREFIX schema: <http://schema.org/> " +
+                "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
+                "SELECT ?rol ?nombre ?apellido ?area " +
+                "WHERE {"+
+                "?s schema:ide_project '"+idProject+"' . "+
+                "?id schema:idProject ?s . "+
+                "?id schema:rolProyecto ?labelrol . "+
+                "?labelrol rdfs:label ?rol . "+
+                "?project j.2:currentProject ?id . "+
+                "?project j.2:lastName ?nombre . "+
+                "?project j.2:firstName ?apellido . "+
+                "?project schema:areaPerson ?labelarea . "+
+                "?labelarea rdfs:label ?area . "+
+                "} ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral rol =
+                        (SimpleLiteral)bindingSet.getValue("rol");
+                SimpleLiteral nombre =
+                        (SimpleLiteral)bindingSet.getValue("nombre");
+                SimpleLiteral apellido =
+                        (SimpleLiteral)bindingSet.getValue("apellido");
+                SimpleLiteral area =
+                        (SimpleLiteral)bindingSet.getValue("area");
+                persona = new Persona(nombre.stringValue(),apellido.stringValue(),rol.stringValue(),area.stringValue());
+                listapersona.add(persona);
+            }
+            json = mapper.writeValueAsString(listapersona);
+            System.out.println(json);
+        }
+        catch (QueryEvaluationException | JsonProcessingException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return json;
+    }
+
+    public String InformacionProyecto(String idProject) {
+        Proyecto proyecto = new Proyecto();
+        String json="";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        String strQuery ="PREFIX schema: <http://schema.org/> " +
+                "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
+                "SELECT ?titulo ?descripcion ?tipo ?incluye_estudiantes ?cobertura ?fechainicio ?fechafin ?ife " +
+                "?smartland ?reprogramado ?avance ?fu ?fe ?tg ?estado ?programa ?objetivo ?presupuesto " +
+                "WHERE {"+
+                "?s schema:ide_project '"+idProject+"' . "+
+                "?s j.2:title ?titulo . "+
+                "?s schema:descripcion ?descripcion . "+
+                "?s schema:tipoproyecto ?labeltipo . "+
+                "?labeltipo rdfs:label ?tipo . "+
+                "?s schema:incluye_estudiantes ?incluye_estudiantes . "+
+                "?s schema:cobertura ?cobertura . "+
+                "?s schema:fecha_inicio ?fechainicio . "+
+                "?s schema:fecha_fin ?fechafin . "+
+                "?s schema:incluye_financiamiento_externo ?ife . " +
+                "?s schema:smartland ?smartland . "+
+                "?s schema:reprogramado ?reprogramado . "+
+                "?s schema:avance ?avance . "+
+                "?s schema:fondo_utpl ?fu . "+
+                "?s schema:fondo_externo ?fe . "+
+                "?s schema:total_general ?tg . "+
+                "?s schema:estadoproyecto ?ep . "+
+                "?ep rdfs:label ?estado . "+
+                "?s schema:programa ?programa . "+
+                "?s schema:objetivos ?objetivo . "+
+                "?s schema:presupuesto ?presupuesto . "+
+                "} ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral titulo =
+                        (SimpleLiteral)bindingSet.getValue("titulo");
+                SimpleLiteral descripcion =
+                        (SimpleLiteral)bindingSet.getValue("descripcion");
+                SimpleLiteral tipo =
+                        (SimpleLiteral)bindingSet.getValue("tipo");
+                SimpleLiteral incluye_estudiantes =
+                        (SimpleLiteral)bindingSet.getValue("incluye_estudiantes");
+                SimpleLiteral cobertura =
+                        (SimpleLiteral)bindingSet.getValue("cobertura");
+                SimpleLiteral fechainicio =
+                        (SimpleLiteral)bindingSet.getValue("fechainicio");
+                SimpleLiteral fechafin =
+                        (SimpleLiteral)bindingSet.getValue("fechafin");
+                SimpleLiteral ife =
+                        (SimpleLiteral)bindingSet.getValue("ife");
+                SimpleLiteral smartland =
+                        (SimpleLiteral)bindingSet.getValue("smartland");
+                SimpleLiteral reprogramado =
+                        (SimpleLiteral)bindingSet.getValue("reprogramado");
+                SimpleLiteral avance =
+                        (SimpleLiteral)bindingSet.getValue("avance");
+                SimpleLiteral fu =
+                        (SimpleLiteral)bindingSet.getValue("fu");
+                SimpleLiteral fe =
+                        (SimpleLiteral)bindingSet.getValue("fe");
+                SimpleLiteral tg =
+                        (SimpleLiteral)bindingSet.getValue("tg");
+                SimpleLiteral estado =
+                        (SimpleLiteral)bindingSet.getValue("estado");
+                SimpleLiteral programa =
+                        (SimpleLiteral)bindingSet.getValue("programa");
+                SimpleLiteral objetivo =
+                        (SimpleLiteral)bindingSet.getValue("objetivo");
+                SimpleLiteral presupuesto =
+                        (SimpleLiteral)bindingSet.getValue("presupuesto");
+                proyecto = new Proyecto(titulo.stringValue(),descripcion.stringValue(),tipo.stringValue(),
+                        incluye_estudiantes.stringValue(),cobertura.stringValue(),fechainicio.stringValue(),fechafin.stringValue(),
+                        ife.stringValue(),smartland.stringValue(),reprogramado.stringValue(),avance.stringValue(),fu.stringValue(),
+                        fe.stringValue(),tg.stringValue(),estado.stringValue(),programa.stringValue(),objetivo.stringValue(),presupuesto.stringValue());
+                json = mapper.writeValueAsString(proyecto);
+                System.out.println(json);
+            }
+        }
+        catch (QueryEvaluationException | JsonProcessingException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return json;
+    }
+
     public String getGrapProject(String xproyecto) {
         ArrayList<Nodo> listNodos = new ArrayList<>();
         ArrayList<Relacion> listRelacion = new ArrayList<>();
@@ -111,7 +240,7 @@ public class consultasBD{
         String strQuery ="PREFIX schema: <http://schema.org/> " +
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
-                "SELECT ?idpersona ?nombre ?apellido ?id_project ?titulo ?rol ?correo ?area ?tipo " +
+                "SELECT ?idpersona ?nombre ?apellido ?id_project ?titulo ?rol ?tipo " +
                 "WHERE {"+
                 "?s schema:ide_project '"+xproyecto+"' . "+
                 "?id schema:idProject ?s . "+
@@ -123,9 +252,6 @@ public class consultasBD{
                 "?project j.2:currentProject ?id. "+
                 "?project j.2:lastName ?nombre. "+
                 "?project j.2:firstName ?apellido. "+
-                "?project j.2:mbox ?correo . "+
-                "?project schema:areaPerson ?labelarea . "+
-                "?labelarea rdfs:label ?area . "+
                 "?project schema:id_person ?idpersona ."+
                 " ?s j.2:title ?titulo . " +
                 "} ";
@@ -145,10 +271,6 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("apellido");
                 SimpleLiteral rol =
                         (SimpleLiteral)bindingSet.getValue("rol");
-                SimpleLiteral correo =
-                        (SimpleLiteral)bindingSet.getValue("correo");
-                SimpleLiteral area =
-                        (SimpleLiteral)bindingSet.getValue("area");
                 SimpleLiteral idProyecto =
                         (SimpleLiteral)bindingSet.getValue("id_project");
                 SimpleLiteral titulo =
@@ -158,19 +280,7 @@ public class consultasBD{
                 String rolP =(rol.stringValue().equalsIgnoreCase("Participación"))?"participante":"director";
                 String titlePersona = nombre.stringValue().concat(" ").concat(apellido.stringValue());
                 String grupo = clasificacion(tipo.stringValue());
-                String tituloreducido = "";
-                int contador1 = 0;
-                for (int i=0;i<titulo.stringValue().length();i++){
-                    contador1++;
-                    tituloreducido = tituloreducido.concat(titulo.stringValue().substring(i,i+1));
-                    if(contador1>=25){
-                        if(titulo.stringValue().substring(i,i+1).equals(" ")){
-                            tituloreducido = tituloreducido.concat("\n");
-                            contador1=0;
-                        }
-
-                    }
-                }
+                String tituloreducido = TraduccionTitulo(titulo.stringValue());
                 Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),rolP,titlePersona);
                 Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),tituloreducido,grupo,titulo.stringValue());
                 Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue());
@@ -234,7 +344,7 @@ public class consultasBD{
         return tituloreducido;
     }
 
-    public String getGrapPerson(String xnombre) {
+    public String getGrapPerson(String id) {
         ArrayList<Nodo> listNodos = new ArrayList<>();
         ArrayList<Relacion> listRelacion = new ArrayList<>();
         ArrayList<NodoRelacion> nodoRelacion = new ArrayList<>();
@@ -245,21 +355,16 @@ public class consultasBD{
                 "PREFIX people: <http://utpl.edu.ec/data/people/> "+
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"+
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
-                "SELECT ?id ?idpersona ?nombre ?apellido ?title ?rol ?correo ?area ?tipo " +
+                "SELECT ?id ?idpersona ?nombre ?apellido ?title ?tipo " +
                 "WHERE {"+
-                "?s  schema:id_person '"+xnombre+"' . "+
+                "?s  schema:id_person '"+id+"' . "+
                 "?s  j.2:currentProject ?current . "+
                 "?s j.2:lastName ?nombre . "+
                 "?s j.2:firstName ?apellido . "+
-                "?s j.2:mbox ?correo . "+
                 "?s schema:id_person ?idpersona . " +
                 "?current schema:idProject ?idproject . "+
-                "?current schema:rolProyecto ?rolp . "+
-                "?rolp rdfs:label ?rol . "+
                 "?idproject j.2:title ?title . "+
                 "?idproject schema:ide_project ?id . "+
-                "?s schema:areaPerson ?labelarea . "+
-                "?labelarea rdfs:label ?area . "+
                 "?idproject schema:tipoproyecto ?labeltipo . "+
                 "?labeltipo rdfs:label ?tipo . " +
                 "} ";
@@ -277,12 +382,6 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("nombre");
                 SimpleLiteral apellido =
                         (SimpleLiteral)bindingSet.getValue("apellido");
-                SimpleLiteral rol =
-                        (SimpleLiteral)bindingSet.getValue("rol");
-                SimpleLiteral correo =
-                        (SimpleLiteral)bindingSet.getValue("correo");
-                SimpleLiteral area =
-                        (SimpleLiteral)bindingSet.getValue("area");
                 SimpleLiteral idProyecto =
                         (SimpleLiteral)bindingSet.getValue("id");
                 SimpleLiteral titulo =
@@ -290,7 +389,7 @@ public class consultasBD{
                 SimpleLiteral tipo =
                         (SimpleLiteral)bindingSet.getValue("tipo");
                 String titlePersona = nombre.stringValue().concat(" ").concat(apellido.stringValue());
-                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"participante",titlePersona);
+                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"buscado",titlePersona);
                 String grupo=clasificacion(tipo.stringValue());
                 Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),"",grupo,titulo.stringValue());
                 Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue());
