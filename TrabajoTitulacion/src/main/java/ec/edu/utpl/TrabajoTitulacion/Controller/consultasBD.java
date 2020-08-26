@@ -13,6 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class consultasBD{
 
@@ -63,7 +65,7 @@ public class consultasBD{
                 String titlePersona = nombre.stringValue().concat(" ").concat(apellido.stringValue());
                 Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"participante",titlePersona);
                 Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),titulo.stringValue(),"projects",titulo.stringValue());
-                Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue());
+                Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue(),1,"");
                 if(contador==0){
                     listNodos.add(nodoProyecto);
                 }
@@ -283,7 +285,7 @@ public class consultasBD{
                 String tituloreducido = TraduccionTitulo(titulo.stringValue());
                 Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),rolP,titlePersona);
                 Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),tituloreducido,grupo,titulo.stringValue());
-                Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue());
+                Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue(),1,"");
                 if(contador==0){
                     listNodos.add(nodoProyecto);
                 }
@@ -344,6 +346,65 @@ public class consultasBD{
         return tituloreducido;
     }
 
+    public String getGrapPersonPerson(String id) {
+        ArrayList<Nodo> listNodos = new ArrayList<>();
+        ArrayList<Relacion> listRelacion = new ArrayList<>();
+        ArrayList<NodoRelacion> nodoRelacion = new ArrayList<>();
+        String json="";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        String strQuery ="PREFIX schema: <http://schema.org/> " +
+                "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                "SELECT ?idpersona (SAMPLE(?nombre) AS ?nombre) (SAMPLE(?apellido) AS ?apellido) (COUNT(?idpersona) as ?relaciones) " +
+                "WHERE { "+
+                "?s  schema:id_person '"+id+"' . "+
+                "?s j.2:currentProject ?id . "+
+                "?id schema:idProject ?idpro . "+
+                "?project schema:idProject ?idpro . "+
+                "?persona j.2:currentProject ?project . " +
+                "?persona j.2:lastName ?nombre . "+
+                "?persona j.2:firstName ?apellido . "+
+                "?persona schema:id_person ?idpersona ."+
+                "} GROUP BY ?idpersona";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        Relacion relacion = new Relacion();
+        try {
+            result = tupleQuery.evaluate();
+            //int contador=0;
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral idPersona =
+                        (SimpleLiteral)bindingSet.getValue("idpersona");
+                SimpleLiteral nombre =
+                        (SimpleLiteral)bindingSet.getValue("nombre");
+                SimpleLiteral apellido =
+                        (SimpleLiteral)bindingSet.getValue("apellido");
+                SimpleLiteral relaciones =
+                        (SimpleLiteral)bindingSet.getValue("relaciones");
+                String titlePersona = nombre.stringValue().concat(" ").concat(apellido.stringValue());
+                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"participante",titlePersona);
+                listNodos.add(nodoPersona);
+                if(idPersona.stringValue().compareTo(id)!=0){
+                    relacion = new Relacion(id,idPersona.stringValue(),relaciones.intValue(),relaciones.stringValue().concat(" proyectos realizados"));
+                    listRelacion.add(relacion);
+                }
+            }
+            NodoRelacion nr = new NodoRelacion(listNodos,listRelacion);
+            nodoRelacion.add(nr);
+            json = mapper.writeValueAsString(nodoRelacion.get(0));
+            System.out.println(json);
+        }
+        catch (QueryEvaluationException | JsonProcessingException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return json;
+    }
+
     public String getGrapPerson(String id) {
         ArrayList<Nodo> listNodos = new ArrayList<>();
         ArrayList<Relacion> listRelacion = new ArrayList<>();
@@ -392,7 +453,7 @@ public class consultasBD{
                 Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"buscado",titlePersona);
                 String grupo=clasificacion(tipo.stringValue());
                 Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),"",grupo,titulo.stringValue());
-                Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue());
+                Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue(),1,"");
                 if(contador==0){
                     listNodos.add(nodoPersona);
                 }
@@ -514,6 +575,93 @@ public class consultasBD{
                 listaPersona.add(proyecto);
             }
             json = mapper.writeValueAsString(listaPersona);
+        }
+
+        catch (QueryEvaluationException | JsonProcessingException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return json;
+    }
+
+    public String BusquedaPorArea(String busqueda) {
+        ArrayList<Objeto> listaArea = new ArrayList<>();
+        String json="";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        String strQuery ="PREFIX onto:<http://www.ontotext.com/> " +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
+                "select ?area " +
+                "from onto:disable-sameAs { "+
+                "?s a <http://schema.org/areaPerson> . "+
+                "?s rdfs:label ?area . "+
+                "FILTER (regex(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE((UCASE(str(?area))),'Á', 'A','i'),'É', 'E','i'),'Í', 'I','i'),'Ó','O','i'),'Ú','U','i'),'"+
+                busqueda+"','i')) }";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            int contador = 0;
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral area =
+                        (SimpleLiteral) bindingSet.getValue("area");
+                String tipoarea = area.stringValue().substring(0,5);
+                if(tipoarea.equalsIgnoreCase("http:")){
+                    //comparar cadenas
+                }else{
+                    Objeto oarea = new Objeto(String.valueOf(contador),area.stringValue().toUpperCase());
+                    listaArea.add(oarea);
+                }
+                contador++;
+            }
+            json = mapper.writeValueAsString(listaArea);
+        }
+
+        catch (QueryEvaluationException | JsonProcessingException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return json;
+    }
+    public String BusquedaPorTipoProyecto(String busqueda) {
+        ArrayList<Objeto> listaTipoProyecto = new ArrayList<>();
+        String json="";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        String strQuery ="PREFIX onto:<http://www.ontotext.com/> " +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
+                "select ?tipo " +
+                "from onto:disable-sameAs { "+
+                "?s a <http://schema.org/tipo_proyecto> . "+
+                "?s rdfs:label ?tipo "+
+                "FILTER (regex(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE((UCASE(str(?tipo))),'Á', 'A','i'),'É', 'E','i'),'Í', 'I','i'),'Ó','O','i'),'Ú','U','i'),'"+
+                busqueda+"','i')) }";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            int contador = 0;
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral tipo =
+                        (SimpleLiteral) bindingSet.getValue("tipo");
+                String tipoarea = tipo.stringValue().substring(0,5);
+                if(tipoarea.equalsIgnoreCase("http:")){
+                    //comparar cadenas
+                }else{
+                    Objeto otipo = new Objeto(String.valueOf(contador),tipo.stringValue().toUpperCase());
+                    listaTipoProyecto.add(otipo);
+                }
+                contador++;
+            }
+            json = mapper.writeValueAsString(listaTipoProyecto);
         }
 
         catch (QueryEvaluationException | JsonProcessingException qee) {

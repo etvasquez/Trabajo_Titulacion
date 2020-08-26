@@ -4,9 +4,16 @@ var idnodobase = ''; //nodo principal del grafo
 var rutaBase='http://localhost:8888/'; //ruta base para consultas
 var idseleccionado; //nodo que da click
 var grafoinicial; //primer resultado del grafo
+var titulo;
+var ruta;
 $(document).ready(function(){
+    //Inicializando variables
+    listaNodoAbierto = [];
+    idseleccionado = 0;
+    grafoinicial = '';
+    ruta = '';
     //Inicializacion de lista para busqueda
-    $('.js-example-basic-single').select2({
+    $('#listaBusqueda').select2({
         width:'100%',
         minimumInputLength:3,
         allowClear:true,
@@ -19,10 +26,14 @@ $(document).ready(function(){
                 busqueda = busqueda.replace('Í', 'I');
                 busqueda = busqueda.replace('Ó', 'O');
                 busqueda = busqueda.replace('Ú', 'U');
-                if(selected=="Nombre"){
+                if(selected=="Nombre" || selected=="Persona"){
                     ruta = rutaBase+"listaBusquedaPersona/"+ busqueda;
-                }else{
+                }else if(selected=="Proyecto"){
                     ruta = rutaBase+"listaBusquedaProyecto/"+ busqueda;
+                }else if(selected=="Area"){
+                    ruta = rutaBase+"listaBusquedaArea/"+ busqueda;
+                }else if(selected=="TipoProyecto"){
+                    ruta = rutaBase+"listaBusquedaTipoProyecto/"+ busqueda;
                 }
                 return ruta;
             },
@@ -31,7 +42,7 @@ $(document).ready(function(){
             processResults: function (data) {
                 return {
                     results: $.map(data, function (item) {
-                       return {
+                        return {
                             text: item.nombre,
                             id: item.id
                         }
@@ -40,16 +51,26 @@ $(document).ready(function(){
             }
         }
     });
+    //Inicializar lista tipo
+    $('#listatipo').select2({
+        width:'100%',
+        minimumResultsForSearch: -1,
+        templateResult: formatOutput
+    });
     //Metodo de Busqueda
-    $("select.form-control").change(function(){
-        selected = $(this).children("option:selected").val();
+    $("#listatipo").change(function(){
+        selected = $('#listatipo').val();
+        titulo =  $('#listatipo').select2('data')[0]['text'];
+        if(titulo == "Proyecto"|| titulo == "Área" || titulo == "Tipo de proyecto"){
+            $('#titulobusqueda').text(titulo);
+        }else{
+            titulo = "Persona";
+            $('#titulobusqueda').text(titulo);
+        }
         $('#listaBusqueda').empty();
-        listaNodoAbierto = [];
-        idseleccionado = 0;
-        grafoinicial = '';
     });
     //Metodo de busqueda al seleccioanr un elemento de la lista
-    $("select.js-example-basic-single").change(function(){
+    $("#listaBusqueda").change(function(){
         idnodobase = $('#listaBusqueda').val();
         idseleccionado = idnodobase;
         if(selected=='Proyecto'){
@@ -68,6 +89,15 @@ $(document).ready(function(){
                     armarGrafo();
                     grafoinicial = res;
                 });
+        }else if(selected=='Persona'){
+            var rutaPerson = rutaBase + "personperson/"+idnodobase;
+            $.get(rutaPerson,
+                function (res) {
+                    console.log(JSON.parse(res));
+                    actualizarJSONHTML(res,res);
+                    armarGrafo();
+                    grafoinicial = res;
+                });
         }
         var heigth=$(window).height();
         $('#mynetwork').height(heigth);
@@ -77,6 +107,16 @@ $(document).ready(function(){
         $('#myleyenda').css('border','1px solid lightgray');
     });
 });
+function formatOutput (optionElement) {
+    if(optionElement.id=='Proyecto' || optionElement.id=='Area' || optionElement.id=='TipoProyecto'){
+        var $state = $(
+            '<span><b>' + optionElement.text + '</b></span>'
+        );
+    }else{
+        return optionElement.text;
+    }
+    return $state;
+};
 function actualizarJSONHTML(stringJSON1, stringJSON) {
     $("#json1").empty(); //JSON 1 PARA GRAFICAR, NO TIENE NODOS NI EDGES REPETIDOS
     $("#json1").append(stringJSON1);
@@ -220,6 +260,23 @@ function reducirGrafo(idProject) {
 }
 function armarGrafo() {
     var options = {
+        physics: {
+            forceAtlas2Based: {
+                gravitationalConstant: -100,
+                /*centralGravity: 0.005,
+                springLength: 230,
+                springConstant: 0.18,
+                avoidOverlap: 1.5*/
+            },
+            //maxVelocity: 146,
+            solver: 'forceAtlas2Based',
+            //timestep: 0.35,
+            stabilization: {
+                enabled: true,
+                iterations: 1000,
+                updateInterval: 25
+            }
+        },
         interaction: { hover: true},
         groups: {
             participante: {
@@ -602,7 +659,8 @@ function armarGrafo() {
     network.on('doubleClick', function(params) {
         doubleClickTime = new Date();
         var id = this.getNodeAt(params.pointer.DOM);
-        window.location.href="/resultados/"+id;
+        //window.location.href="/resultados/"+id;
+        window.open(rutaBase+'resultados/'+id, '_blank');
     });
     network.on("afterDrawing", function (ctx) {
         try{
