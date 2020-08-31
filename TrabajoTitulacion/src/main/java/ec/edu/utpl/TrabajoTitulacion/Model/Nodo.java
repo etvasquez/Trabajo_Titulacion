@@ -7,6 +7,9 @@ public class Nodo {
     private String group;
     private String title;
 
+    public Nodo() {
+    }
+
     public Nodo(String id, String label, String group, String title) {
         this.id = id;
         this.label = label;

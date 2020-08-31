@@ -7,12 +7,150 @@ var grafoinicial; //primer resultado del grafo
 var titulo;
 var ruta;
 $(document).ready(function(){
+    inicializarSelectPersona();
     //Inicializando variables
     listaNodoAbierto = [];
     idseleccionado = 0;
     grafoinicial = '';
     ruta = '';
-    //Inicializacion de lista para busqueda
+    //Inicializar lista tipo
+    $('#listatipo').select2({
+        width:'100%',
+        minimumResultsForSearch: -1,
+        templateResult: formatOutput
+    });
+    //Metodo de Busqueda
+    $("#listatipo").change(function(){
+        selected = $('#listatipo').val();
+        if(selected=="Nombre"){
+            $("#descripcion").html("El tipo de búsqueda <b>Persona - Proyecto</b> visualiza los proyectos en los que ha intervenido una persona," +
+                "al dar <b>click</b> sobre un proyecto se extienden las demás personas involucradas. Y al dar <b>doble click</b>" +
+                " se presenta la información específica del proyecto seleccionado.");
+            inicializarSelectPersona();
+        }else if(selected=="Persona"){
+            $("#descripcion").html("El tipo de búsqueda por <b>Persona - Persona</b> visualiza las personas que han intervenido en un proyecto, " +
+                "si la línea de relación es más notoria significa mayor participación, dicho de otro modo, han trabajado en más proyectos.");
+            inicializarSelectPersona();
+        }else if(selected=="Proyecto"){
+            $("#descripcion").html("El tipo de búsqueda por <b>Proyecto</b> visualiza las personas que han intervenido en un proyecto, " +
+                "al dar <b>click</b> sobre una persona se extienden los proyectos en los que ha participado. Y al dar <b>doble click</b>" +
+                " se presenta la información específica del proyecto seleccionado.");
+            inicializarSelectProyecto();
+        }else if(selected=="Area"){
+            $("#descripcion").html("El tipo de búsqueda <b>Área </b> visualiza los proyectos que pertenecen a una area específica," +
+                "al dar <b>click</b> sobre un proyecto se extienden las personas involucradas. Y al dar <b>doble click</b>" +
+                " se presenta la información del proyecto seleccionado.");
+            inicializarSelectArea();
+        }else if(selected=="TipoProyecto"){
+            $("#descripcion").html("El tipo de búsqueda <b>Tipo de proyecto </b> visualiza los proyectos que pertenecen a una tipo específico," +
+                "al dar <b>click</b> sobre un proyecto se extienden las personas involucradas. Y al dar <b>doble click</b>" +
+                " se presenta la información del proyecto seleccionado.");
+            inicializarSelectTipo();
+        }
+        titulo =  $('#listatipo').select2('data')[0]['text'];
+        if(titulo == "Proyecto"|| titulo == "Área" || titulo == "Tipo de proyecto"){
+            $('#titulobusqueda').text(titulo);
+        }else{
+            titulo = "Persona";
+            $('#titulobusqueda').text(titulo);
+        }
+        $('#listaBusqueda').empty();
+    });
+    //Metodo de busqueda al seleccioanr un elemento de la lista
+    $("#listaBusqueda").change(function(){
+        if($('#listaBusqueda').val()!=null){
+            idnodobase = $('#listaBusqueda').val();
+            idseleccionado = idnodobase;
+            if(selected=='Proyecto'){
+                var rutaProject = rutaBase + "project/"+idnodobase;
+                $.get(rutaProject,
+                    function (res) {
+                        actualizarJSONHTML(res,res);
+                        armarGrafo();
+                        grafoinicial = res;
+                    });
+            }else if(selected=='Nombre'){
+                var rutaPerson = rutaBase + "person/"+idnodobase;
+                $.get(rutaPerson,
+                    function (res) {
+                        actualizarJSONHTML(res,res);
+                        armarGrafo();
+                        grafoinicial = res;
+                    });
+            }else if(selected=='Persona'){
+                var rutaPerson = rutaBase + "personperson/"+idnodobase;
+                $.get(rutaPerson,
+                    function (res) {
+                        actualizarJSONHTML(res,res);
+                        armarGrafo();
+                        grafoinicial = res;
+                    });
+            }else if(selected=='Area'){
+                var rutaPerson = rutaBase + "projectArea/"+idnodobase;
+                $.get(rutaPerson,
+                    function (res) {
+                        actualizarJSONHTML(res,res);
+                        armarGrafo();
+                        grafoinicial = res;
+                    });
+            }else if(selected=='TipoProyecto'){
+                var rutaPerson = rutaBase + "projectTipo/"+idnodobase;
+                $.get(rutaPerson,
+                    function (res) {
+                        actualizarJSONHTML(res,res);
+                        armarGrafo();
+                        grafoinicial = res;
+                    });
+            }
+            var heigth=$(window).height();
+            $('#mynetwork').height(heigth);
+            $('#mynetwork').css('border','1px solid lightgray');
+            var heigth1=$(window).height();
+            $('#myleyenda').height(heigth1);
+            $('#myleyenda').css('border','1px solid lightgray');
+            $('#card').css('display','block');
+        }
+    });
+});
+function inicializarSelectTipo() {
+    var rutaProject = rutaBase + "listaBusquedaTipoProyecto";
+    $('#listaBusqueda').select2({
+        width:'100%',
+        minimumInputLength:0,
+        allowClear:true,
+        placeholder:"Seleccione una opción ...",
+    });
+    $.get(rutaProject,
+        function (res) {
+            var data = JSON.parse(res);
+            console.log(res);
+            for(var i=0;i<data.length;i++){
+                var newOption = new Option(data[i].nombre, data[i].id, false, false);
+                $('#listaBusqueda').append(newOption);
+            }
+            $('#listaBusqueda').val(null).trigger('change');
+        });
+}
+function inicializarSelectArea() {
+    var rutaProject = rutaBase + "listaBusquedaArea";
+    $('#listaBusqueda').select2({
+        width:'100%',
+        minimumInputLength:0,
+        allowClear:true,
+        placeholder:"Seleccione una opción ...",
+    });
+    $.get(rutaProject,
+        function (res) {
+            var data = JSON.parse(res);
+            console.log(res);
+            for(var i=0;i<data.length;i++){
+                var newOption = new Option(data[i].nombre, data[i].id, false, false);
+                $('#listaBusqueda').append(newOption);
+            }
+            $('#listaBusqueda').val(null).trigger('change');
+        });
+}
+function inicializarSelectProyecto() {
     $('#listaBusqueda').select2({
         width:'100%',
         minimumInputLength:3,
@@ -26,15 +164,7 @@ $(document).ready(function(){
                 busqueda = busqueda.replace('Í', 'I');
                 busqueda = busqueda.replace('Ó', 'O');
                 busqueda = busqueda.replace('Ú', 'U');
-                if(selected=="Nombre" || selected=="Persona"){
-                    ruta = rutaBase+"listaBusquedaPersona/"+ busqueda;
-                }else if(selected=="Proyecto"){
-                    ruta = rutaBase+"listaBusquedaProyecto/"+ busqueda;
-                }else if(selected=="Area"){
-                    ruta = rutaBase+"listaBusquedaArea/"+ busqueda;
-                }else if(selected=="TipoProyecto"){
-                    ruta = rutaBase+"listaBusquedaTipoProyecto/"+ busqueda;
-                }
+                ruta = rutaBase+"listaBusquedaProyecto/"+ busqueda;
                 return ruta;
             },
             dataType: "json",
@@ -51,62 +181,39 @@ $(document).ready(function(){
             }
         }
     });
-    //Inicializar lista tipo
-    $('#listatipo').select2({
+}
+function inicializarSelectPersona() {
+    $('#listaBusqueda').select2({
         width:'100%',
-        minimumResultsForSearch: -1,
-        templateResult: formatOutput
-    });
-    //Metodo de Busqueda
-    $("#listatipo").change(function(){
-        selected = $('#listatipo').val();
-        titulo =  $('#listatipo').select2('data')[0]['text'];
-        if(titulo == "Proyecto"|| titulo == "Área" || titulo == "Tipo de proyecto"){
-            $('#titulobusqueda').text(titulo);
-        }else{
-            titulo = "Persona";
-            $('#titulobusqueda').text(titulo);
+        minimumInputLength:3,
+        allowClear:true,
+        placeholder:"Seleccione una opción ...",
+        ajax: {
+            url: function (params){
+                var busqueda = params.term.toUpperCase();
+                busqueda = busqueda.replace('Á', 'A');
+                busqueda = busqueda.replace('É', 'E');
+                busqueda = busqueda.replace('Í', 'I');
+                busqueda = busqueda.replace('Ó', 'O');
+                busqueda = busqueda.replace('Ú', 'U');
+                ruta = rutaBase+"listaBusquedaPersona/"+ busqueda;
+                return ruta;
+            },
+            dataType: "json",
+            type: "GET",
+            processResults: function (data) {
+                return {
+                    results: $.map(data, function (item) {
+                        return {
+                            text: item.nombre,
+                            id: item.id
+                        }
+                    })
+                };
+            }
         }
-        $('#listaBusqueda').empty();
     });
-    //Metodo de busqueda al seleccioanr un elemento de la lista
-    $("#listaBusqueda").change(function(){
-        idnodobase = $('#listaBusqueda').val();
-        idseleccionado = idnodobase;
-        if(selected=='Proyecto'){
-            var rutaProject = rutaBase + "project/"+idnodobase;
-            $.get(rutaProject,
-                function (res) {
-                    actualizarJSONHTML(res,res);
-                    armarGrafo();
-                    grafoinicial = res;
-                });
-        }else if(selected=='Nombre'){
-            var rutaPerson = rutaBase + "person/"+idnodobase;
-            $.get(rutaPerson,
-                function (res) {
-                    actualizarJSONHTML(res,res);
-                    armarGrafo();
-                    grafoinicial = res;
-                });
-        }else if(selected=='Persona'){
-            var rutaPerson = rutaBase + "personperson/"+idnodobase;
-            $.get(rutaPerson,
-                function (res) {
-                    console.log(JSON.parse(res));
-                    actualizarJSONHTML(res,res);
-                    armarGrafo();
-                    grafoinicial = res;
-                });
-        }
-        var heigth=$(window).height();
-        $('#mynetwork').height(heigth);
-        $('#mynetwork').css('border','1px solid lightgray');
-        var heigth1=$(window).height();
-        $('#myleyenda').height(heigth1);
-        $('#myleyenda').css('border','1px solid lightgray');
-    });
-});
+}
 function formatOutput (optionElement) {
     if(optionElement.id=='Proyecto' || optionElement.id=='Area' || optionElement.id=='TipoProyecto'){
         var $state = $(
@@ -152,6 +259,9 @@ function eliminarEdgesRepetidos(arrayEdges) {
 }
 function agrandarGrafo(idProject) {
     var rutaProject = rutaBase + "projectID/"+idProject;
+    if(selected == "Proyecto"){
+        rutaProject = rutaBase + "person/"+idProject;
+    }
     var dataRepetidos = JSON.parse(document.getElementById('json').innerHTML);
     $.get(rutaProject,
         function (res) {
@@ -238,6 +348,9 @@ function EliminarEdges(data, dataRepetidos) {
 }
 function reducirGrafo(idProject) {
     var rutaProject = rutaBase + "projectID/"+idProject;
+    if(selected == "Proyecto"){
+        rutaProject = rutaBase + "person/"+idProject;
+    }
     var dataRepetidos = JSON.parse(document.getElementById('json').innerHTML);
     $.get(rutaProject,
         function (res) {
@@ -259,31 +372,44 @@ function reducirGrafo(idProject) {
         });
 }
 function armarGrafo() {
-    var options = {
-        physics: {
-            forceAtlas2Based: {
-                gravitationalConstant: -100,
-                /*centralGravity: 0.005,
-                springLength: 230,
-                springConstant: 0.18,
-                avoidOverlap: 1.5*/
-            },
-            //maxVelocity: 146,
-            solver: 'forceAtlas2Based',
-            //timestep: 0.35,
-            stabilization: {
-                enabled: true,
-                iterations: 1000,
-                updateInterval: 25
-            }
+    var  physics = {
+        forceAtlas2Based: {
+            gravitationalConstant: -80,
         },
-        interaction: { hover: true},
+        solver: 'forceAtlas2Based',
+        stabilization: {
+            enabled: true,
+            iterations: 1000,
+            updateInterval: 25
+        }
+    };
+    var options = {
+        physics: physics,
+        interaction: {
+            hover: true
+        },
         groups: {
             participante: {
                 shape: "circularImage",
                 image: "../img/participante.png",
                 color: {
-                    border: "lightgray",
+                    border: "#4D4D4D",
+                    background: "#FFFFFF",
+                }
+            },
+            area: {
+                shape: "circularImage",
+                image: "../img/area.png",
+                color: {
+                    border: "#4D4D4D",
+                    background: "#FFFFFF",
+                }
+            },
+            tipo: {
+                shape: "circularImage",
+                image: "../img/area.png",
+                color: {
+                    border: "#4D4D4D",
                     background: "#FFFFFF",
                 }
             },
@@ -292,7 +418,7 @@ function armarGrafo() {
                 image: "../img/user.png",
                 borderWidth: 4,
                 color: {
-                    border: "lightgray",
+                    border: "#4D4D4D",
                     background: "#FFFFFF",
                 }
             },
@@ -308,7 +434,7 @@ function armarGrafo() {
                 shape: "circularImage",
                 image: "../img/usersearch.png",
                 color: {
-                    border: "lightgray",
+                    border: "#4D4D4D",
                     background: "#FFFFFF",
                 }
             },
@@ -371,6 +497,7 @@ function armarGrafo() {
         }
     };
     var data = JSON.parse(document.getElementById('json1').innerHTML);
+    console.log(JSON.stringify(data));
     var container = document.getElementById('mynetwork');
     var leyenda = document.getElementById('myleyenda');
     var x = -leyenda.clientWidth/4 + 50;
@@ -387,6 +514,19 @@ function armarGrafo() {
     var acumulador=1;
     var arrayLegend = [];
     var step = 80;
+    if(data.nodes.length>200){
+        options.physics = {
+            stabilization: false,
+            barnesHut: {
+                gravitationalConstant: -2000,
+                springConstant: 0.001,
+            },
+        };
+    }
+    for (var i = 0; i < data.nodes.length; i++) {
+        delete data.nodes[i].x;
+        delete data.nodes[i].y;
+    }
     var data = {
         nodes: data.nodes,
         edges: data.edges
@@ -461,6 +601,38 @@ function armarGrafo() {
                     acumulador++;
                 }
                 break;
+            case 'area':
+                if(arrayLegend.indexOf(1012)==-1){
+                    dataleyenda.push({
+                        id: 1012,
+                        x: x,
+                        y: yacumulador,
+                        label: "Área Buscada",
+                        group: "area",
+                        value: 1,
+                        fixed: true,
+                        physics: false,
+                    });
+                    arrayLegend.push(1011);
+                    acumulador++;
+                }
+                break;
+            case 'tipo':
+                if(arrayLegend.indexOf(1013)==-1){
+                    dataleyenda.push({
+                        id: 1013,
+                        x: x,
+                        y: yacumulador,
+                        label: "Tipo Proyecto Buscada",
+                        group: "tipo",
+                        value: 1,
+                        fixed: true,
+                        physics: false,
+                    });
+                    arrayLegend.push(1011);
+                    acumulador++;
+                }
+                break;
             case 'extension':
                 if(arrayLegend.indexOf(1002)==-1){
                     dataleyenda.push({
@@ -483,7 +655,7 @@ function armarGrafo() {
                         id: 1003,
                         x: x,
                         y: yacumulador,
-                        label: "Investigación Docente ("+totalInvestigacionDocente+")",
+                        label: "Innovación Docente ("+totalInvestigacionDocente+")",
                         group: "investigacion_docente",
                         value: 1,
                         fixed: true,
@@ -572,7 +744,7 @@ function armarGrafo() {
                         });
                         arrayLegend.push(1008);
                         acumulador++;
-                    }else{
+                    }else if(selected=="Proyecto"){
                         dataleyenda.push({
                             id: 1008,
                             x: x,
@@ -585,8 +757,20 @@ function armarGrafo() {
                         });
                         arrayLegend.push(1008);
                         acumulador++;
+                    }else if(selected=="Persona"){
+                        dataleyenda.push({
+                            id: 1008,
+                            x: x,
+                            y: yacumulador,
+                            label: "Persona ("+totalParticipante+")",
+                            group: "participante",
+                            value: 1,
+                            fixed: true,
+                            physics: false,
+                        });
+                        arrayLegend.push(1008);
+                        acumulador++;
                     }
-
                 }
                 break;
             case 'director':
@@ -609,7 +793,7 @@ function armarGrafo() {
     }
     totalProyectos = totalExtension+totalPropuesta+totalInnovacion+totalImplementacion+totalConsultoria+
         totalInvestigacionDocente+totalInvestigacion;
-    if(selected=="Nombre"){
+    if(selected=="Nombre" || selected=="Area"){
         dataleyenda.push({
             id: 1010,
             x: x,
@@ -636,8 +820,12 @@ function armarGrafo() {
             setTimeout(function () {
                 if (t0 - doubleClickTime > threshold) {
                     var arrayEdges = network.getConnectedNodes(identificador,'from');
+                    if(selected=="Proyecto"){
+                        arrayEdges = network.getConnectedNodes(identificador,'to');
+                    }
                     var idNodo = identificador;
                     if(idNodo!=idnodobase){
+                        console.log(arrayEdges);
                         if(arrayEdges!=undefined && arrayEdges!=null && arrayEdges!='') {
                             if (listaNodoAbierto.indexOf(idNodo) == -1) {
                                 agrandarGrafo(idNodo);
@@ -659,7 +847,6 @@ function armarGrafo() {
     network.on('doubleClick', function(params) {
         doubleClickTime = new Date();
         var id = this.getNodeAt(params.pointer.DOM);
-        //window.location.href="/resultados/"+id;
         window.open(rutaBase+'resultados/'+id, '_blank');
     });
     network.on("afterDrawing", function (ctx) {

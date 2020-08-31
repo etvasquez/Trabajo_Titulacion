@@ -52,15 +52,15 @@ public class HomeController {
         return new ResponseEntity<String> (appName, HttpStatus.OK);
     }
 
-    @GetMapping("/listaBusquedaArea/{id}")
-    public ResponseEntity<String> ObtenerAreas(@PathVariable(value="id") String id) throws JsonProcessingException {
-        appName = consultas.BusquedaPorArea(id);
+    @GetMapping("/listaBusquedaArea")
+    public ResponseEntity<String> ObtenerAreas() throws JsonProcessingException {
+        appName = consultas.BusquedaPorArea();
         return new ResponseEntity<String> (appName, HttpStatus.OK);
     }
 
-    @GetMapping("/listaBusquedaTipoProyecto/{id}")
-    public ResponseEntity<String> ObtenerTiposProyectos(@PathVariable(value="id") String id) throws JsonProcessingException {
-        appName = consultas.BusquedaPorTipoProyecto(id);
+    @GetMapping("/listaBusquedaTipoProyecto")
+    public ResponseEntity<String> ObtenerTipoProyecto() throws JsonProcessingException {
+        appName = consultas.BusquedaPorTipoProyecto();
         return new ResponseEntity<String> (appName, HttpStatus.OK);
     }
 
@@ -73,6 +73,18 @@ public class HomeController {
     @GetMapping("/projectID/{id}")
     public ResponseEntity<String> busquedaProyectoID(@PathVariable(value="id") String id) throws JsonProcessingException {
         appName = consultas.getGrapProjectID(id);
+        return new ResponseEntity<String>(appName, HttpStatus.OK);
+    }
+
+    @GetMapping("/projectArea/{id}")
+    public ResponseEntity<String> busquedaProyectoArea(@PathVariable(value="id") String id) throws JsonProcessingException {
+        appName = consultas.getGrapAreaProject(id);
+        return new ResponseEntity<String>(appName, HttpStatus.OK);
+    }
+
+    @GetMapping("/projectTipo/{id}")
+    public ResponseEntity<String> busquedaProyectoTipo(@PathVariable(value="id") String id) throws JsonProcessingException {
+        appName = consultas.getGrapTipoProject(id);
         return new ResponseEntity<String>(appName, HttpStatus.OK);
     }
 

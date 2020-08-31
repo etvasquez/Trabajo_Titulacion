@@ -47,7 +47,6 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/com.ontotext.graphdb/graphdb-free-runtime -->
 		<dependency>
 			<groupId>com.ontotext.graphdb</groupId>
@@ -80,6 +79,12 @@
 			<groupId>org.webjars</groupId>
 			<artifactId>font-awesome</artifactId>
 			<version>5.14.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.owlike/genson -->
+		<dependency>
+			<groupId>com.owlike</groupId>
+			<artifactId>genson</artifactId>
+			<version>1.4</version>
 		</dependency>
 	</dependencies>
 	<build>

@@ -43,34 +43,43 @@
     </div>
 </nav>
 <br>
-<div class="container">
-    <div class="row">
-        <div class="col-xs-3 col-sm-3 col-md-3 col-xl-3 col-lg-3">
-            <label for="listatipo"><strong>BUSCAR POR: </strong></label>
-            <select class="js-example-basic-single" id="listatipo">
-                <optgroup label="Persona">
-                    <option value="Nombre">Persona - Proyecto</option>
-                    <option value="Persona">Persona - Persona</option>
-                </optgroup>
-                <option value="Proyecto">Proyecto</option>
-                <option value="Area">Área</option>
-                <option value="TipoProyecto">Tipo de proyecto</option>
-            </select>
-        </div>
-        <div class="col-xs-9 col-sm-9 col-md-9 col-xl-9 col-lg-9">
-            <label for="listaBusqueda"><strong id="titulobusqueda">Persona</strong></label>
-            <select class="js-example-basic-single" id="listaBusqueda">
-            </select>
+<div class="card card ml-4 mr-4">
+    <div class="card-body">
+        <div class="row m-0 p-0">
+            <div class="col-xs-3 col-sm-3 col-md-3 col-xl-3 col-lg-3">
+                <label for="listatipo"><strong>BUSCAR POR: </strong></label>
+                <select class="js-example-basic-single" id="listatipo">
+                    <optgroup label="Persona">
+                        <option value="Nombre">Persona - Proyecto</option>
+                        <option value="Persona">Persona - Persona</option>
+                    </optgroup>
+                    <option value="Proyecto">Proyecto</option>
+                    <option value="Area">Área</option>
+                    <option value="TipoProyecto">Tipo de proyecto</option>
+                </select>
+            </div>
+            <div class="col-xs-9 col-sm-9 col-md-9 col-xl-9 col-lg-9">
+                <label for="listaBusqueda"><strong id="titulobusqueda">Persona</strong></label>
+                <select class="js-example-basic-single" id="listaBusqueda">
+                </select>
+            </div>
         </div>
     </div>
 </div>
 <br>
 <p style="display: none" id="json" th:text="${appName}"></p>
 <p style="display: none" id="json1"></p>
-<div class="container">
-    <div class="row">
-        <div id="myleyenda" class="col-xs-3 col-sm-3 col-md-3 col-xl-3 col-lg-3"></div>
-        <div id="mynetwork" class="col-xs-9 col-sm-9 col-md-9 col-xl-9 col-lg-9"></div>
+<div class="card ml-4 mr-4">
+    <div class="card-header" id="descripcion">
+        El tipo de búsqueda <b>Persona - Proyecto</b> visualiza los proyectos en los que ha intervenido una persona,
+            al dar <b>click</b> sobre un proyecto se extienden las demás personas involucradas. Y al dar <b>doble click</b>
+            se presenta la información específica del proyecto seleccionado.
+    </div>
+    <div class="card-body m-0 p-0" style="display: none" id="card">
+        <div class="row m-0 p-0">
+            <div id="myleyenda" class="col-xs-2 col-sm-2 col-md-2 col-xl-2 col-lg-2"></div>
+            <div id="mynetwork" class="col-xs-10 col-sm-10 col-md-10 col-xl-10 col-lg-10"></div>
+        </div>
     </div>
 </div>
 <!-- Add an invisible <div> element to the document, to hold the JSON data: -->

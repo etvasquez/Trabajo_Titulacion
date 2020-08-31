@@ -16,6 +16,11 @@ public class Relacion {
         this.title = title;
     }
 
+    public Relacion(String from, String to) {
+        this.from = from;
+        this.to = to;
+    }
+
     public String getFrom() {
         return from;
     }
