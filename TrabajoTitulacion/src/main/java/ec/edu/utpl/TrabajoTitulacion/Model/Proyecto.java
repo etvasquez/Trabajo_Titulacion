@@ -1,6 +1,7 @@
 package ec.edu.utpl.TrabajoTitulacion.Model;
 
 public class Proyecto {
+    private String id;
     private String titulo;
     private String descripcion;
     private String tipo;
@@ -23,10 +24,11 @@ public class Proyecto {
     public Proyecto() {
     }
 
-    public Proyecto(String titulo, String descripcion, String tipo, String incluye_estudiantes, String cobertura,
+    public Proyecto(String id,String titulo, String descripcion, String tipo, String incluye_estudiantes, String cobertura,
                     String fechainicio, String fechafin, String ife, String smartland, String reprogramado, String avance,
                     String financiamiento_utpl, String financiamiento_externo, String financiamiento_general, String estado,
                     String programa, String objetivo, String presupuesto) {
+        this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.tipo = tipo;
@@ -189,5 +191,13 @@ public class Proyecto {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

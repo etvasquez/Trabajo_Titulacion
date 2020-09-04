@@ -1,4 +1,9 @@
 var tipo="";
+var rutaBase='http://localhost:8888/';
+var idProject="";
+var comentario="";
+var nombre="";
+var correo="";
 $(document).ready(function() {
     var regex = /&lt;br&gt;/gi
     var arryAreas = [];
@@ -29,8 +34,6 @@ $(document).ready(function() {
     console.log(Object.keys(persona));
     $("#titulo").append(tipo.titulo);
     $("#tipo_proyecto").append(tipo.tipo);
-    /*$("#area").css('background', '#cd2b2b').css('border-radius','20px').css('margin-left','15px').
-    css('padding','10px 10px 10px 10px').css('color','#fff').css('font-size','small').css('font-weight','bolder');*/
     if (tipo.tipo == 'Investigación') {
         $("#tipo_proyecto").css('background', '#cd2b2b');
     }

@@ -39,3 +39,7 @@
     height:10%;
     width: 10%;
 }
+
+.card-inner{
+    margin-left: 4rem;
+}

@@ -847,7 +847,7 @@ function armarGrafo() {
     network.on('doubleClick', function(params) {
         doubleClickTime = new Date();
         var id = this.getNodeAt(params.pointer.DOM);
-        window.open(rutaBase+'resultados/'+id, '_blank');
+        window.open(rutaBase+'comentario/'+id, '_blank');
     });
     network.on("afterDrawing", function (ctx) {
         try{

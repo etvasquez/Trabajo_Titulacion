@@ -5,6 +5,7 @@ import ec.edu.utpl.TrabajoTitulacion.ConnectionDB.conectingGraphDB;
 import ec.edu.utpl.TrabajoTitulacion.Model.*;
 import org.eclipse.rdf4j.model.impl.SimpleLiteral;
 import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -13,14 +14,187 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.UUID;
 
 public class consultasBD{
-
+    private static String urlBase = "<http://192.168.10.90:7200/repositories/";
     private static Logger logger = LoggerFactory.getLogger(conectingGraphDB.class);
     private static final Marker WTF_MARKER = MarkerFactory.getMarker("WTF");
 
     conectingGraphDB con = new conectingGraphDB();
+
+    public String insertNewLike(String idProject){
+        int numeroActualLike = getCountLike(idProject) + 1;
+        String strInsert =
+                "INSERT DATA { " +
+                        urlBase + "commentProject/" + idProject + "> schema:likeCount " + numeroActualLike + " . }";
+
+        RepositoryConnection repositoryConnection = con.getRepositoryConnection();
+        repositoryConnection.begin();
+        Update updateOperation = repositoryConnection.prepareUpdate(QueryLanguage.SPARQL, strInsert);
+        updateOperation.execute();
+        try {
+            repositoryConnection.commit();
+        } catch (Exception e) {
+            if (repositoryConnection.isActive())
+                repositoryConnection.rollback();
+        }
+        return "";
+    }
+
+    public int getCountLike(String idProject){
+        int contador=0;
+        String strQuery ="PREFIX schema: <http://schema.org/> " +
+                "SELECT ?total " +
+                "WHERE {"+
+                "?s schema:ide_project '"+idProject+"' . "+
+                "?s schema:Comment ?tipo . "+
+                "?tipo schema:likeCount ?total } ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral total =
+                        (SimpleLiteral)bindingSet.getValue("total");
+                contador = total.intValue();
+
+            }
+        }
+        catch (QueryEvaluationException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return contador;
+    }
+
+    public ArrayList<Comentario> getComment(String idProject){
+        ArrayList<Comentario> listComentarios = new ArrayList<>();
+        String strQuery ="PREFIX schema: <http://schema.org/> " +
+                "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                "SELECT ?com ?date ?nombre ?correo ?uuid " +
+                "WHERE { "+
+                "?s schema:ide_project '"+idProject+"' . "+
+                "?s schema:Comment ?tipo . "+
+                "?tipo schema:uuid ?uuid . "+
+                "?tipo schema:comment ?com . "+
+                "?tipo schema:dateCreated ?date ."+
+                "?tipo schema:character ?autor . "+
+                "?autor j.2:lastName ?nombre . "+
+                "?autor j.2:mbox ?correo . } ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral com =
+                        (SimpleLiteral)bindingSet.getValue("com");
+                SimpleLiteral date =
+                        (SimpleLiteral)bindingSet.getValue("date");
+                SimpleLiteral nombre =
+                        (SimpleLiteral)bindingSet.getValue("nombre");
+                SimpleLiteral correo =
+                        (SimpleLiteral)bindingSet.getValue("correo");
+                SimpleLiteral uuid =
+                        (SimpleLiteral)bindingSet.getValue("uuid");
+                Comentario comentario = new Comentario(uuid.stringValue(),nombre.stringValue(),date.stringValue(),com.stringValue(),correo.stringValue());
+                listComentarios.add(comentario);
+            }
+        }
+        catch (QueryEvaluationException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return listComentarios;
+    }
+
+    public String getDate(){
+        SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = new Date(System.currentTimeMillis());
+        return formatter.format(date);
+    }
+
+    public String insertComent(Comentario comentario) {
+        String uuid = UUID.randomUUID().toString();
+        String strInsert = "";
+        String estado="Exito";
+        if (comentario.getIdCom() != null) {
+            if(getPersonByEmail(comentario.getCorreo()).equals(comentario.getCorreo())){
+                strInsert =
+                        "INSERT DATA { " +
+                                urlBase + "project/" + comentario.getIdCom() + "> schema:Comment " + urlBase + "commentProject/" + uuid + "> . " +
+                                urlBase + "commentProject/" + uuid + "> schema:uuid \"" + uuid + "\" . " +
+                                urlBase + "commentProject/" + uuid + "> schema:comment \"" + comentario.getComentarios() + "\" . " +
+                                urlBase + "commentProject/" + uuid + "> schema:dateCreated \"" + getDate() + "\" . " +
+                                urlBase + "commentProject/" + uuid+ "> schema:character " + urlBase + "people/" + comentario.getCorreo() + "> . " +
+                                "}";
+            }else{
+                strInsert =
+                        "INSERT DATA { " +
+                                urlBase + "project/" + comentario.getIdCom() + "> schema:Comment " + urlBase + "commentProject/" + uuid + "> . " +
+                                urlBase + "commentProject/" + uuid + "> schema:uuid \"" + uuid + "\" . " +
+                                urlBase + "commentProject/" + uuid + "> schema:comment \"" + comentario.getComentarios() + "\" . " +
+                                urlBase + "commentProject/" + uuid + "> schema:dateCreated \"" + getDate() + "\" . " +
+                                urlBase + "commentProject/" + uuid+ "> schema:character " + urlBase + "people/" + comentario.getCorreo() + "> . " +
+                                urlBase + "people/" + comentario.getCorreo() + "> foaf:lastName \"" + comentario.getNombre() + "\" . " +
+                                urlBase + "people/" + comentario.getCorreo() + "> foaf:mbox \"" + comentario.getCorreo() + "\" . " +
+                                "}";
+            }
+
+        }
+        RepositoryConnection repositoryConnection = con.getRepositoryConnection();
+        repositoryConnection.begin();
+        Update updateOperation = repositoryConnection.prepareUpdate(QueryLanguage.SPARQL, strInsert);
+        updateOperation.execute();
+        try {
+            repositoryConnection.commit();
+        } catch (Exception e) {
+            estado="error";
+            if (repositoryConnection.isActive())
+                repositoryConnection.rollback();
+        }
+        return estado;
+    }
+
+    public String getPersonByEmail(String busqueda) {
+        String json="";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        String strQuery ="PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                "SELECT ?correo " +
+                "WHERE { "+
+                urlBase+"people/"+busqueda+"> j.2:mbox ?correo }";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral correo =
+                        (SimpleLiteral)bindingSet.getValue("correo");
+                json = correo.stringValue();
+            }
+        }
+        catch (QueryEvaluationException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return json;
+    }
 
     public String getGrapProjectID(String idProject) {
         ArrayList<Nodo> listNodos = new ArrayList<>();
@@ -222,7 +396,7 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("objetivo");
                 SimpleLiteral presupuesto =
                         (SimpleLiteral)bindingSet.getValue("presupuesto");
-                proyecto = new Proyecto(titulo.stringValue(),descripcion.stringValue(),tipo.stringValue(),
+                proyecto = new Proyecto(idProject,titulo.stringValue(),descripcion.stringValue(),tipo.stringValue(),
                         incluye_estudiantes.stringValue(),cobertura.stringValue(),fechainicio.stringValue(),fechafin.stringValue(),
                         ife.stringValue(),smartland.stringValue(),reprogramado.stringValue(),avance.stringValue(),fu.stringValue(),
                         fe.stringValue(),tg.stringValue(),estado.stringValue(),programa.stringValue(),objetivo.stringValue(),presupuesto.stringValue());

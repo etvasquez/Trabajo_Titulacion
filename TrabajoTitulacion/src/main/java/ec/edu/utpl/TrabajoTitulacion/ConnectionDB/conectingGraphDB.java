@@ -21,6 +21,7 @@ public class conectingGraphDB {
             "http://localhost:7200/";
 
     private static final String REPOSITORY_ID = "OntologyProjects";
+    //private static final String REPOSITORY_ID = "Test";
 
     public RepositoryConnection getRepositoryConnection() {
         Repository repository = new HTTPRepository(

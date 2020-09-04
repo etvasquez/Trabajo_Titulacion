@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Información proyecto</title>
+    <link rel="stylesheet" href="../webjars/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../webjars/font-awesome/5.14.0/css/all.css">
+    <script src="../webjars/jquery/3.5.1/jquery.min.js"></script>
+    <script src="../webjars/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="../webjars/jquery/3.5.1/jquery.min.js"></script>
+    <script src="../js/resultados.js"></script>
+    <link href="../css/estilos.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/">Plataforma Semántica UTPL</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Inicio <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="estadisticas.html">Estadísticas</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="repositorio.html">Repositorio</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="nosotros.html">Nosotros</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav justify-content-end">
+            <li class="nav-item">
+                <a class="nav-link" href="#"><span class="fas fa-sign-in-alt"></span> Login</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<p style="display: none" id="json" th:text="${appName}"></p>
+<p style="display: none" id="jsonpersona" th:text="${personas}"></p>
+<p style="display: none" id="estado1" th:text="${estado}"></p>
+<div class="container" id="divtitulo">
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-xl-12 col-lg-12">
+            <h3 id="titulo"></h3>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-xl-3 col-lg-3">
+            <p><b>Tipo de Proyecto</b></p>
+            <p><span id="tipo_proyecto"></span></p>
+            <p><b>Áreas involucradas</b></p>
+            <p><span id="areas"></span></p>
+            <p><b>Coordinador(es)</b><br><span id="coordinador"></span></p>
+            <p><b>Participante(s)</b><br><span id="participante"></span></p>
+            <p id="ejecucion"><b>Período académico de ejecución </b><br><span id="inicio"><b>Fecha inicio: </b></span>
+                <br><span id="fin"><b>Fecha fin: </b></span></p>
+            <p id="reprogramado"><b>Proyecto reprogramado </b><br></p>
+            <p id="avance"><b>Avance </b><br></p>
+            <p id="estado"><b>Estado </b><br></p>
+            <p id="programa"><b>Programa </b><br></p>
+            <p id="recursos"><b>Recursos </b><br></p>
+        </div>
+        <div class="col-xs-9 col-sm-9 col-md-9 col-xl-9 col-lg-9">
+            <p id="descripcion"><b>Descripción </b><br></p>
+            <p id="objetivo"><b>Objetivos </b><br></p>
+            <div class="container">
+                <!--<p class="text-center"><a class="btn text-white btn-danger"> <i class="fa fa-heart"></i> <span id="like" th:text="${like}"></span> Me gusta</a></p>-->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row" th:each="comentario : ${comentarios}">
+                            <div class="col-md-2">
+                                <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid"/>
+                                <p class="text-secondary text-center" th:text="${comentario.fecha}"></p>
+                            </div>
+                            <div class="col-md-10">
+                                <p>
+                                    <a class="float-left" href="#" th:text="${comentario.nombre}"><strong></strong></a>
+                                </p>
+                                <div class="clearfix"></div>
+                                <p th:text="${comentario.comentarios}"></p>
+                                <p>
+                                    <a class="float-right btn btn-outline-primary ml-2"> <i class="fa fa-reply"></i><span class="responder"></span> Responder</a>
+                                    <!--<a class="float-right btn text-white btn-secondary"> <i class="fa fa-heart"></i> <span class="like">0</span> Me gusta</a>-->
+                                </p>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5>Deja tu comentario</h5>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <form action="#" th:action="@{/comentario}" method="post" th:object="${coment}">
+                                        <div class="form-group" style="display: none">
+                                            <input type="text" class="form-control" id="idCom" th:field="*{idCom}" name="idCom">
+                                        </div>
+                                        <div class="form-group">
+                                            <textarea class="form-control" required id="FormControlTextarea" rows="3" placeholder="Escribe tu comentario ..." th:field="*{comentarios}"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="InputName">Nombre</label>
+                                            <input type="text" class="form-control" required id="InputName" aria-describedby="emailHelp" placeholder="Escribe tu nombre o anónimo" th:field="*{nombre}">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="InputEmail1">Correo electrónico</label>
+                                            <input type="email" class="form-control" id="InputEmail1" required aria-describedby="emailHelp" placeholder="Escribe tu correo" th:field="*{correo}">
+                                        </div>
+                                        <button type="submit" class="float-right btn btn-danger">Enviar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
