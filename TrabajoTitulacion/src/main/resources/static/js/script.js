@@ -6,6 +6,7 @@ var idseleccionado; //nodo que da click
 var grafoinicial; //primer resultado del grafo
 var titulo;
 var ruta;
+var nodoseleccionado;
 $(document).ready(function(){
     inicializarSelectPersona();
     //Inicializando variables
@@ -17,19 +18,18 @@ $(document).ready(function(){
     $('#listatipo').select2({
         width:'100%',
         minimumResultsForSearch: -1,
-        templateResult: formatOutput
     });
     //Metodo de Busqueda
     $("#listatipo").change(function(){
         selected = $('#listatipo').val();
         if(selected=="Nombre"){
-            $("#descripcion").html("El tipo de búsqueda <b>Persona - Proyecto</b> visualiza los proyectos en los que ha intervenido una persona," +
-                "al dar <b>click</b> sobre un proyecto se extienden las demás personas involucradas. Y al dar <b>doble click</b>" +
-                " se presenta la información específica del proyecto seleccionado.");
+            $("#descripcion").html("El tipo de búsqueda <b>Persona</b> permite visualizar los proyectos en los que ha intervenido" +
+                " un usuario. Si da un <b>click</b> sobre el proyecto conocerá los participantes. Si da <b>dobleclick</b> sobre el proyecto accederá a " +
+                "la información del mismo.");
             inicializarSelectPersona();
         }else if(selected=="Persona"){
-            $("#descripcion").html("El tipo de búsqueda por <b>Persona - Persona</b> visualiza las personas que han intervenido en un proyecto, " +
-                "si la línea de relación es más notoria significa mayor participación, dicho de otro modo, han trabajado en más proyectos.");
+            $("#descripcion").html("El tipo de búsqueda por <b>Redes</b> le permite visualizar las redes de personas con las que ha participado" +
+                " un usuario. La línea resaltada señala con quién ha mantenido mayor participación. ");
             inicializarSelectPersona();
         }else if(selected=="Proyecto"){
             $("#descripcion").html("El tipo de búsqueda por <b>Proyecto</b> visualiza las personas que han intervenido en un proyecto, " +
@@ -37,14 +37,14 @@ $(document).ready(function(){
                 " se presenta la información específica del proyecto seleccionado.");
             inicializarSelectProyecto();
         }else if(selected=="Area"){
-            $("#descripcion").html("El tipo de búsqueda <b>Área </b> visualiza los proyectos que pertenecen a una area específica," +
-                "al dar <b>click</b> sobre un proyecto se extienden las personas involucradas. Y al dar <b>doble click</b>" +
-                " se presenta la información del proyecto seleccionado.");
+            $("#descripcion").html("El tipo de búsqueda <b>Área </b>  le presenta todos los proyectos correspondientes al área buscada. " +
+                "Si da un <b>click</b> sobre el proyecto conocerá los participantes. Si da <b>click</b> sobre el proyecto accederá a " +
+                "la información del mismo. ");
             inicializarSelectArea();
         }else if(selected=="TipoProyecto"){
-            $("#descripcion").html("El tipo de búsqueda <b>Tipo de proyecto </b> visualiza los proyectos que pertenecen a una tipo específico," +
-                "al dar <b>click</b> sobre un proyecto se extienden las personas involucradas. Y al dar <b>doble click</b>" +
-                " se presenta la información del proyecto seleccionado.");
+            $("#descripcion").html("El tipo de búsqueda <b>Tipo de proyecto </b> le presenta todos los proyectos correspondientes al tipo buscado." +
+                " Si da un <b>click</b> sobre el proyecto conocerá los participantes. Si da <b>click</b> sobre el proyecto accederá a " +
+                "la información del mismo.");
             inicializarSelectTipo();
         }
         titulo =  $('#listatipo').select2('data')[0]['text'];
@@ -60,7 +60,6 @@ $(document).ready(function(){
     $("#listaBusqueda").change(function(){
         if($('#listaBusqueda').val()!=null){
             idnodobase = $('#listaBusqueda').val();
-            idseleccionado = idnodobase;
             if(selected=='Proyecto'){
                 var rutaProject = rutaBase + "project/"+idnodobase;
                 $.get(rutaProject,
@@ -118,12 +117,11 @@ function inicializarSelectTipo() {
         width:'100%',
         minimumInputLength:0,
         allowClear:true,
-        placeholder:"Seleccione una opción ...",
+        placeholder:"Escriba o seleccione el nombre del tipo de proyecto ...",
     });
     $.get(rutaProject,
         function (res) {
             var data = JSON.parse(res);
-            console.log(res);
             for(var i=0;i<data.length;i++){
                 var newOption = new Option(data[i].nombre, data[i].id, false, false);
                 $('#listaBusqueda').append(newOption);
@@ -137,12 +135,11 @@ function inicializarSelectArea() {
         width:'100%',
         minimumInputLength:0,
         allowClear:true,
-        placeholder:"Seleccione una opción ...",
+        placeholder:"Escriba o seleccione el nombre del área ...",
     });
     $.get(rutaProject,
         function (res) {
             var data = JSON.parse(res);
-            console.log(res);
             for(var i=0;i<data.length;i++){
                 var newOption = new Option(data[i].nombre, data[i].id, false, false);
                 $('#listaBusqueda').append(newOption);
@@ -154,8 +151,13 @@ function inicializarSelectProyecto() {
     $('#listaBusqueda').select2({
         width:'100%',
         minimumInputLength:3,
+        language: {
+            inputTooShort: function () {
+                return 'Porfavor, ingrese 3 o más caracteres';
+            }
+        },
         allowClear:true,
-        placeholder:"Seleccione una opción ...",
+        placeholder:"Escriba el nombre del proyecto ...",
         ajax: {
             url: function (params){
                 var busqueda = params.term.toUpperCase();
@@ -186,8 +188,13 @@ function inicializarSelectPersona() {
     $('#listaBusqueda').select2({
         width:'100%',
         minimumInputLength:3,
+        language: {
+            inputTooShort: function () {
+                return 'Porfavor, ingrese 3 o más caracteres';
+            }
+        },
         allowClear:true,
-        placeholder:"Seleccione una opción ...",
+        placeholder:"Escriba el nombre de la persona ...",
         ajax: {
             url: function (params){
                 var busqueda = params.term.toUpperCase();
@@ -214,16 +221,7 @@ function inicializarSelectPersona() {
         }
     });
 }
-function formatOutput (optionElement) {
-    if(optionElement.id=='Proyecto' || optionElement.id=='Area' || optionElement.id=='TipoProyecto'){
-        var $state = $(
-            '<span><b>' + optionElement.text + '</b></span>'
-        );
-    }else{
-        return optionElement.text;
-    }
-    return $state;
-};
+
 function actualizarJSONHTML(stringJSON1, stringJSON) {
     $("#json1").empty(); //JSON 1 PARA GRAFICAR, NO TIENE NODOS NI EDGES REPETIDOS
     $("#json1").append(stringJSON1);
@@ -346,13 +344,13 @@ function EliminarEdges(data, dataRepetidos) {
     }
     return edges;
 }
-function reducirGrafo(idProject) {
-    var rutaProject = rutaBase + "projectID/"+idProject;
+function reducirGrafo(idNodo) {
+    var ruta = rutaBase + "projectID/"+idNodo;
     if(selected == "Proyecto"){
-        rutaProject = rutaBase + "person/"+idProject;
+        ruta = rutaBase + "person/"+idNodo;
     }
     var dataRepetidos = JSON.parse(document.getElementById('json').innerHTML);
-    $.get(rutaProject,
+    $.get(ruta,
         function (res) {
             var data = JSON.parse(res);
             if(data.edges.length>1){
@@ -486,6 +484,14 @@ function armarGrafo() {
                     background: "#FFFFFF",
                 }
             },
+            vinculacion:{
+                shape: "circularImage",
+                image: "../img/file8.png",
+                color: {
+                    border: "#FFFFFF",
+                    background: "#FFFFFF",
+                }
+            },
             total:{
                 shape: "circularImage",
                 image: "../img/suma.png",
@@ -497,11 +503,15 @@ function armarGrafo() {
         }
     };
     var data = JSON.parse(document.getElementById('json1').innerHTML);
-    console.log(JSON.stringify(data));
+    for(var i=0;i<data.nodes.length;i++){
+        if(idnodobase==data.nodes[i].id){
+            nodoseleccionado = data.nodes[i].label;
+        }
+    }
     var container = document.getElementById('mynetwork');
     var leyenda = document.getElementById('myleyenda');
     var x = -leyenda.clientWidth/4 + 50;
-    var y = -leyenda.clientHeight/2 + 50;
+    var y = -leyenda.clientHeight/2;
     var totalExtension = 0;
     var totalInvestigacion = 0;
     var totalInvestigacionDocente = 0;
@@ -509,6 +519,7 @@ function armarGrafo() {
     var totalImplementacion = 0;
     var totalInnovacion = 0;
     var totalPropuesta = 0;
+    var totalVinculacion = 0;
     var totalDirector = 0;
     var totalParticipante = 0;
     var acumulador=1;
@@ -555,6 +566,9 @@ function armarGrafo() {
             case 'propuesta':
                 totalPropuesta++;
                 break;
+            case 'vinculacion':
+                totalVinculacion++;
+                break;
             case 'director':
                 totalDirector++;
                 break;
@@ -571,18 +585,33 @@ function armarGrafo() {
         switch (data.nodes[i].group) {
             case 'buscado':
                 if(arrayLegend.indexOf(1011)==-1){
-                    dataleyenda.push({
-                        id: 1011,
-                        x: x,
-                        y: yacumulador,
-                        label: "Persona Buscada",
-                        group: "buscado",
-                        value: 1,
-                        fixed: true,
-                        physics: false,
-                    });
-                    arrayLegend.push(1011);
-                    acumulador++;
+                    if(selected=="Nombre" || selected=="Persona" || selected=="Area" || selected=="TipoProyecto"){
+                        dataleyenda.push({
+                            id: 1011,
+                            x: x,
+                            y: yacumulador,
+                            label: nodoseleccionado,
+                            group: "buscado",
+                            value: 1,
+                            fixed: true,
+                            physics: false,
+                        });
+                        arrayLegend.push(1011);
+                        acumulador++;
+                    }else{
+                        dataleyenda.push({
+                            id: 1011,
+                            x: x,
+                            y: yacumulador,
+                            label: "Persona buscada",
+                            group: "buscado",
+                            value: 1,
+                            fixed: true,
+                            physics: false,
+                        });
+                        arrayLegend.push(1011);
+                        acumulador++;
+                    }
                 }
                 break;
             case 'investigacion':
@@ -607,7 +636,7 @@ function armarGrafo() {
                         id: 1012,
                         x: x,
                         y: yacumulador,
-                        label: "Área Buscada",
+                        label: nodoseleccionado,
                         group: "area",
                         value: 1,
                         fixed: true,
@@ -623,7 +652,7 @@ function armarGrafo() {
                         id: 1013,
                         x: x,
                         y: yacumulador,
-                        label: "Tipo Proyecto Buscada",
+                        label: nodoseleccionado,
                         group: "tipo",
                         value: 1,
                         fixed: true,
@@ -694,6 +723,22 @@ function armarGrafo() {
                         physics: false,
                     });
                     arrayLegend.push(1005);
+                    acumulador++;
+                }
+                break;
+            case 'vinculacion':
+                if(arrayLegend.indexOf(1014)==-1){
+                    dataleyenda.push({
+                        id: 1014,
+                        x: x,
+                        y: yacumulador,
+                        label: "Vinculación ("+totalVinculacion+")",
+                        group: "vinculacion",
+                        value: 1,
+                        fixed: true,
+                        physics: false,
+                    });
+                    arrayLegend.push(1014);
                     acumulador++;
                 }
                 break;
@@ -825,7 +870,6 @@ function armarGrafo() {
                     }
                     var idNodo = identificador;
                     if(idNodo!=idnodobase){
-                        console.log(arrayEdges);
                         if(arrayEdges!=undefined && arrayEdges!=null && arrayEdges!='') {
                             if (listaNodoAbierto.indexOf(idNodo) == -1) {
                                 agrandarGrafo(idNodo);

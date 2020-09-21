@@ -3,12 +3,15 @@ package ec.edu.utpl.TrabajoTitulacion.View;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ec.edu.utpl.TrabajoTitulacion.Controller.consultasBD;
 import ec.edu.utpl.TrabajoTitulacion.Model.Comentario;
+import ec.edu.utpl.TrabajoTitulacion.Model.ComentarioGlobal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 
 @Controller
@@ -16,8 +19,11 @@ public class HomeController {
     String appName;
     String personas;
     String estado;
+    String idProyecto;
     ArrayList<Comentario> listacomentarios = new ArrayList<>();
+    ArrayList<ComentarioGlobal> listacomentarioGlobal = new ArrayList<>();
     consultasBD consultas = new consultasBD();
+
     @GetMapping("/")
     public String homePage() {
         return "home";
@@ -30,24 +36,34 @@ public class HomeController {
         model.addAttribute("appName",appName);
         model.addAttribute("personas",personas);
         Comentario coment = new Comentario(id,"","","","");
+        Comentario comentario1 = new Comentario("","","","","");
         model.addAttribute("coment", coment);
+        model.addAttribute("comentario", comentario1);
         listacomentarios = consultas.getComment(id);
-        model.addAttribute("comentarios", listacomentarios);
+        listacomentarioGlobal = consultas.getCommentGloblal(listacomentarios);
+        model.addAttribute("comentarios", listacomentarioGlobal);
         return "comentario";
     }
+
+    @GetMapping("/getNameByEmail/{email}")
+    public ResponseEntity<String> getNameByEmail(@PathVariable(value="email") String email) {
+        appName = consultas.getNameByEmail(email);
+        return new ResponseEntity<String>(appName, HttpStatus.OK);
+    }
+
+    @PostMapping("/comentarioresponse")
+    public void submitFormComment(@ModelAttribute("comentario") Comentario comentario, HttpServletResponse httpResponse) throws IOException{
+        System.out.println("Si antes"+comentario.getIdCom());
+        estado = consultas.insertComentComment(comentario);
+        idProyecto = consultas.getIDProject(comentario.getIdCom());
+        System.out.println("Si despues"+idProyecto);
+        httpResponse.sendRedirect("/comentario/"+idProyecto);
+    }
+
     @PostMapping("/comentario")
-    public String submitForm(@ModelAttribute("coment") Comentario comentario, Model model) {
+    public void submitForm(@ModelAttribute("coment") Comentario comentario, HttpServletResponse httpResponse) throws IOException {
         estado = consultas.insertComent(comentario);
-        model.addAttribute("estado",estado);
-        appName = consultas.InformacionProyecto(comentario.getIdCom());
-        personas = consultas.InformacionInvolucrados(comentario.getIdCom());
-        Comentario coment = new Comentario(comentario.getIdCom(),"","","","");
-        model.addAttribute("coment", coment);
-        model.addAttribute("appName",appName);
-        model.addAttribute("personas",personas);
-        listacomentarios = consultas.getComment(comentario.getIdCom());
-        model.addAttribute("comentarios", listacomentarios);
-        return "comentario";
+        httpResponse.sendRedirect("/comentario/"+comentario.getIdCom());
     }
 
     @GetMapping("/person/{id}")

@@ -1,9 +1,5 @@
 var tipo="";
 var rutaBase='http://localhost:8888/';
-var idProject="";
-var comentario="";
-var nombre="";
-var correo="";
 $(document).ready(function() {
     var regex = /&lt;br&gt;/gi
     var arryAreas = [];
@@ -37,7 +33,7 @@ $(document).ready(function() {
     if (tipo.tipo == 'Investigación') {
         $("#tipo_proyecto").css('background', '#cd2b2b');
     }
-    if(tipo.tipo=='Innovación Docente'){
+    if(tipo.tipo=='Innovación Docente' || tipo.tipo=='Innovación docente'){
         $("#tipo_proyecto").css('background','#ddd12d');
     }
     if(tipo.tipo=='Extensión'){
@@ -54,6 +50,9 @@ $(document).ready(function() {
     }
     if(tipo.tipo=='Propuesta Enviada'){
         $("#tipo_proyecto").css('background','#cd672b');
+    }
+    if(tipo.tipo=='Vinculación'){
+        $("#tipo_proyecto").css('background','#f122d0');
     }
     $("#inicio").append(tipo.fechainicio);
     $("#fin").append(tipo.fechafin);
@@ -75,4 +74,25 @@ $(document).ready(function() {
     }else{
         $("#programa").append(tipo.programa);
     }
+//get name
+    $( "#InputEmail1" ).blur(function() {
+        var str = $("#InputEmail1").val();
+        var ruta = rutaBase + "getNameByEmail/"+str;
+        $.get(ruta,
+            function (res) {
+                $("#InputName").val(res);
+            });
+    });
+    $( "#InputEmail11" ).blur(function() {
+        var str = $("#InputEmail11").val();
+        var ruta = rutaBase + "getNameByEmail/"+str;
+        $.get(ruta,
+            function (res) {
+                $("#InputName1").val(res);
+            });
+    });
 });
+
+function inicializarFormulario(str){
+    $("#idCom1").val(str);
+}

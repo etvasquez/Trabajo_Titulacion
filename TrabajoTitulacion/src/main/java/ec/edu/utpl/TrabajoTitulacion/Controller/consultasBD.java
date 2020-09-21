@@ -75,6 +75,87 @@ public class consultasBD{
         return contador;
     }
 
+    public String getNameByEmail(String email){
+        String name="";
+        String strQuery ="PREFIX j.2: <http://xmlns.com/foaf/0.1/> " +
+                "SELECT DISTINCT ?name " +
+                "WHERE { "+
+                urlBase+"people/"+email +"> j.2:lastName ?name }";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral nombre =
+                        (SimpleLiteral)bindingSet.getValue("name");
+                name = nombre.stringValue();
+
+            }
+        }
+        catch (QueryEvaluationException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return name;
+    }
+
+    public ArrayList<ComentarioGlobal> getCommentGloblal(ArrayList<Comentario> listaComentarios){
+        ArrayList<Comentario> listaComentario = new ArrayList<>();
+        ArrayList<ComentarioGlobal> listaComentarioGlobal = new ArrayList<>();
+        for (Comentario comentario: listaComentarios){
+            String strQuery ="PREFIX schema: <http://schema.org/> " +
+                    "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                    "SELECT ?com ?date ?nombre ?correo ?uuid " +
+                    "WHERE { "+
+                    urlBase+"commentProject/"+comentario.getIdCom()+"> schema:Comment ?tipo ."+
+                    "?tipo schema:uuid ?uuid . "+
+                    "?tipo schema:comment ?com . "+
+                    "?tipo schema:dateCreated ?date ."+
+                    "?tipo schema:character ?autor . "+
+                    "?autor j.2:lastName ?nombre . "+
+                    "?autor j.2:mbox ?correo . } ";
+            TupleQuery tupleQuery = con.getRepositoryConnection()
+                    .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+            TupleQueryResult result = null;
+            try {
+                result = tupleQuery.evaluate();
+                while (result.hasNext()) {
+                    BindingSet bindingSet = result.next();
+                    SimpleLiteral com =
+                            (SimpleLiteral)bindingSet.getValue("com");
+                    SimpleLiteral date =
+                            (SimpleLiteral)bindingSet.getValue("date");
+                    SimpleLiteral nombre =
+                            (SimpleLiteral)bindingSet.getValue("nombre");
+                    SimpleLiteral correo =
+                            (SimpleLiteral)bindingSet.getValue("correo");
+                    SimpleLiteral uuid =
+                            (SimpleLiteral)bindingSet.getValue("uuid");
+                    Comentario comentario1 = new Comentario(uuid.stringValue(),nombre.stringValue(),date.stringValue(),com.stringValue(),correo.stringValue());
+                    listaComentario.add(comentario1);
+                }
+                ComentarioGlobal comentarioGlobal = new ComentarioGlobal(comentario,listaComentario);
+                listaComentarioGlobal.add(comentarioGlobal);
+                if(listaComentario.size()>=0){
+                    for(int i=0;i>listaComentario.size();i++){
+                        listaComentario.remove(i);
+                    }
+                }
+            }
+            catch (QueryEvaluationException qee) {
+                logger.error(WTF_MARKER,
+                        qee.getStackTrace().toString(), qee);
+            } finally {
+                result.close();
+            }
+        }
+        return listaComentarioGlobal;
+    }
+
     public ArrayList<Comentario> getComment(String idProject){
         ArrayList<Comentario> listComentarios = new ArrayList<>();
         String strQuery ="PREFIX schema: <http://schema.org/> " +
@@ -129,17 +210,22 @@ public class consultasBD{
         String uuid = UUID.randomUUID().toString();
         String strInsert = "";
         String estado="Exito";
-        if (comentario.getIdCom() != null) {
-            if(getPersonByEmail(comentario.getCorreo()).equals(comentario.getCorreo())){
+        if(getPersonByEmail(comentario.getCorreo()).equals(comentario.getCorreo())){
                 strInsert =
-                        "INSERT DATA { " +
+                        "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                                "PREFIX schema: <http://schema.org/> "+
+                                "DELETE { "+
+                                urlBase+"people/"+comentario.getCorreo()+"> j.2:lastName ?oldname . }"+
+                        "INSERT { " +
                                 urlBase + "project/" + comentario.getIdCom() + "> schema:Comment " + urlBase + "commentProject/" + uuid + "> . " +
                                 urlBase + "commentProject/" + uuid + "> schema:uuid \"" + uuid + "\" . " +
                                 urlBase + "commentProject/" + uuid + "> schema:comment \"" + comentario.getComentarios() + "\" . " +
                                 urlBase + "commentProject/" + uuid + "> schema:dateCreated \"" + getDate() + "\" . " +
                                 urlBase + "commentProject/" + uuid+ "> schema:character " + urlBase + "people/" + comentario.getCorreo() + "> . " +
-                                "}";
-            }else{
+                                urlBase + "people/" + comentario.getCorreo() + "> j.2:lastName \"" + comentario.getNombre() + "\" . " +
+                                "} WHERE { " +
+                                    urlBase+"people/"+comentario.getCorreo()+"> j.2:lastName ?oldname . }";
+        }else{
                 strInsert =
                         "INSERT DATA { " +
                                 urlBase + "project/" + comentario.getIdCom() + "> schema:Comment " + urlBase + "commentProject/" + uuid + "> . " +
@@ -150,7 +236,52 @@ public class consultasBD{
                                 urlBase + "people/" + comentario.getCorreo() + "> foaf:lastName \"" + comentario.getNombre() + "\" . " +
                                 urlBase + "people/" + comentario.getCorreo() + "> foaf:mbox \"" + comentario.getCorreo() + "\" . " +
                                 "}";
-            }
+
+        }
+        RepositoryConnection repositoryConnection = con.getRepositoryConnection();
+        repositoryConnection.begin();
+        Update updateOperation = repositoryConnection.prepareUpdate(QueryLanguage.SPARQL, strInsert);
+        updateOperation.execute();
+        try {
+            repositoryConnection.commit();
+        } catch (Exception e) {
+            estado="error";
+            if (repositoryConnection.isActive())
+                repositoryConnection.rollback();
+        }
+        return estado;
+    }
+
+    public String insertComentComment(Comentario comentario) {
+        String uuid = UUID.randomUUID().toString();
+        String strInsert = "";
+        String estado="correcto";
+        if(getPersonByEmail(comentario.getCorreo()).equals(comentario.getCorreo())){
+            strInsert =
+                    "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                            "PREFIX schema: <http://schema.org/> "+
+                            "DELETE { "+
+                            urlBase+"people/"+comentario.getCorreo()+"> j.2:lastName ?oldname . }"+
+                            "INSERT { " +
+                            urlBase + "commentProject/" + comentario.getIdCom() + "> schema:Comment " + urlBase + "comment/" + uuid + "> . " +
+                            urlBase + "comment/" + uuid + "> schema:uuid \"" + uuid + "\" . " +
+                            urlBase + "comment/" + uuid + "> schema:comment \"" + comentario.getComentarios() + "\" . " +
+                            urlBase + "comment/" + uuid + "> schema:dateCreated \"" + getDate() + "\" . " +
+                            urlBase + "comment/" + uuid+ "> schema:character " + urlBase + "people/" + comentario.getCorreo() + "> . " +
+                            urlBase + "people/" + comentario.getCorreo() + "> j.2:lastName \"" + comentario.getNombre() + "\" . " +
+                            "} WHERE { " +
+                            urlBase+"people/"+comentario.getCorreo()+"> j.2:lastName ?oldname . }";
+        }else{
+            strInsert =
+                    "INSERT DATA { " +
+                            urlBase + "commentProject/" + comentario.getIdCom() + "> schema:Comment " + urlBase + "comment/" + uuid + "> . " +
+                            urlBase + "comment/" + uuid + "> schema:uuid \"" + uuid + "\" . " +
+                            urlBase + "comment/" + uuid + "> schema:comment \"" + comentario.getComentarios() + "\" . " +
+                            urlBase + "comment/" + uuid + "> schema:dateCreated \"" + getDate() + "\" . " +
+                            urlBase + "comment/" + uuid+ "> schema:character " + urlBase + "people/" + comentario.getCorreo() + "> . " +
+                            urlBase + "people/" + comentario.getCorreo() + "> foaf:lastName \"" + comentario.getNombre() + "\" . " +
+                            urlBase + "people/" + comentario.getCorreo() + "> foaf:mbox \"" + comentario.getCorreo() + "\" . " +
+                            "}";
 
         }
         RepositoryConnection repositoryConnection = con.getRepositoryConnection();
@@ -635,7 +766,7 @@ public class consultasBD{
         }else if(tipo.equalsIgnoreCase("Propuesta Enviada")){
             grupo = "propuesta";
         }else if(tipo.equalsIgnoreCase("Vinculación")){
-            grupo = "investigacion";
+            grupo = "vinculacion";
         }
         return grupo;
     }
@@ -863,6 +994,35 @@ public class consultasBD{
                     qee.getStackTrace().toString(), qee);
         } finally {
                 result.close();
+        }
+        return json;
+    }
+
+    public String getIDProject(String idComentario) {
+        String json="";
+        String strQuery ="PREFIX schema: <http://schema.org/> " +
+                "SELECT ?idprojecto " +
+                "WHERE {"+
+                "?name schema:Comment "+urlBase+"commentProject/"+idComentario+"> . "+
+                "?name schema:ide_project ?idprojecto . "+
+                "} ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral idprojecto =
+                        (SimpleLiteral) bindingSet.getValue("idprojecto");
+                json = idprojecto.stringValue();
+            }
+        }
+        catch (QueryEvaluationException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
         }
         return json;
     }

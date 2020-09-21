@@ -41,7 +41,6 @@
 </nav>
 <p style="display: none" id="json" th:text="${appName}"></p>
 <p style="display: none" id="jsonpersona" th:text="${personas}"></p>
-<p style="display: none" id="estado1" th:text="${estado}"></p>
 <div class="container" id="divtitulo">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-xl-12 col-lg-12">
@@ -69,45 +68,95 @@
         <div class="col-xs-9 col-sm-9 col-md-9 col-xl-9 col-lg-9">
             <p id="descripcion"><b>Descripción </b><br></p>
             <p id="objetivo"><b>Objetivos </b><br></p>
-            <div class="container">
-                <!--<p class="text-center"><a class="btn text-white btn-danger"> <i class="fa fa-heart"></i> <span id="like" th:text="${like}"></span> Me gusta</a></p>-->
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row" th:each="comentario : ${comentarios}">
-                            <div class="col-md-2">
-                                <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid"/>
-                                <p class="text-secondary text-center" th:text="${comentario.fecha}"></p>
+            <div class="card">
+                <div class="card-body" style="overflow-y: scroll; height: 400px">
+                    <div class="container">
+                        <div class="row" th:each="lista : ${comentarios}">
+                            <div class="col-xs-2 col-sm-2 col-md-2 col-xl-2 col-lg-2">
+                                <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid mx-auto d-block" width="60" height="60"/>
+                                <p class="text-secondary text-center small" th:text="${lista.comentario.fecha}"></p>
                             </div>
-                            <div class="col-md-10">
+                            <div class="col-xs-10 col-sm-10 col-md-10 col-xl-10 col-lg-10">
+                                <p th:text="${lista.comentario.idCom}" style="display:none;"></p>
                                 <p>
-                                    <a class="float-left" href="#" th:text="${comentario.nombre}"><strong></strong></a>
+                                    <a class="float-left"><strong th:text="${lista.comentario.nombre}" style="font-weight: bolder;color: #4f81bd"></strong></a>
                                 </p>
                                 <div class="clearfix"></div>
-                                <p th:text="${comentario.comentarios}"></p>
+                                <p th:text="${lista.comentario.comentarios}"></p>
                                 <p>
-                                    <a class="float-right btn btn-outline-primary ml-2"> <i class="fa fa-reply"></i><span class="responder"></span> Responder</a>
+                                    <a class="float-right btn btn-outline-primary ml-2" data-toggle="modal" data-target="#exampleModal"
+                                       th:attr="onclick='inicializarFormulario(\'' + ${lista.comentario.idCom}+'\')'"> <i class="fa fa-reply"></i><span class="responder"></span> Responder</a>
                                     <!--<a class="float-right btn text-white btn-secondary"> <i class="fa fa-heart"></i> <span class="like">0</span> Me gusta</a>-->
                                 </p>
                             </div>
+                            <div class="container">
+                                <div class="row" th:each="comen : ${lista.listaComentario}">
+                                    <div class="col-xs-1 col-sm-1 col-md-1 col-xl-1 col-lg-1">
+
+                                    </div>
+                                    <div class="col-xs-2 col-sm-2 col-md-2 col-xl-2 col-lg-2">
+                                        <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid mx-auto d-block" width="60" height="60"/>
+                                        <p class="text-secondary text-center small" th:text="${comen.fecha}"></p>
+                                    </div>
+                                    <div class="col-xs-9 col-sm-9 col-md-9 col-xl-9 col-lg-9">
+                                        <p th:text="${comen.idCom}" style="display:none;"></p>
+                                        <p>
+                                            <a class="float-left"><strong th:text="${comen.nombre}" style="font-weight: bolder;color: #4f81bd"></strong></a>
+                                        </p>
+                                        <div class="clearfix"></div>
+                                        <p th:text="${comen.comentarios}"></p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <h5>Deja tu comentario</h5>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <form action="#" th:action="@{/comentario}" method="post" th:object="${coment}">
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5>Deja tu comentario</h5>
+                    <form action="#" th:action="@{/comentario}" method="post" th:object="${coment}">
+                        <div class="form-group" style="display: none">
+                            <input type="text" class="form-control" id="idCom" th:field="*{idCom}" name="idCom">
+                        </div>
+                        <div class="form-group">
+                            <label for="InputEmail1">Correo electrónico</label>
+                            <input type="email" class="form-control" id="InputEmail1" required aria-describedby="emailHelp" placeholder="Escribe tu correo" th:field="*{correo}">
+                        </div>
+                        <div class="form-group">
+                            <label for="InputName">Nombre</label>
+                            <input type="text" class="form-control" required id="InputName" aria-describedby="emailHelp" placeholder="Escribe tu nombre o anónimo" th:field="*{nombre}">
+                        </div>
+                        <div class="form-group">
+                            <textarea class="form-control" required id="FormControlTextarea" rows="3" placeholder="Escribe tu comentario ..." th:field="*{comentarios}"></textarea>
+                        </div>
+                        <button type="submit" class="float-right btn btn-danger">Enviar</button>
+                    </form>
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Responder comentario</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="#" th:action="@{/comentarioresponse}" method="post" th:object="${comentario}">
                                         <div class="form-group" style="display: none">
-                                            <input type="text" class="form-control" id="idCom" th:field="*{idCom}" name="idCom">
-                                        </div>
-                                        <div class="form-group">
-                                            <textarea class="form-control" required id="FormControlTextarea" rows="3" placeholder="Escribe tu comentario ..." th:field="*{comentarios}"></textarea>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="InputName">Nombre</label>
-                                            <input type="text" class="form-control" required id="InputName" aria-describedby="emailHelp" placeholder="Escribe tu nombre o anónimo" th:field="*{nombre}">
+                                            <input type="text" class="form-control" id="idCom1" th:field="*{idCom}" name="idCom1">
                                         </div>
                                         <div class="form-group">
                                             <label for="InputEmail1">Correo electrónico</label>
-                                            <input type="email" class="form-control" id="InputEmail1" required aria-describedby="emailHelp" placeholder="Escribe tu correo" th:field="*{correo}">
+                                            <input type="email" class="form-control" id="InputEmail11" required aria-describedby="emailHelp" placeholder="Escribe tu correo" th:field="*{correo}">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="InputName">Nombre</label>
+                                            <input type="text" class="form-control" required id="InputName1" aria-describedby="emailHelp" placeholder="Escribe tu nombre o anónimo" th:field="*{nombre}">
+                                        </div>
+                                        <div class="form-group">
+                                            <textarea class="form-control" required id="FormControlTextarea1" rows="3" placeholder="Escribe tu comentario ..." th:field="*{comentarios}"></textarea>
                                         </div>
                                         <button type="submit" class="float-right btn btn-danger">Enviar</button>
                                     </form>
