@@ -20,6 +20,7 @@ public class HomeController {
     String personas;
     String estado;
     String idProyecto;
+    String tamanioLista;
     ArrayList<Comentario> listacomentarios = new ArrayList<>();
     ArrayList<ComentarioGlobal> listacomentarioGlobal = new ArrayList<>();
     consultasBD consultas = new consultasBD();
@@ -41,7 +42,23 @@ public class HomeController {
         model.addAttribute("comentario", comentario1);
         listacomentarios = consultas.getComment(id);
         listacomentarioGlobal = consultas.getCommentGloblal(listacomentarios);
+        int tamanio =listacomentarios.size();
+        for(int i=0;i<listacomentarioGlobal.size();i++){
+            tamanio=tamanio+listacomentarioGlobal.get(i).getListaComentario().size();
+        }//
+        if(tamanio==0){
+            tamanioLista="display: none";
+        }else if(tamanio==1){
+            tamanioLista="overflow-y: scroll; height: 150px";
+        }else if(tamanio==2){
+            tamanioLista="overflow-y: scroll; height: 300px";
+        }else if(tamanio==3){
+            tamanioLista="overflow-y: scroll; height: 350px";
+        }else if(tamanio>=4){
+            tamanioLista="overflow-y: scroll; height: 400px";
+        }
         model.addAttribute("comentarios", listacomentarioGlobal);
+        model.addAttribute("tamanio", tamanioLista);
         return "comentario";
     }
 

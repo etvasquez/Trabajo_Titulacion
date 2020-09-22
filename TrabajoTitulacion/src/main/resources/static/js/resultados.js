@@ -17,13 +17,16 @@ $(document).ready(function() {
     });
     var contador = 0;
     for(var i=0;i<arryAreas.length;i++){
-        if(contador==arryAreas.length-1){
-            $("#areas").append("<span style='background: #4235cd;border-radius: 20px;margin-left: 15px;" +
-                "padding: 10px 10px 10px 10px;color: #fff;font-weight: bolder;font-size: small'>"+arryAreas[i]+"</span>");
+        if(arryAreas[i]=='SIN ASIGNAR'||arryAreas[i].substring(0,4)=="http") {
         }else{
-            $("#areas").append("<span style='background: #4235cd;border-radius: 20px;margin-left: 15px;" +
-                "padding: 10px 10px 10px 10px;color: #fff;font-weight: bolder;font-size: small'>"+arryAreas[i]+"</span><br><br>");
-            contador++;
+            if(contador==arryAreas.length-1){
+                $("#areas").append("<span style='background: #4235cd;border-radius: 20px;margin-left: 15px;" +
+                    "padding: 10px 10px 10px 10px;color: #fff;font-weight: bolder;font-size: small'>"+arryAreas[i]+"</span>");
+            }else{
+                $("#areas").append("<span style='background: #4235cd;border-radius: 20px;margin-left: 15px;" +
+                    "padding: 10px 10px 10px 10px;color: #fff;font-weight: bolder;font-size: small'>"+arryAreas[i]+"</span><br><br>");
+                contador++;
+            }
         }
     }
     var descripcion = tipo.descripcion.replace(regex, '\n');

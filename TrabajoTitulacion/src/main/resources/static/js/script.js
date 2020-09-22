@@ -504,8 +504,12 @@ function armarGrafo() {
     };
     var data = JSON.parse(document.getElementById('json1').innerHTML);
     for(var i=0;i<data.nodes.length;i++){
-        if(idnodobase==data.nodes[i].id){
-            nodoseleccionado = data.nodes[i].label;
+        if(selected=="Area" || selected=="TipoProyecto"){
+             nodoseleccionado = data.nodes[0].label;
+        }else{
+            if(idnodobase==data.nodes[i].id){
+                nodoseleccionado = data.nodes[i].label;
+            }
         }
     }
     var container = document.getElementById('mynetwork');
@@ -585,7 +589,7 @@ function armarGrafo() {
         switch (data.nodes[i].group) {
             case 'buscado':
                 if(arrayLegend.indexOf(1011)==-1){
-                    if(selected=="Nombre" || selected=="Persona" || selected=="Area" || selected=="TipoProyecto"){
+                    if(selected=="Nombre" || selected=="Persona"){
                         dataleyenda.push({
                             id: 1011,
                             x: x,

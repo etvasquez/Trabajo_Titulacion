@@ -104,9 +104,9 @@ public class consultasBD{
     }
 
     public ArrayList<ComentarioGlobal> getCommentGloblal(ArrayList<Comentario> listaComentarios){
-        ArrayList<Comentario> listaComentario = new ArrayList<>();
         ArrayList<ComentarioGlobal> listaComentarioGlobal = new ArrayList<>();
         for (Comentario comentario: listaComentarios){
+            ArrayList<Comentario> listaComentario = new ArrayList<>();
             String strQuery ="PREFIX schema: <http://schema.org/> " +
                     "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
                     "SELECT ?com ?date ?nombre ?correo ?uuid " +
@@ -140,11 +140,6 @@ public class consultasBD{
                 }
                 ComentarioGlobal comentarioGlobal = new ComentarioGlobal(comentario,listaComentario);
                 listaComentarioGlobal.add(comentarioGlobal);
-                if(listaComentario.size()>=0){
-                    for(int i=0;i>listaComentario.size();i++){
-                        listaComentario.remove(i);
-                    }
-                }
             }
             catch (QueryEvaluationException qee) {
                 logger.error(WTF_MARKER,
