@@ -32,6 +32,21 @@ public class HomeController {
         return "home";
     }
 
+    @GetMapping("/estadisticas")
+    public String estadisticas() {
+        return "estadisticas";
+    }
+
+    @GetMapping("/repositorio")
+    public String repositorio() {
+        return "repositorio";
+    }
+
+    @GetMapping("/nosotros")
+    public String nosotros() {
+        return "nosotros";
+    }
+
     @GetMapping("/comentario/{id}")
     public String comentario(Model model, @PathVariable(value="id") String id) {
         appName = consultas.InformacionProyecto(id);

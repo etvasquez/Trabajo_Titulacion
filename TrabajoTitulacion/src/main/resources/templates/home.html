@@ -1,48 +1,9 @@
 <!doctype html>
-<html xmlns:th="http://www.w3.org/1999/xhtml">
-<head>
-    <meta charset="utf-8" />
-    <Title>Inicio</Title>
-    <base href="/">
-    <link rel="stylesheet" href="webjars/bootstrap/4.4.1/css/bootstrap.min.css" type="text/css">
-    <link rel="stylesheet" href="webjars/font-awesome/5.14.0/css/all.css" type="text/css">
-    <script type="text/javascript" src="webjars/jquery/3.5.1/jquery.min.js"></script>
-    <script type="text/javascript" src="webjars/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="../static/vis/vis.min.css" type="text/css">
-    <link rel="stylesheet" type="text/css" href="../static/vis/vis.min.css">
-    <script type="text/javascript" src="../static/vis/vis.min.js"></script>
-    <script type="text/javascript" src="../static/js/script.js"></script>
-    <link href="../static/css/estilos.css" rel="stylesheet" type="text/css" />
-    <link href="../static/css/select2.min.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript" src="../static/js/select2.min.js"></script>
+<html xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:insert="fragments/head :: header">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">Plataforma Semántica UTPL</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
-        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-            <li class="nav-item active">
-                <a class="nav-link" href="#">Inicio <span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="estadisticas.html">Estadísticas</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="repositorio.html">Repositorio</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="nosotros.html">Nosotros</a>
-            </li>
-        </ul>
-        <ul class="navbar-nav justify-content-end">
-            <li class="nav-item">
-                <a class="nav-link" href="/usuario"><span class="fas fa-sign-in-alt"></span> Login</a>
-            </li>
-        </ul>
-    </div>
+<nav th:insert="fragments/menu :: menu">
 </nav>
 <br>
 <div class="card card ml-4 mr-4">
@@ -84,5 +45,7 @@
 </div>
 <!-- Add an invisible <div> element to the document, to hold the JSON data: -->
 <div id="networkJSON-results" class="results" style="display:none"></div>
+<footer th:insert="fragments/footer :: footer">
+</footer>
 </body>
 </html>
