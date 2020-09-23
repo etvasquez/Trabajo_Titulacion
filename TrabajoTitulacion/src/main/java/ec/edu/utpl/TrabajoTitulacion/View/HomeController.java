@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import ec.edu.utpl.TrabajoTitulacion.Controller.consultasBD;
 import ec.edu.utpl.TrabajoTitulacion.Model.Comentario;
 import ec.edu.utpl.TrabajoTitulacion.Model.ComentarioGlobal;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 @Controller
+@EnableAutoConfiguration(exclude = {org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class})
 public class HomeController {
     String appName;
     String personas;
@@ -148,4 +150,6 @@ public class HomeController {
         String idPerson = consultas.getIDPerson(id);
         return new ResponseEntity<String>(idPerson, HttpStatus.OK);
     }
+
+
 }

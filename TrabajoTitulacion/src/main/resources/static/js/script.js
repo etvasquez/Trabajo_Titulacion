@@ -389,7 +389,7 @@ function armarGrafo() {
         groups: {
             participante: {
                 shape: "circularImage",
-                image: "../img/participante.png",
+                image: "../static/img/participante.png",
                 color: {
                     border: "#4D4D4D",
                     background: "#FFFFFF",
@@ -397,7 +397,7 @@ function armarGrafo() {
             },
             area: {
                 shape: "circularImage",
-                image: "../img/area.png",
+                image: "../static/img/area.png",
                 color: {
                     border: "#4D4D4D",
                     background: "#FFFFFF",
@@ -405,7 +405,7 @@ function armarGrafo() {
             },
             tipo: {
                 shape: "circularImage",
-                image: "../img/area.png",
+                image: "../static/img/area.png",
                 color: {
                     border: "#4D4D4D",
                     background: "#FFFFFF",
@@ -413,7 +413,7 @@ function armarGrafo() {
             },
             director: {
                 shape: "circularImage",
-                image: "../img/user.png",
+                image: "../static/img/user.png",
                 borderWidth: 4,
                 color: {
                     border: "#4D4D4D",
@@ -422,7 +422,7 @@ function armarGrafo() {
             },
             investigacion:{
                 shape: "circularImage",
-                image: "../img/file1.png",
+                image: "../static/img/file1.png",
                 color: {
                     border: "#FFFFFF",
                     background: "#FFFFFF",
@@ -430,7 +430,7 @@ function armarGrafo() {
             },
             buscado:{
                 shape: "circularImage",
-                image: "../img/usersearch.png",
+                image: "../static/img/usersearch.png",
                 color: {
                     border: "#4D4D4D",
                     background: "#FFFFFF",
@@ -438,7 +438,7 @@ function armarGrafo() {
             },
             investigacion_docente:{
                 shape: "circularImage",
-                image: "../img/file2.png",
+                image: "../static/img/file2.png",
                 color: {
                     border: "#FFFFFF",
                     background: "#FFFFFF",
@@ -446,7 +446,7 @@ function armarGrafo() {
             },
             extension:{
                 shape: "circularImage",
-                image: "../img/file3.png",
+                image: "../static/img/file3.png",
                 color: {
                     border: "#FFFFFF",
                     background: "#FFFFFF",
@@ -454,7 +454,7 @@ function armarGrafo() {
             },
             consultoria:{
                 shape: "circularImage",
-                image: "../img/file4.png",
+                image: "../static/img/file4.png",
                 color: {
                     border: "#FFFFFF",
                     background: "#FFFFFF",
@@ -462,7 +462,7 @@ function armarGrafo() {
             },
             implementacion:{
                 shape: "circularImage",
-                image: "../img/file5.png",
+                image: "../static/img/file5.png",
                 color: {
                     border: "#FFFFFF",
                     background: "#FFFFFF",
@@ -470,7 +470,7 @@ function armarGrafo() {
             },
             innovacion:{
                 shape: "circularImage",
-                image: "../img/file6.png",
+                image: "../static/img/file6.png",
                 color: {
                     border: "#FFFFFF",
                     background: "#FFFFFF",
@@ -478,7 +478,7 @@ function armarGrafo() {
             },
             propuesta:{
                 shape: "circularImage",
-                image: "../img/file7.png",
+                image: "../static/img/file7.png",
                 color: {
                     border: "#FFFFFF",
                     background: "#FFFFFF",
@@ -486,7 +486,7 @@ function armarGrafo() {
             },
             vinculacion:{
                 shape: "circularImage",
-                image: "../img/file8.png",
+                image: "../static/img/file8.png",
                 color: {
                     border: "#FFFFFF",
                     background: "#FFFFFF",
@@ -494,7 +494,7 @@ function armarGrafo() {
             },
             total:{
                 shape: "circularImage",
-                image: "../img/suma.png",
+                image: "../static/img/suma.png",
                 color: {
                     border: "#FFFFFF",
                     background: "#FFFFFF",
