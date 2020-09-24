@@ -103,6 +103,52 @@ public class consultasBD{
         return name;
     }
 
+    public ArrayList<Proyecto> getProject(String correo){
+        ArrayList<Proyecto> listaProyectos = new ArrayList<>();
+        String strQuery ="PREFIX schema: <http://schema.org/> " +
+                "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
+                "SELECT ?id ?titulo ?rol ?tipo " +
+                "WHERE { "+
+                "?s j.2:currentProject ?p . "+
+                "?p schema:idProject ?idp . "+
+                "?p schema:rolProyecto ?rolabel . "+
+                "?rolabel rdfs:label ?rol . "+
+                "?idp j.2:title ?titulo . "+
+                "?idp schema:ide_project ?id . "+
+                "?idp schema:tipoproyecto ?tipolabel . " +
+                "?tipolabel rdfs:label ?tipo ."+
+                "?s j.2:mbox ?m ."+
+                "filter(regex(?m, '"+correo+"','i')) } ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral id =
+                        (SimpleLiteral)bindingSet.getValue("id");
+                SimpleLiteral titulo =
+                        (SimpleLiteral)bindingSet.getValue("titulo");
+                SimpleLiteral rol =
+                        (SimpleLiteral)bindingSet.getValue("rol");
+                SimpleLiteral tipo =
+                        (SimpleLiteral)bindingSet.getValue("tipo");
+                Proyecto proyecto = new Proyecto(id.stringValue(),titulo.stringValue(),tipo.stringValue(),rol.stringValue());
+                listaProyectos.add(proyecto);
+            }
+        }
+        catch (QueryEvaluationException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+
+        return listaProyectos;
+    }
+
     public ArrayList<ComentarioGlobal> getCommentGloblal(ArrayList<Comentario> listaComentarios){
         ArrayList<ComentarioGlobal> listaComentarioGlobal = new ArrayList<>();
         for (Comentario comentario: listaComentarios){

@@ -1,6 +1,9 @@
 package ec.edu.utpl.TrabajoTitulacion.Controller;
 
 import ec.edu.utpl.TrabajoTitulacion.Model.Comentario;
+import ec.edu.utpl.TrabajoTitulacion.Model.Proyecto;
+
+import java.util.ArrayList;
 
 public class test {
     public static void main(String[] args) {
@@ -12,5 +15,6 @@ public class test {
         /*Comentario comentario = new Comentario("9512fb62-c446-4843-9d7f-be685f52c46e","Juan Maldoando",
                 "hoy","si","jgmaldonadoj@gmail.com");
         System.out.println(query1.insertComentComment(comentario));*/
+        //System.out.println(consultasBD.getProject("nopiedra@utpl.edu.ec"));
     }
 }

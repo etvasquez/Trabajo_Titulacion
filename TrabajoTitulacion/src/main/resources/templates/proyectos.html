@@ -1,10 +1,34 @@
 <!doctype html>
-<html xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head th:insert="fragments/head :: header">
 </head>
 <body>
 <nav th:insert="fragments/menu :: menu">
 </nav>
+<h2 style="text-align: center">Mis proyectos</h2>
+<table id="tableProyectos" class="p-1 table table-sm table-striped table-hover table-bordered" style="width:100%">
+    <thead>
+    <tr>
+        <th hidden>ID</th>
+        <th>NOMBRE DEL PROYECTO</th>
+        <th>TIPO PROYECTO</th>
+        <th>ROL</th>
+        <th>OPCIONES</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="lista : ${listaproyectos}">
+        <td hidden th:text="${lista.id}"></td>
+        <td th:text="${lista.titulo}"></td>
+        <td th:text="${lista.tipo}"></td>
+        <td th:text="${lista.estado}"></td>
+        <td>
+            <a title="Ver proyecto" class="btn btn-sm btn-primary" th:attr="onclick='verProyecto(\'' + ${lista.id}+'\')'"><i class="fa fa-eye"></i></a>&nbsp;&nbsp;
+            <a title="Editar proyecto" class="btn btn-sm btn-secondary" th:attr="onclick='editarProyecto(\'' + ${lista.id}+'\')'"><i class="fa fa-edit"></i></a>
+        </td>
+    </tr>
+    </tbody>
+</table>
 <footer th:insert="fragments/footer :: footer">
 </footer>
 </body>

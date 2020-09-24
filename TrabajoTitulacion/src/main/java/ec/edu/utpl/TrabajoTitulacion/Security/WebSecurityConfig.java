@@ -19,8 +19,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 PasswordEncoderFactories.createDelegatingPasswordEncoder();
         auth
                 .inMemoryAuthentication()
-                .withUser("user")
-                .password(encoder.encode("password"))
+                .withUser("cpsarango")
+                .password(encoder.encode("123"))
+                .roles("USER")
+                .and()
+                .withUser("nopiedra")
+                .password(encoder.encode("123"))
+                .roles("USER")
+                .and()
+                .withUser("rlramirez")
+                .password(encoder.encode("123"))
                 .roles("USER")
                 .and()
                 .withUser("admin")
@@ -42,7 +50,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/comentario","/personperson/{id}","/listaBusquedaProyecto/{id}","/listaBusquedaArea","/listaBusquedaTipoProyecto",
                         "/projectArea/{id}","/projectTipo/{id}","/estadisticas","/nosotros","/repositorio")
                 .permitAll()
-                .antMatchers ("/proyectos").authenticated ()
+                .antMatchers ("/proyectos","/editar_proyecto/{id}").authenticated ()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().loginPage("/login")

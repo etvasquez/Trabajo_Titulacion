@@ -20,7 +20,7 @@
             <li class="nav-item" sec:authorize="hasRole('USER')">
                 <a class="nav-link" href="/proyectos">Mis proyectos</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" sec:authorize="!isAuthenticated()">
                 <a class="nav-link" href="/nosotros">Nosotros</a>
             </li>
         </ul>
@@ -32,7 +32,7 @@
                 <a class="btn btn-secondary dropdown-toggle"
                    href="/#" role="button" id="dropdownMenuButton" data-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">
-                    <span class="fas fa-user" th:inline="text"> [[${#httpServletRequest.remoteUser}]]</span></a>
+                    <span id="user" class="fas fa-user" th:inline="text"> [[${#httpServletRequest.remoteUser}]]</span></a>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <!--<a class="dropdown-item" href="#">Perfil</a>-->
                     <a class="dropdown-item" href="/proyectos">Mis proyectos</a>

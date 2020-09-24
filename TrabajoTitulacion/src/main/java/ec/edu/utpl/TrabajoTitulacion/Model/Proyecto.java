@@ -24,6 +24,13 @@ public class Proyecto {
     public Proyecto() {
     }
 
+    public Proyecto(String id, String titulo, String tipo, String estado) {
+        this.id = id;
+        this.titulo = titulo;
+        this.tipo = tipo;
+        this.estado = estado;
+    }
+
     public Proyecto(String id,String titulo, String descripcion, String tipo, String incluye_estudiantes, String cobertura,
                     String fechainicio, String fechafin, String ife, String smartland, String reprogramado, String avance,
                     String financiamiento_utpl, String financiamiento_externo, String financiamiento_general, String estado,

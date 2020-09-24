@@ -1,172 +1,179 @@
 var selected = 'Nombre';
 var listaNodoAbierto = []; //Almacenar nodos abierto para cerrar conforme seleccione
 var idnodobase = ''; //nodo principal del grafo
-var rutaBase='http://localhost:8888/'; //ruta base para consultas
+var rutaBase = 'http://localhost:8888/'; //ruta base para consultas
 var idseleccionado; //nodo que da click
 var grafoinicial; //primer resultado del grafo
 var titulo;
 var ruta;
 var nodoseleccionado;
-$(document).ready(function(){
-    inicializarSelectPersona();
-    //Inicializando variables
-    listaNodoAbierto = [];
-    idseleccionado = 0;
-    grafoinicial = '';
-    ruta = '';
-    //Inicializar lista tipo
-    $('#listatipo').select2({
-        width:'100%',
-        minimumResultsForSearch: -1,
-    });
-    //Metodo de Busqueda
-    $("#listatipo").change(function(){
-        selected = $('#listatipo').val();
-        if(selected=="Nombre"){
-            $("#descripcion").html("El tipo de búsqueda <b>Persona</b> permite visualizar los proyectos en los que ha intervenido" +
-                " un usuario. Si da un <b>click</b> sobre el proyecto conocerá los participantes. Si da <b>dobleclick</b> sobre el proyecto accederá a " +
-                "la información del mismo.");
-            inicializarSelectPersona();
-        }else if(selected=="Persona"){
-            $("#descripcion").html("El tipo de búsqueda por <b>Redes</b> le permite visualizar las redes de personas con las que ha participado" +
-                " un usuario. La línea resaltada señala con quién ha mantenido mayor participación. ");
-            inicializarSelectPersona();
-        }else if(selected=="Proyecto"){
-            $("#descripcion").html("El tipo de búsqueda por <b>Proyecto</b> visualiza las personas que han intervenido en un proyecto, " +
-                "al dar <b>click</b> sobre una persona se extienden los proyectos en los que ha participado. Y al dar <b>doble click</b>" +
-                " se presenta la información específica del proyecto seleccionado.");
-            inicializarSelectProyecto();
-        }else if(selected=="Area"){
-            $("#descripcion").html("El tipo de búsqueda <b>Área </b>  le presenta todos los proyectos correspondientes al área buscada. " +
-                "Si da un <b>click</b> sobre el proyecto conocerá los participantes. Si da <b>click</b> sobre el proyecto accederá a " +
-                "la información del mismo. ");
-            inicializarSelectArea();
-        }else if(selected=="TipoProyecto"){
-            $("#descripcion").html("El tipo de búsqueda <b>Tipo de proyecto </b> le presenta todos los proyectos correspondientes al tipo buscado." +
-                " Si da un <b>click</b> sobre el proyecto conocerá los participantes. Si da <b>click</b> sobre el proyecto accederá a " +
-                "la información del mismo.");
-            inicializarSelectTipo();
-        }
-        titulo =  $('#listatipo').select2('data')[0]['text'];
-        if(titulo == "Proyecto"|| titulo == "Área" || titulo == "Tipo de proyecto"){
-            $('#titulobusqueda').text(titulo);
-        }else{
-            titulo = "Persona";
-            $('#titulobusqueda').text(titulo);
-        }
-        $('#listaBusqueda').empty();
-    });
-    //Metodo de busqueda al seleccioanr un elemento de la lista
-    $("#listaBusqueda").change(function(){
-        if($('#listaBusqueda').val()!=null){
-            idnodobase = $('#listaBusqueda').val();
-            if(selected=='Proyecto'){
-                var rutaProject = rutaBase + "project/"+idnodobase;
-                $.get(rutaProject,
-                    function (res) {
-                        actualizarJSONHTML(res,res);
-                        armarGrafo();
-                        grafoinicial = res;
-                    });
-            }else if(selected=='Nombre'){
-                var rutaPerson = rutaBase + "person/"+idnodobase;
-                $.get(rutaPerson,
-                    function (res) {
-                        actualizarJSONHTML(res,res);
-                        armarGrafo();
-                        grafoinicial = res;
-                    });
-            }else if(selected=='Persona'){
-                var rutaPerson = rutaBase + "personperson/"+idnodobase;
-                $.get(rutaPerson,
-                    function (res) {
-                        actualizarJSONHTML(res,res);
-                        armarGrafo();
-                        grafoinicial = res;
-                    });
-            }else if(selected=='Area'){
-                var rutaPerson = rutaBase + "projectArea/"+idnodobase;
-                $.get(rutaPerson,
-                    function (res) {
-                        actualizarJSONHTML(res,res);
-                        armarGrafo();
-                        grafoinicial = res;
-                    });
-            }else if(selected=='TipoProyecto'){
-                var rutaPerson = rutaBase + "projectTipo/"+idnodobase;
-                $.get(rutaPerson,
-                    function (res) {
-                        actualizarJSONHTML(res,res);
-                        armarGrafo();
-                        grafoinicial = res;
-                    });
+$(document).ready(function () {
+    try {
+        inicializarSelectPersona();
+        //Inicializando variables
+        listaNodoAbierto = [];
+        idseleccionado = 0;
+        grafoinicial = '';
+        ruta = '';
+        //Inicializar lista tipo
+        $('#listatipo').select2({
+            width: '100%',
+            minimumResultsForSearch: -1,
+        });
+        //Metodo de Busqueda
+        $("#listatipo").change(function () {
+            selected = $('#listatipo').val();
+            if (selected == "Nombre") {
+                $("#descripcion").html("El tipo de búsqueda <b>Persona</b> permite visualizar los proyectos en los que ha intervenido" +
+                    " un usuario. Si da un <b>click</b> sobre el proyecto conocerá los participantes. Si da <b>dobleclick</b> sobre el proyecto accederá a " +
+                    "la información del mismo.");
+                inicializarSelectPersona();
+            } else if (selected == "Persona") {
+                $("#descripcion").html("El tipo de búsqueda por <b>Redes</b> le permite visualizar las redes de personas con las que ha participado" +
+                    " un usuario. La línea resaltada señala con quién ha mantenido mayor participación. ");
+                inicializarSelectPersona();
+            } else if (selected == "Proyecto") {
+                $("#descripcion").html("El tipo de búsqueda por <b>Proyecto</b> visualiza las personas que han intervenido en un proyecto, " +
+                    "al dar <b>click</b> sobre una persona se extienden los proyectos en los que ha participado. Y al dar <b>doble click</b>" +
+                    " se presenta la información específica del proyecto seleccionado.");
+                inicializarSelectProyecto();
+            } else if (selected == "Area") {
+                $("#descripcion").html("El tipo de búsqueda <b>Área </b>  le presenta todos los proyectos correspondientes al área buscada. " +
+                    "Si da un <b>click</b> sobre el proyecto conocerá los participantes. Si da <b>click</b> sobre el proyecto accederá a " +
+                    "la información del mismo. ");
+                inicializarSelectArea();
+            } else if (selected == "TipoProyecto") {
+                $("#descripcion").html("El tipo de búsqueda <b>Tipo de proyecto </b> le presenta todos los proyectos correspondientes al tipo buscado." +
+                    " Si da un <b>click</b> sobre el proyecto conocerá los participantes. Si da <b>click</b> sobre el proyecto accederá a " +
+                    "la información del mismo.");
+                inicializarSelectTipo();
             }
-            var heigth=$(window).height();
-            $('#mynetwork').height(heigth);
-            $('#mynetwork').css('border','1px solid lightgray');
-            var heigth1=$(window).height();
-            $('#myleyenda').height(heigth1);
-            $('#myleyenda').css('border','1px solid lightgray');
-            $('#card').css('display','block');
-        }
-    });
+            titulo = $('#listatipo').select2('data')[0]['text'];
+            if (titulo == "Proyecto" || titulo == "Área" || titulo == "Tipo de proyecto") {
+                $('#titulobusqueda').text(titulo);
+            } else {
+                titulo = "Persona";
+                $('#titulobusqueda').text(titulo);
+            }
+            $('#listaBusqueda').empty();
+        });
+        //Metodo de busqueda al seleccioanr un elemento de la lista
+        $("#listaBusqueda").change(function () {
+            if ($('#listaBusqueda').val() != null) {
+                idnodobase = $('#listaBusqueda').val();
+                if (selected == 'Proyecto') {
+                    var rutaProject = rutaBase + "project/" + idnodobase;
+                    $.get(rutaProject,
+                        function (res) {
+                            actualizarJSONHTML(res, res);
+                            armarGrafo();
+                            grafoinicial = res;
+                        });
+                } else if (selected == 'Nombre') {
+                    var rutaPerson = rutaBase + "person/" + idnodobase;
+                    $.get(rutaPerson,
+                        function (res) {
+                            actualizarJSONHTML(res, res);
+                            armarGrafo();
+                            grafoinicial = res;
+                        });
+                } else if (selected == 'Persona') {
+                    var rutaPerson = rutaBase + "personperson/" + idnodobase;
+                    $.get(rutaPerson,
+                        function (res) {
+                            actualizarJSONHTML(res, res);
+                            armarGrafo();
+                            grafoinicial = res;
+                        });
+                } else if (selected == 'Area') {
+                    var rutaPerson = rutaBase + "projectArea/" + idnodobase;
+                    $.get(rutaPerson,
+                        function (res) {
+                            actualizarJSONHTML(res, res);
+                            armarGrafo();
+                            grafoinicial = res;
+                        });
+                } else if (selected == 'TipoProyecto') {
+                    var rutaPerson = rutaBase + "projectTipo/" + idnodobase;
+                    $.get(rutaPerson,
+                        function (res) {
+                            actualizarJSONHTML(res, res);
+                            armarGrafo();
+                            grafoinicial = res;
+                        });
+                }
+                var heigth = $(window).height();
+                $('#mynetwork').height(heigth);
+                $('#mynetwork').css('border', '1px solid lightgray');
+                var heigth1 = $(window).height();
+                $('#myleyenda').height(heigth1);
+                $('#myleyenda').css('border', '1px solid lightgray');
+                $('#card').css('display', 'block');
+            }
+        });
+    } catch (e) {
+
+    }
 });
+
 function inicializarSelectTipo() {
     var rutaProject = rutaBase + "listaBusquedaTipoProyecto";
     $('#listaBusqueda').select2({
-        width:'100%',
-        minimumInputLength:0,
-        allowClear:true,
-        placeholder:"Escriba o seleccione el nombre del tipo de proyecto ...",
+        width: '100%',
+        minimumInputLength: 0,
+        allowClear: true,
+        placeholder: "Escriba o seleccione el nombre del tipo de proyecto ...",
     });
     $.get(rutaProject,
         function (res) {
             var data = JSON.parse(res);
-            for(var i=0;i<data.length;i++){
+            for (var i = 0; i < data.length; i++) {
                 var newOption = new Option(data[i].nombre, data[i].id, false, false);
                 $('#listaBusqueda').append(newOption);
             }
             $('#listaBusqueda').val(null).trigger('change');
         });
 }
+
 function inicializarSelectArea() {
     var rutaProject = rutaBase + "listaBusquedaArea";
     $('#listaBusqueda').select2({
-        width:'100%',
-        minimumInputLength:0,
-        allowClear:true,
-        placeholder:"Escriba o seleccione el nombre del área ...",
+        width: '100%',
+        minimumInputLength: 0,
+        allowClear: true,
+        placeholder: "Escriba o seleccione el nombre del área ...",
     });
     $.get(rutaProject,
         function (res) {
             var data = JSON.parse(res);
-            for(var i=0;i<data.length;i++){
+            for (var i = 0; i < data.length; i++) {
                 var newOption = new Option(data[i].nombre, data[i].id, false, false);
                 $('#listaBusqueda').append(newOption);
             }
             $('#listaBusqueda').val(null).trigger('change');
         });
 }
+
 function inicializarSelectProyecto() {
     $('#listaBusqueda').select2({
-        width:'100%',
-        minimumInputLength:3,
+        width: '100%',
+        minimumInputLength: 3,
         language: {
             inputTooShort: function () {
                 return 'Porfavor, ingrese 3 o más caracteres';
             }
         },
-        allowClear:true,
-        placeholder:"Escriba el nombre del proyecto ...",
+        allowClear: true,
+        placeholder: "Escriba el nombre del proyecto ...",
         ajax: {
-            url: function (params){
+            url: function (params) {
                 var busqueda = params.term.toUpperCase();
                 busqueda = busqueda.replace('Á', 'A');
                 busqueda = busqueda.replace('É', 'E');
                 busqueda = busqueda.replace('Í', 'I');
                 busqueda = busqueda.replace('Ó', 'O');
                 busqueda = busqueda.replace('Ú', 'U');
-                ruta = rutaBase+"listaBusquedaProyecto/"+ busqueda;
+                ruta = rutaBase + "listaBusquedaProyecto/" + busqueda;
                 return ruta;
             },
             dataType: "json",
@@ -184,26 +191,27 @@ function inicializarSelectProyecto() {
         }
     });
 }
+
 function inicializarSelectPersona() {
     $('#listaBusqueda').select2({
-        width:'100%',
-        minimumInputLength:3,
+        width: '100%',
+        minimumInputLength: 3,
         language: {
             inputTooShort: function () {
                 return 'Porfavor, ingrese 3 o más caracteres';
             }
         },
-        allowClear:true,
-        placeholder:"Escriba el nombre de la persona ...",
+        allowClear: true,
+        placeholder: "Escriba el nombre de la persona ...",
         ajax: {
-            url: function (params){
+            url: function (params) {
                 var busqueda = params.term.toUpperCase();
                 busqueda = busqueda.replace('Á', 'A');
                 busqueda = busqueda.replace('É', 'E');
                 busqueda = busqueda.replace('Í', 'I');
                 busqueda = busqueda.replace('Ó', 'O');
                 busqueda = busqueda.replace('Ú', 'U');
-                ruta = rutaBase+"listaBusquedaPersona/"+ busqueda;
+                ruta = rutaBase + "listaBusquedaPersona/" + busqueda;
                 return ruta;
             },
             dataType: "json",
@@ -228,26 +236,28 @@ function actualizarJSONHTML(stringJSON1, stringJSON) {
     $("#json").empty(); // JSON PARA AGRANDAR Y REDUCIR GRAFO
     $("#json").append(stringJSON);
 }
+
 function eliminarNodosRepetidos(arrayNodos) {
     var hash = {};
-    var nodossinRepetir = arrayNodos.nodes.filter(function(current) {
+    var nodossinRepetir = arrayNodos.nodes.filter(function (current) {
         var exists = !hash[current.id];
         hash[current.id] = true;
         return exists;
     });
     return nodossinRepetir;
 }
+
 function eliminarEdgesRepetidos(arrayEdges) {
     var edgessinRepetir = [];
-    for(var j = 0; j < arrayEdges.edges.length; j ++){
+    for (var j = 0; j < arrayEdges.edges.length; j++) {
         var contador = 0;
-        if(j==0){
+        if (j == 0) {
             edgessinRepetir.push(arrayEdges.edges[j]);
         }
-        for(var k = 0 ; k<edgessinRepetir.length;k++){
-            if(JSON.stringify(arrayEdges.edges[j])!=JSON.stringify(edgessinRepetir[k])){
+        for (var k = 0; k < edgessinRepetir.length; k++) {
+            if (JSON.stringify(arrayEdges.edges[j]) != JSON.stringify(edgessinRepetir[k])) {
                 contador++;
-                if(contador==edgessinRepetir.length){
+                if (contador == edgessinRepetir.length) {
                     edgessinRepetir.push(arrayEdges.edges[j]);
                 }
             }
@@ -255,56 +265,58 @@ function eliminarEdgesRepetidos(arrayEdges) {
     }
     return edgessinRepetir;
 }
+
 function agrandarGrafo(idProject) {
-    var rutaProject = rutaBase + "projectID/"+idProject;
-    if(selected == "Proyecto"){
-        rutaProject = rutaBase + "person/"+idProject;
+    var rutaProject = rutaBase + "projectID/" + idProject;
+    if (selected == "Proyecto") {
+        rutaProject = rutaBase + "person/" + idProject;
     }
     var dataRepetidos = JSON.parse(document.getElementById('json').innerHTML);
     $.get(rutaProject,
         function (res) {
             var data = JSON.parse(res);
-            if(data.edges.length>1){
+            if (data.edges.length > 1) {
                 dataRepetidos = {
-                    nodes : dataRepetidos.nodes.concat(data.nodes),
-                    edges : dataRepetidos.edges.concat(data.edges)
+                    nodes: dataRepetidos.nodes.concat(data.nodes),
+                    edges: dataRepetidos.edges.concat(data.edges)
                 };
                 var datapresentar = {
                     nodes: eliminarNodosRepetidos(dataRepetidos),
                     edges: eliminarEdgesRepetidos(dataRepetidos)
                 };
-                actualizarJSONHTML(JSON.stringify(datapresentar),JSON.stringify(dataRepetidos));
+                actualizarJSONHTML(JSON.stringify(datapresentar), JSON.stringify(dataRepetidos));
                 armarGrafo();
-            }else{
+            } else {
                 console.log("No contiene participantes");
             }
         });
 }
+
 function EliminarNodos(data, dataRepetidos) {
-    var nodosEliminados =[];
+    var nodosEliminados = [];
     var nodos = [];
-    for (var i = 0; i < dataRepetidos.nodes.length; i ++){
+    for (var i = 0; i < dataRepetidos.nodes.length; i++) {
         var acumulador = 0;
-        for(var j = 0; j < data.nodes.length; j ++){
-            if(JSON.stringify(dataRepetidos.nodes[i])!=JSON.stringify(data.nodes[j])){
+        for (var j = 0; j < data.nodes.length; j++) {
+            if (JSON.stringify(dataRepetidos.nodes[i]) != JSON.stringify(data.nodes[j])) {
                 acumulador++;
-                if(acumulador==data.nodes.length){
+                if (acumulador == data.nodes.length) {
                     nodos.push(dataRepetidos.nodes[i]);
                 }
-            }else{
-                if(nodosEliminados.length==0){
+            } else {
+                if (nodosEliminados.length == 0) {
                     nodosEliminados.push(dataRepetidos.nodes[i]);
                     break;
                 }
                 var acumulador2 = 0;
-                for(var k = 0; k<nodosEliminados.length; k++){
-                    if(JSON.stringify(dataRepetidos.nodes[i])!=JSON.stringify(nodosEliminados[k])){
+                for (var k = 0; k < nodosEliminados.length; k++) {
+                    if (JSON.stringify(dataRepetidos.nodes[i]) != JSON.stringify(nodosEliminados[k])) {
                         acumulador2++;
                     }
                 }
-                if(acumulador2==nodosEliminados.length){
+                if (acumulador2 == nodosEliminados.length) {
                     nodosEliminados.push(dataRepetidos.nodes[i]);
-                }else {
+                } else {
                     nodos.push(dataRepetidos.nodes[i]);
                 }
             }
@@ -312,31 +324,32 @@ function EliminarNodos(data, dataRepetidos) {
     }
     return nodos;
 }
+
 function EliminarEdges(data, dataRepetidos) {
-    var edgesEliminados =[];
+    var edgesEliminados = [];
     var edges = [];
-    for (var i = 0; i < dataRepetidos.edges.length; i ++){
+    for (var i = 0; i < dataRepetidos.edges.length; i++) {
         var acumulador = 0;
-        for(var j = 0; j < data.edges.length; j ++){
-            if(JSON.stringify(dataRepetidos.edges[i])!=JSON.stringify(data.edges[j])){
+        for (var j = 0; j < data.edges.length; j++) {
+            if (JSON.stringify(dataRepetidos.edges[i]) != JSON.stringify(data.edges[j])) {
                 acumulador++;
-                if(acumulador==data.edges.length){
+                if (acumulador == data.edges.length) {
                     edges.push(dataRepetidos.edges[i]);
                 }
-            }else{
-                if(edgesEliminados.length==0){
+            } else {
+                if (edgesEliminados.length == 0) {
                     edgesEliminados.push(dataRepetidos.edges[i]);
                     break;
                 }
                 var acumulador2 = 0;
-                for(var k = 0; k<edgesEliminados.length; k++){
-                    if(JSON.stringify(dataRepetidos.edges[i])!=JSON.stringify(edgesEliminados[k])){
+                for (var k = 0; k < edgesEliminados.length; k++) {
+                    if (JSON.stringify(dataRepetidos.edges[i]) != JSON.stringify(edgesEliminados[k])) {
                         acumulador2++;
                     }
                 }
-                if(acumulador2==edgesEliminados.length){
+                if (acumulador2 == edgesEliminados.length) {
                     edgesEliminados.push(dataRepetidos.edges[i]);
-                }else {
+                } else {
                     edges.push(dataRepetidos.edges[i]);
                 }
             }
@@ -344,16 +357,17 @@ function EliminarEdges(data, dataRepetidos) {
     }
     return edges;
 }
+
 function reducirGrafo(idNodo) {
-    var ruta = rutaBase + "projectID/"+idNodo;
-    if(selected == "Proyecto"){
-        ruta = rutaBase + "person/"+idNodo;
+    var ruta = rutaBase + "projectID/" + idNodo;
+    if (selected == "Proyecto") {
+        ruta = rutaBase + "person/" + idNodo;
     }
     var dataRepetidos = JSON.parse(document.getElementById('json').innerHTML);
     $.get(ruta,
         function (res) {
             var data = JSON.parse(res);
-            if(data.edges.length>1){
+            if (data.edges.length > 1) {
                 var datares = {
                     nodes: EliminarNodos(data, dataRepetidos),
                     edges: EliminarEdges(data, dataRepetidos)
@@ -362,15 +376,16 @@ function reducirGrafo(idNodo) {
                     nodes: eliminarNodosRepetidos(datares),
                     edges: eliminarEdgesRepetidos(datares)
                 };
-                actualizarJSONHTML(JSON.stringify(datapresentar),JSON.stringify(datares));
+                actualizarJSONHTML(JSON.stringify(datapresentar), JSON.stringify(datares));
                 armarGrafo();
-            }else{
+            } else {
                 console.log('No contiene participantes');
             }
         });
 }
+
 function armarGrafo() {
-    var  physics = {
+    var physics = {
         forceAtlas2Based: {
             gravitationalConstant: -80,
         },
@@ -420,7 +435,7 @@ function armarGrafo() {
                     background: "#FFFFFF",
                 }
             },
-            investigacion:{
+            investigacion: {
                 shape: "circularImage",
                 image: "../static/img/file1.png",
                 color: {
@@ -428,7 +443,7 @@ function armarGrafo() {
                     background: "#FFFFFF",
                 }
             },
-            buscado:{
+            buscado: {
                 shape: "circularImage",
                 image: "../static/img/usersearch.png",
                 color: {
@@ -436,7 +451,7 @@ function armarGrafo() {
                     background: "#FFFFFF",
                 }
             },
-            investigacion_docente:{
+            investigacion_docente: {
                 shape: "circularImage",
                 image: "../static/img/file2.png",
                 color: {
@@ -444,7 +459,7 @@ function armarGrafo() {
                     background: "#FFFFFF",
                 }
             },
-            extension:{
+            extension: {
                 shape: "circularImage",
                 image: "../static/img/file3.png",
                 color: {
@@ -452,7 +467,7 @@ function armarGrafo() {
                     background: "#FFFFFF",
                 }
             },
-            consultoria:{
+            consultoria: {
                 shape: "circularImage",
                 image: "../static/img/file4.png",
                 color: {
@@ -460,7 +475,7 @@ function armarGrafo() {
                     background: "#FFFFFF",
                 }
             },
-            implementacion:{
+            implementacion: {
                 shape: "circularImage",
                 image: "../static/img/file5.png",
                 color: {
@@ -468,7 +483,7 @@ function armarGrafo() {
                     background: "#FFFFFF",
                 }
             },
-            innovacion:{
+            innovacion: {
                 shape: "circularImage",
                 image: "../static/img/file6.png",
                 color: {
@@ -476,7 +491,7 @@ function armarGrafo() {
                     background: "#FFFFFF",
                 }
             },
-            propuesta:{
+            propuesta: {
                 shape: "circularImage",
                 image: "../static/img/file7.png",
                 color: {
@@ -484,7 +499,7 @@ function armarGrafo() {
                     background: "#FFFFFF",
                 }
             },
-            vinculacion:{
+            vinculacion: {
                 shape: "circularImage",
                 image: "../static/img/file8.png",
                 color: {
@@ -492,7 +507,7 @@ function armarGrafo() {
                     background: "#FFFFFF",
                 }
             },
-            total:{
+            total: {
                 shape: "circularImage",
                 image: "../static/img/suma.png",
                 color: {
@@ -503,19 +518,19 @@ function armarGrafo() {
         }
     };
     var data = JSON.parse(document.getElementById('json1').innerHTML);
-    for(var i=0;i<data.nodes.length;i++){
-        if(selected=="Area" || selected=="TipoProyecto"){
-             nodoseleccionado = data.nodes[0].label;
-        }else{
-            if(idnodobase==data.nodes[i].id){
+    for (var i = 0; i < data.nodes.length; i++) {
+        if (selected == "Area" || selected == "TipoProyecto") {
+            nodoseleccionado = data.nodes[0].label;
+        } else {
+            if (idnodobase == data.nodes[i].id) {
                 nodoseleccionado = data.nodes[i].label;
             }
         }
     }
     var container = document.getElementById('mynetwork');
     var leyenda = document.getElementById('myleyenda');
-    var x = -leyenda.clientWidth/4 + 50;
-    var y = -leyenda.clientHeight/2;
+    var x = -leyenda.clientWidth / 4 + 50;
+    var y = -leyenda.clientHeight / 2;
     var totalExtension = 0;
     var totalInvestigacion = 0;
     var totalInvestigacionDocente = 0;
@@ -526,10 +541,10 @@ function armarGrafo() {
     var totalVinculacion = 0;
     var totalDirector = 0;
     var totalParticipante = 0;
-    var acumulador=1;
+    var acumulador = 1;
     var arrayLegend = [];
     var step = 80;
-    if(data.nodes.length>200){
+    if (data.nodes.length > 200) {
         options.physics = {
             stabilization: false,
             barnesHut: {
@@ -546,8 +561,8 @@ function armarGrafo() {
         nodes: data.nodes,
         edges: data.edges
     };
-    var dataleyenda =  [];
-    for(var j = 0; j < data.nodes.length; j ++){
+    var dataleyenda = [];
+    for (var j = 0; j < data.nodes.length; j++) {
         switch (data.nodes[j].group) {
             case 'investigacion':
                 totalInvestigacion++;
@@ -581,15 +596,15 @@ function armarGrafo() {
                 break;
         }
     }
-    for (var i = 0; i < data.nodes.length; i ++){
-        var yacumulador = y + acumulador+step;
-        if(i!=0){
-            yacumulador = y + acumulador*step;
+    for (var i = 0; i < data.nodes.length; i++) {
+        var yacumulador = y + acumulador + step;
+        if (i != 0) {
+            yacumulador = y + acumulador * step;
         }
         switch (data.nodes[i].group) {
             case 'buscado':
-                if(arrayLegend.indexOf(1011)==-1){
-                    if(selected=="Nombre" || selected=="Persona"){
+                if (arrayLegend.indexOf(1011) == -1) {
+                    if (selected == "Nombre" || selected == "Persona") {
                         dataleyenda.push({
                             id: 1011,
                             x: x,
@@ -602,7 +617,7 @@ function armarGrafo() {
                         });
                         arrayLegend.push(1011);
                         acumulador++;
-                    }else{
+                    } else {
                         dataleyenda.push({
                             id: 1011,
                             x: x,
@@ -619,12 +634,12 @@ function armarGrafo() {
                 }
                 break;
             case 'investigacion':
-                if(arrayLegend.indexOf(1001)==-1){
+                if (arrayLegend.indexOf(1001) == -1) {
                     dataleyenda.push({
                         id: 1001,
                         x: x,
                         y: yacumulador,
-                        label: "Investigación (" +totalInvestigacion+")",
+                        label: "Investigación (" + totalInvestigacion + ")",
                         group: "investigacion",
                         value: 1,
                         fixed: true,
@@ -635,7 +650,7 @@ function armarGrafo() {
                 }
                 break;
             case 'area':
-                if(arrayLegend.indexOf(1012)==-1){
+                if (arrayLegend.indexOf(1012) == -1) {
                     dataleyenda.push({
                         id: 1012,
                         x: x,
@@ -651,7 +666,7 @@ function armarGrafo() {
                 }
                 break;
             case 'tipo':
-                if(arrayLegend.indexOf(1013)==-1){
+                if (arrayLegend.indexOf(1013) == -1) {
                     dataleyenda.push({
                         id: 1013,
                         x: x,
@@ -667,12 +682,12 @@ function armarGrafo() {
                 }
                 break;
             case 'extension':
-                if(arrayLegend.indexOf(1002)==-1){
+                if (arrayLegend.indexOf(1002) == -1) {
                     dataleyenda.push({
                         id: 1002,
                         x: x,
                         y: yacumulador,
-                        label: "Extensión ("+totalExtension+")",
+                        label: "Extensión (" + totalExtension + ")",
                         group: "extension",
                         value: 1,
                         fixed: true,
@@ -683,12 +698,12 @@ function armarGrafo() {
                 }
                 break;
             case 'investigacion_docente':
-                if(arrayLegend.indexOf(1003)==-1){
+                if (arrayLegend.indexOf(1003) == -1) {
                     dataleyenda.push({
                         id: 1003,
                         x: x,
                         y: yacumulador,
-                        label: "Innovación Docente ("+totalInvestigacionDocente+")",
+                        label: "Innovación Docente (" + totalInvestigacionDocente + ")",
                         group: "investigacion_docente",
                         value: 1,
                         fixed: true,
@@ -699,12 +714,12 @@ function armarGrafo() {
                 }
                 break;
             case 'consultoria':
-                if(arrayLegend.indexOf(1004)==-1){
+                if (arrayLegend.indexOf(1004) == -1) {
                     dataleyenda.push({
                         id: 1004,
                         x: x,
                         y: yacumulador,
-                        label: "Consultoría ("+totalConsultoria+")",
+                        label: "Consultoría (" + totalConsultoria + ")",
                         group: "consultoria",
                         value: 1,
                         fixed: true,
@@ -715,12 +730,12 @@ function armarGrafo() {
                 }
                 break;
             case 'implementacion':
-                if(arrayLegend.indexOf(1005)==-1){
+                if (arrayLegend.indexOf(1005) == -1) {
                     dataleyenda.push({
                         id: 1005,
                         x: x,
                         y: yacumulador,
-                        label: "Implementación ("+totalImplementacion+")",
+                        label: "Implementación (" + totalImplementacion + ")",
                         group: "implementacion",
                         value: 1,
                         fixed: true,
@@ -731,12 +746,12 @@ function armarGrafo() {
                 }
                 break;
             case 'vinculacion':
-                if(arrayLegend.indexOf(1014)==-1){
+                if (arrayLegend.indexOf(1014) == -1) {
                     dataleyenda.push({
                         id: 1014,
                         x: x,
                         y: yacumulador,
-                        label: "Vinculación ("+totalVinculacion+")",
+                        label: "Vinculación (" + totalVinculacion + ")",
                         group: "vinculacion",
                         value: 1,
                         fixed: true,
@@ -747,12 +762,12 @@ function armarGrafo() {
                 }
                 break;
             case 'innovacion':
-                if(arrayLegend.indexOf(1006)==-1){
+                if (arrayLegend.indexOf(1006) == -1) {
                     dataleyenda.push({
                         id: 1006,
                         x: x,
                         y: yacumulador,
-                        label: "Innovación ("+totalInnovacion+")",
+                        label: "Innovación (" + totalInnovacion + ")",
                         group: "innovacion",
                         value: 1,
                         fixed: true,
@@ -763,12 +778,12 @@ function armarGrafo() {
                 }
                 break;
             case 'propuesta':
-                if(arrayLegend.indexOf(1007)==-1){
+                if (arrayLegend.indexOf(1007) == -1) {
                     dataleyenda.push({
                         id: 1007,
                         x: x,
                         y: yacumulador,
-                        label: "Propuesta Enviada ("+totalPropuesta+")",
+                        label: "Propuesta Enviada (" + totalPropuesta + ")",
                         group: "propuesta",
                         value: 1,
                         fixed: true,
@@ -779,8 +794,8 @@ function armarGrafo() {
                 }
                 break;
             case 'participante':
-                if(arrayLegend.indexOf(1008)==-1){
-                    if(selected=="Nombre"){
+                if (arrayLegend.indexOf(1008) == -1) {
+                    if (selected == "Nombre") {
                         dataleyenda.push({
                             id: 1008,
                             x: x,
@@ -793,12 +808,12 @@ function armarGrafo() {
                         });
                         arrayLegend.push(1008);
                         acumulador++;
-                    }else if(selected=="Proyecto"){
+                    } else if (selected == "Proyecto") {
                         dataleyenda.push({
                             id: 1008,
                             x: x,
                             y: yacumulador,
-                            label: "Participante ("+totalParticipante+")",
+                            label: "Participante (" + totalParticipante + ")",
                             group: "participante",
                             value: 1,
                             fixed: true,
@@ -806,12 +821,12 @@ function armarGrafo() {
                         });
                         arrayLegend.push(1008);
                         acumulador++;
-                    }else if(selected=="Persona"){
+                    } else if (selected == "Persona") {
                         dataleyenda.push({
                             id: 1008,
                             x: x,
                             y: yacumulador,
-                            label: "Persona ("+totalParticipante+")",
+                            label: "Persona (" + totalParticipante + ")",
                             group: "participante",
                             value: 1,
                             fixed: true,
@@ -823,12 +838,12 @@ function armarGrafo() {
                 }
                 break;
             case 'director':
-                if(arrayLegend.indexOf(1009)==-1){
+                if (arrayLegend.indexOf(1009) == -1) {
                     dataleyenda.push({
                         id: 1009,
                         x: x,
                         y: y + acumulador * step,
-                        label: "Director ("+totalDirector+")",
+                        label: "Director (" + totalDirector + ")",
                         group: "director",
                         value: 1,
                         fixed: true,
@@ -840,14 +855,14 @@ function armarGrafo() {
                 break;
         }
     }
-    totalProyectos = totalExtension+totalPropuesta+totalInnovacion+totalImplementacion+totalConsultoria+
-        totalInvestigacionDocente+totalInvestigacion;
-    if(selected=="Nombre" || selected=="Area"){
+    totalProyectos = totalExtension + totalPropuesta + totalInnovacion + totalImplementacion + totalConsultoria +
+        totalInvestigacionDocente + totalInvestigacion + totalVinculacion;
+    if (selected == "Nombre" || selected == "Area") {
         dataleyenda.push({
             id: 1010,
             x: x,
             y: y + acumulador * step,
-            label: "Total proyectos ("+totalProyectos+")",
+            label: "Total proyectos (" + totalProyectos + ")",
             group: "total",
             value: 1,
             fixed: true,
@@ -855,26 +870,26 @@ function armarGrafo() {
         });
     }
     var leyendaData = {
-        nodes:dataleyenda
+        nodes: dataleyenda
     }
     var network = new vis.Network(container, data, options);
     var networkleyenda = new vis.Network(leyenda, leyendaData, options);
     var doubleClickTime = 0;
     var threshold = 200;
-    network.on("click", function(params) {
+    network.on("click", function (params) {
         var t0 = new Date();
         var identificador = this.getNodeAt(params.pointer.DOM);
         idseleccionado = this.getNodeAt(params.pointer.DOM);
         if (t0 - doubleClickTime > threshold) {
             setTimeout(function () {
                 if (t0 - doubleClickTime > threshold) {
-                    var arrayEdges = network.getConnectedNodes(identificador,'from');
-                    if(selected=="Proyecto"){
-                        arrayEdges = network.getConnectedNodes(identificador,'to');
+                    var arrayEdges = network.getConnectedNodes(identificador, 'from');
+                    if (selected == "Proyecto") {
+                        arrayEdges = network.getConnectedNodes(identificador, 'to');
                     }
                     var idNodo = identificador;
-                    if(idNodo!=idnodobase){
-                        if(arrayEdges!=undefined && arrayEdges!=null && arrayEdges!='') {
+                    if (idNodo != idnodobase) {
+                        if (arrayEdges != undefined && arrayEdges != null && arrayEdges != '') {
                             if (listaNodoAbierto.indexOf(idNodo) == -1) {
                                 agrandarGrafo(idNodo);
                                 listaNodoAbierto.push(idNodo);
@@ -884,30 +899,30 @@ function armarGrafo() {
                                 listaNodoAbierto.splice(index, 1);
                             }
                         }
-                    }else{
-                        actualizarJSONHTML(grafoinicial,grafoinicial);
+                    } else {
+                        actualizarJSONHTML(grafoinicial, grafoinicial);
                         armarGrafo();
                     }
                 }
-            },threshold);
+            }, threshold);
         }
     });
-    network.on('doubleClick', function(params) {
+    network.on('doubleClick', function (params) {
         doubleClickTime = new Date();
         var id = this.getNodeAt(params.pointer.DOM);
-        window.open(rutaBase+'comentario/'+id, '_blank');
+        window.open(rutaBase + 'comentario/' + id, '_blank');
     });
     network.on("afterDrawing", function (ctx) {
-        try{
+        try {
             var nodeId = idseleccionado;
             var nodePosition = network.getPositions([nodeId]);
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 2;
             ctx.fillStyle = "rgba(0,0,0,0)";
-            ctx.circle(nodePosition[nodeId].x, nodePosition[nodeId].y,28);
+            ctx.circle(nodePosition[nodeId].x, nodePosition[nodeId].y, 28);
             ctx.fill();
             ctx.stroke();
-        }catch (e) {
+        } catch (e) {
 
         }
     });
