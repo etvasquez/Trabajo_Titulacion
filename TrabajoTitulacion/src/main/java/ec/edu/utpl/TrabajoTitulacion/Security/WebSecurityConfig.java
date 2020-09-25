@@ -50,7 +50,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/comentario","/personperson/{id}","/listaBusquedaProyecto/{id}","/listaBusquedaArea","/listaBusquedaTipoProyecto",
                         "/projectArea/{id}","/projectTipo/{id}","/estadisticas","/nosotros","/repositorio")
                 .permitAll()
-                .antMatchers ("/proyectos","/editar_proyecto/{id}").authenticated ()
+                .antMatchers ("/proyectos","/editar_proyecto/{id}","/login").authenticated ()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().loginPage("/login")

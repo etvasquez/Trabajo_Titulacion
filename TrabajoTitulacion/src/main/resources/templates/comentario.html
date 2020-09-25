@@ -1,12 +1,12 @@
 <!doctype html>
-<html xmlns:th="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head th:insert="fragments/head :: header">
 </head>
 <body>
 <nav th:insert="fragments/menu :: menu">
 </nav>
-<p style="display: none" id="json" th:text="${appName}"></p>
-<p style="display: none" id="jsonpersona" th:text="${personas}"></p>
+<p hidden id="json" th:text="${appName}"></p>
+<p hidden id="jsonpersona" th:text="${personas}"></p>
 <div class="container" id="divtitulo">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-xl-12 col-lg-12">
@@ -86,13 +86,21 @@
                         <div class="form-group" style="display: none">
                             <input type="text" class="form-control" id="idCom" th:field="*{idCom}" name="idCom">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" sec:authorize="!isAuthenticated()">
                             <label for="InputEmail1">Correo electrónico</label>
                             <input type="email" class="form-control" id="InputEmail1" required aria-describedby="emailHelp" placeholder="Escribe tu correo" th:field="*{correo}">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" sec:authorize="isAuthenticated()" hidden>
+                            <label for="InputEmail1user">Correo electrónico</label>
+                            <input type="email" class="form-control" id="InputEmail1user" required aria-describedby="emailHelp" placeholder="Escribe tu correo" th:field="*{correo}">
+                        </div>
+                        <div class="form-group" sec:authorize="!isAuthenticated()">
                             <label for="InputName">Nombre</label>
                             <input type="text" class="form-control" required id="InputName" aria-describedby="emailHelp" placeholder="Escribe tu nombre o anónimo" th:field="*{nombre}">
+                        </div>
+                        <div class="form-group" sec:authorize="isAuthenticated()" hidden>
+                            <label for="InputNameuser">Nombre</label>
+                            <input type="text" class="form-control" required id="InputNameuser" aria-describedby="emailHelp" placeholder="Escribe tu nombre o anónimo" th:field="*{nombre}">
                         </div>
                         <div class="form-group">
                             <textarea class="form-control" required id="FormControlTextarea" rows="3" placeholder="Escribe tu comentario ..." th:field="*{comentarios}"></textarea>
@@ -114,13 +122,21 @@
                                         <div class="form-group" style="display: none">
                                             <input type="text" class="form-control" id="idCom1" th:field="*{idCom}" name="idCom1">
                                         </div>
-                                        <div class="form-group">
+                                        <div class="form-group" sec:authorize="!isAuthenticated()">
                                             <label for="InputEmail1">Correo electrónico</label>
                                             <input type="email" class="form-control" id="InputEmail11" required aria-describedby="emailHelp" placeholder="Escribe tu correo" th:field="*{correo}">
                                         </div>
-                                        <div class="form-group">
+                                        <div class="form-group" sec:authorize="isAuthenticated()" hidden>
+                                            <label for="InputEmail1user">Correo electrónico</label>
+                                            <input type="email" class="form-control" id="InputEmail11user" required aria-describedby="emailHelp" placeholder="Escribe tu correo" th:field="*{correo}">
+                                        </div>
+                                        <div class="form-group" sec:authorize="!isAuthenticated()">
                                             <label for="InputName">Nombre</label>
                                             <input type="text" class="form-control" required id="InputName1" aria-describedby="emailHelp" placeholder="Escribe tu nombre o anónimo" th:field="*{nombre}">
+                                        </div>
+                                        <div class="form-group" sec:authorize="isAuthenticated()" hidden>
+                                            <label for="InputName1user">Nombre</label>
+                                            <input type="text" class="form-control" required id="InputName1user" aria-describedby="emailHelp" placeholder="Escribe tu nombre o anónimo" th:field="*{nombre}">
                                         </div>
                                         <div class="form-group">
                                             <textarea class="form-control" required id="FormControlTextarea1" rows="3" placeholder="Escribe tu comentario ..." th:field="*{comentarios}"></textarea>

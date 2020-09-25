@@ -4,19 +4,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import ec.edu.utpl.TrabajoTitulacion.Controller.consultasBD;
 import ec.edu.utpl.TrabajoTitulacion.Model.Comentario;
 import ec.edu.utpl.TrabajoTitulacion.Model.ComentarioGlobal;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import ec.edu.utpl.TrabajoTitulacion.Model.Usuario;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 
 @Controller
-@EnableAutoConfiguration(exclude = {org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class})
 public class HomeController {
     String appName;
     String personas;
@@ -28,8 +29,12 @@ public class HomeController {
     consultasBD consultas = new consultasBD();
 
     @GetMapping("/")
-    public String homePage() {
-        return "home";
+    public String homePage(HttpServletRequest request) {
+        if(request.getRemoteUser()!=null){
+            return "redirect:/proyectos";
+        }else{
+            return "home";
+        }
     }
 
     @GetMapping("/estadisticas")
@@ -48,15 +53,26 @@ public class HomeController {
     }
 
     @GetMapping("/comentario/{id}")
-    public String comentario(Model model, @PathVariable(value="id") String id) {
+    public String comentario(HttpServletRequest request, Model model, HttpSession session, @PathVariable(value="id") String id) {
+        if(request.getRemoteUser()!=null) {
+            String user = request.getRemoteUser().concat("@utpl.edu.ec");
+            Usuario usuario = consultas.getUser(user);
+            session.setAttribute("usuario",usuario);
+            usuario = (Usuario) session.getAttribute("usuario");
+            Comentario coment = new Comentario(id,usuario.getNombre(),"","",usuario.getMbox());
+            Comentario comentario1 = new Comentario(id,usuario.getNombre(),"","",usuario.getMbox());
+            model.addAttribute("coment", coment);
+            model.addAttribute("comentario", comentario1);
+        }else{
+            Comentario coment = new Comentario(id,"","","","");
+            Comentario comentario1 = new Comentario("","","","","");
+            model.addAttribute("coment", coment);
+            model.addAttribute("comentario", comentario1);
+        }
         appName = consultas.InformacionProyecto(id);
         personas = consultas.InformacionInvolucrados(id);
         model.addAttribute("appName",appName);
         model.addAttribute("personas",personas);
-        Comentario coment = new Comentario(id,"","","","");
-        Comentario comentario1 = new Comentario("","","","","");
-        model.addAttribute("coment", coment);
-        model.addAttribute("comentario", comentario1);
         listacomentarios = consultas.getComment(id);
         listacomentarioGlobal = consultas.getCommentGloblal(listacomentarios);
         int tamanio =listacomentarios.size();
@@ -82,6 +98,7 @@ public class HomeController {
     @GetMapping("/getNameByEmail/{email}")
     public ResponseEntity<String> getNameByEmail(@PathVariable(value="email") String email) {
         appName = consultas.getNameByEmail(email);
+        System.out.println("Esto es: "+appName);
         return new ResponseEntity<String>(appName, HttpStatus.OK);
     }
 
@@ -165,6 +182,4 @@ public class HomeController {
         String idPerson = consultas.getIDPerson(id);
         return new ResponseEntity<String>(idPerson, HttpStatus.OK);
     }
-
-
 }

@@ -45,6 +45,80 @@ public class consultasBD{
         return "";
     }
 
+    public Usuario getUser(String xemail){
+        Usuario usuario = new Usuario();
+        String strQuery =
+                "PREFIX schema: <http://schema.org/> "+
+                        "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
+                        "SELECT ?id ?nombre ?apellido ?area ?departamento ?seccion ?modalidad ?tipo ?status ?nacionalidad ?extension ?telefono ?email "+
+                        "WHERE { "+
+                        "?s schema:id_person ?id . "+
+                        "?s j.2:lastName ?nombre . "+
+                        "?s j.2:firstName ?apellido . "+
+                        "?s schema:areaPerson ?arealabel . "+
+                        "?arealabel rdfs:label ?area . "+
+                        "?s schema:depertamentPerson ?deplabel . "+
+                        "?deplabel rdfs:label ?departamento . "+
+                        "?s schema:seccionPerson ?seccionlabel . "+
+                        "?seccionlabel rdfs:label ?seccion . "+
+                        "?s schema:modalidadPerson ?modalabel . "+
+                        "?modalabel rdfs:label ?modalidad . "+
+                        "?s schema:tipoOcupationPerson ?oculabel . "+
+                        "?oculabel rdfs:label ?tipo . "+
+                        "?s schema:statusPerson ?statuslabel . "+
+                        "?statuslabel rdfs:label ?status . "+
+                        "?s schema:national ?nationalabel . "+
+                        "?nationalabel rdfs:label ?nacionalidad . "+
+                        "?s schema:extension ?extension . "+
+                        "?s j.2:phone ?telefono . ?s j.2:mbox ?email . "+
+                        "filter(regex(?email, '"+xemail+"','i')) }";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral id =
+                        (SimpleLiteral)bindingSet.getValue("id");
+                SimpleLiteral nombre =
+                        (SimpleLiteral)bindingSet.getValue("nombre");
+                SimpleLiteral apellido =
+                        (SimpleLiteral)bindingSet.getValue("apellido");
+                SimpleLiteral area =
+                        (SimpleLiteral)bindingSet.getValue("area");
+                SimpleLiteral departamento =
+                        (SimpleLiteral)bindingSet.getValue("departamento");
+                SimpleLiteral seccion =
+                        (SimpleLiteral)bindingSet.getValue("seccion");
+                SimpleLiteral modalidad =
+                        (SimpleLiteral)bindingSet.getValue("modalidad");
+                SimpleLiteral tipo =
+                        (SimpleLiteral)bindingSet.getValue("tipo");
+                SimpleLiteral status =
+                        (SimpleLiteral)bindingSet.getValue("status");
+                SimpleLiteral nacionalidad =
+                        (SimpleLiteral)bindingSet.getValue("nacionalidad");
+                SimpleLiteral extension =
+                        (SimpleLiteral)bindingSet.getValue("extension");
+                SimpleLiteral telefono =
+                        (SimpleLiteral)bindingSet.getValue("telefono");
+                SimpleLiteral email =
+                        (SimpleLiteral)bindingSet.getValue("email");
+                usuario = new Usuario(id.stringValue(),nombre.stringValue().concat(" ").concat(apellido.stringValue()),area.stringValue(),
+                        departamento.stringValue(),seccion.stringValue(),modalidad.stringValue(),tipo.stringValue(),status.stringValue(),
+                        nacionalidad.stringValue(),extension.stringValue(),telefono.stringValue(),email.stringValue());
+            }
+        }catch (QueryEvaluationException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return usuario;
+    }
+
     public int getCountLike(String idProject){
         int contador=0;
         String strQuery ="PREFIX schema: <http://schema.org/> " +

@@ -81,19 +81,23 @@ $(document).ready(function () {
 //get name
         $("#InputEmail1").blur(function () {
             var str = $("#InputEmail1").val();
+            if(str!=null && str!=""){
             var ruta = rutaBase + "getNameByEmail/" + str;
             $.get(ruta,
                 function (res) {
                     $("#InputName").val(res);
                 });
+            }
         });
         $("#InputEmail11").blur(function () {
             var str = $("#InputEmail11").val();
-            var ruta = rutaBase + "getNameByEmail/" + str;
-            $.get(ruta,
-                function (res) {
-                    $("#InputName1").val(res);
-                });
+            if(str!=null && str!="") {
+                var ruta = rutaBase + "getNameByEmail/" + str;
+                $.get(ruta,
+                    function (res) {
+                        $("#InputName1").val(res);
+                    });
+            }
         });
     } catch (e) {
 
@@ -103,3 +107,5 @@ $(document).ready(function () {
 function inicializarFormulario(str) {
     $("#idCom1").val(str);
 }
+
+
