@@ -1,10 +1,138 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+<!doctype html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:insert="fragments/head :: header">
 </head>
 <body>
-<h1>editar</h1>
+<nav th:insert="fragments/menu :: menu">
+</nav>
+<h3 style="text-align: center" class="p-1">Editar proyecto</h3>
+<br>
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active font-weight-bold" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Información general</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link font-weight-bold" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Recursos</a>
+    </li>
+</ul>
+<div class="tab-content p-2" id="myTabContent">
+    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <form action="#" th:action="@{/proyecto}" method="post" th:object="${proyecto}">
+            <div class="form-group">
+                <button type="submit" class="form-control col-4 float-right btn btn-primary fa fa-save"> Guardar cambios</button>
+                <br/>
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="idCom" th:field="*{id}" name="idCom" hidden>
+                <label for="FormControlTextTitulo"><strong>Título del proyecto</strong></label>
+                <textarea class="form-control" required id="FormControlTextTitulo" rows="1" th:field="*{titulo}"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="FormControlTextareaDes"><strong>Descripción del proyecto</strong></label>
+                <textarea class="form-control" required id="FormControlTextareaDes" rows="3" th:field="*{descripcion}"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="FormControlTextareaObjetivo"><strong>Objetivo del proyecto</strong></label>
+                <textarea class="form-control" required id="FormControlTextareaObjetivo" rows="3" th:field="*{objetivo}"></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="exampleFormControlSelect1"><strong>Tipo de proyecto</strong></label>
+                    <select class="form-control" id="exampleFormControlSelect1" th:field="*{tipo}">
+                        <option th:each="tipo : ${tipoProyecto}"
+                                th:value="${tipo.id}" th:text="${tipo.nombre}"></option>
+                    </select>
+                    <label for="FormControlTextCobertura"><strong>Cobertura del proyecto</strong></label>
+                    <select class="form-control" id="FormControlTextCobertura" th:field="*{cobertura}">
+                        <option value="Nacional">NACIONAL</option>
+                        <option value="Internacional">INTERNACIONAL</option>
+                        <option value="Local">LOCAL</option>
+                    </select>
+                    <label for="FormControlTextReprogramado"><strong>Proyecto reprogramado</strong></label>
+                    <select class="form-control" id="FormControlTextReprogramado" th:field="*{reprogramado}">
+                        <option value="Si">SI</option>
+                        <option value="No">NO</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="FormControlTextEstado"><strong>Estado del proyecto</strong></label>
+                    <select class="form-control" id="FormControlTextEstado" th:field="*{estado}">
+                        <option value="anulado">ANULADO</option>
+                        <option value="dado_de_baja">DADO DE BAJA</option>
+                        <option value="ejecutandose">EJECUTÁNDOSE</option>
+                        <option value="finalizado">FINALIZADO</option>
+                    </select>
+                    <label for="FormControlTextSmartland"><strong>Incluye smartland</strong></label>
+                    <select class="form-control" id="FormControlTextSmartland" th:field="*{smartland}">
+                        <option value="si">SI</option>
+                        <option value="no">NO</option>
+                    </select>
+                    <label for="FormControlTextAvance"><strong>Avance del proyecto</strong></label>
+                    <input type="number" class="form-control" id="FormControlTextAvance" th:field="*{avance}" min="0" max="100" step="any">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="FormControlTextPrograma"><strong>Programa</strong></label>
+                    <input type="text" class="form-control" id="FormControlTextPrograma" th:field="*{programa}">
+                    <label for="FormControlTextFInicio"><strong>Fecha inicio del proyecto</strong></label>
+                    <input type="date" class="form-control" id="FormControlTextFInicio" th:field="*{fechainicio}">
+                    <label for="FormControlTextFFin"><strong>Fecha fin del proyecto</strong></label>
+                    <input type="date" class="form-control" id="FormControlTextFFin" th:field="*{fechafin}">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="FormControlTextpresupuesto"><strong>Presupuesto de proyecto</strong></label>
+                    <input type="number" class="form-control" id="FormControlTextpresupuesto"  th:field="*{presupuesto}">
+                    <label for="FormControlTextFGeneral"><strong>Financiamiento General</strong></label>
+                    <input type="number" class="form-control" id="FormControlTextFGeneral" th:field="*{financiamiento_general}">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="FormControlTextFUtpl"><strong>Incluye financiamiento UTPL</strong></label>
+                    <input type="number" class="form-control" id="FormControlTextFUtpl" th:field="*{financiamiento_utpl}">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="FormControlTextFExterno"><strong>Incluye financiamiento externo</strong></label>
+                    <input type="number" class="form-control" id="FormControlTextFExterno" th:field="*{financiamiento_externo}">
+                    <label for="FormControlTextFExterno" class="text-white"><strong>Incluye financiamiento externo</strong></label>
+                    <button type="submit" class="form-control btn btn-primary fa fa-save"> Guardar cambios</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+        <div>
+            <form action="#" th:action="@{/upload}" enctype="multipart/form-data" method="post" th:object="${recurso}">
+                <div class="form-group">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <input type="text" id="fileName" name="fileName" hidden>
+                            <input type="text" id="id" name="id" hidden>
+                            <label for="file"><strong>Subir nuevo recurso</strong></label>
+                            <input type="file" class="form-control-file" id="file" name="file" onclick="generarUID()">
+                            <label for="descripcion"><strong>Descripción del recurso</strong></label>
+                            <textarea class="form-control" required rows="3" id="descripcion" name="descripcion"></textarea>
+                            <label for="licencia"><strong>Tipo de licencia</strong></label>
+                            <input type="text" id="licencia" name="licencia" class="form-control">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <div>
+                                <label for="file" class="font-weight-bold">Lista de archivos cargados</label>
+                                <ul style="list-style: none">
+                                    <li th:each="file : ${files}">
+                                        <a th:href="${file}" th:text="${file}" />
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="form-control float-left btn btn-primary fa fa-upload col-4" value="Upload"> Subir recurso</button>
+                </div>
+            </form>
+        </div>
+        <div th:if="${message}">
+            <h4 th:text="${message}"/>
+        </div>
+    </div>
+</div>
 </body>
 </html>

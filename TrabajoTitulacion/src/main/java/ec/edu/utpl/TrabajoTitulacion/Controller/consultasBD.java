@@ -321,6 +321,33 @@ public class consultasBD{
         return formatter.format(date);
     }
 
+    public String insertResource(Recurso recurso, String id, String fileName) {
+        String uuid = UUID.randomUUID().toString();
+        String strInsert = "";
+        String estado="Exito";
+        strInsert =
+                "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                        "PREFIX schema: <http://schema.org/> "+
+                        "INSERT DATA { " +
+                        urlBase + "project/" + id + "> schema:Resource " + urlBase + "resourceProject/" + fileName + "> . " +
+                        urlBase + "resourceProject/" + fileName + "> schema:nombrereal \"" + recurso.getNombrecompleto() + "\" . " +
+                        urlBase + "resourceProject/" + fileName + "> schema:nombrecompleto \"" + recurso.getNombrereal()+ "\" . " +
+                        urlBase + "resourceProject/" + fileName + "> schema:descripcion \"" + recurso.getDescripcion()+ "\" . " +
+                        urlBase + "resourceProject/" + fileName + "> schema:licencia \"" + recurso.getTipo()+ "\" . } ";
+        RepositoryConnection repositoryConnection = con.getRepositoryConnection();
+        repositoryConnection.begin();
+        Update updateOperation = repositoryConnection.prepareUpdate(QueryLanguage.SPARQL, strInsert);
+        updateOperation.execute();
+        try {
+            repositoryConnection.commit();
+        } catch (Exception e) {
+            estado="error";
+            if (repositoryConnection.isActive())
+                repositoryConnection.rollback();
+        }
+        return estado;
+    }
+
     public String insertComent(Comentario comentario) {
         String uuid = UUID.randomUUID().toString();
         String strInsert = "";
@@ -353,6 +380,65 @@ public class consultasBD{
                                 "}";
 
         }
+        RepositoryConnection repositoryConnection = con.getRepositoryConnection();
+        repositoryConnection.begin();
+        Update updateOperation = repositoryConnection.prepareUpdate(QueryLanguage.SPARQL, strInsert);
+        updateOperation.execute();
+        try {
+            repositoryConnection.commit();
+        } catch (Exception e) {
+            estado="error";
+            if (repositoryConnection.isActive())
+                repositoryConnection.rollback();
+        }
+        return estado;
+    }
+
+    public String updateProject(Proyecto proyecto) {
+        String strInsert = "";
+        String estado="Exito";
+        String consulta = urlBase+"project/"+proyecto.getId()+"> j.2:title ?titleold . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:descripcion ?desold . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:objetivos ?objold . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:tipoproyecto ?tipo . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:estadoproyecto ?estado . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:programa ?programa . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:cobertura ?cobertura . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:smartland ?smartland . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:fecha_inicio ?fechainicio . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:fecha_fin ?fechafin . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:reprogramado ?reprogramado . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:avance ?avance . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:presupuesto ?presupuesto . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:fondo_utpl ?fondoutpl . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:fondo_externo ?fondoexterno . "+
+                urlBase+"project/"+proyecto.getId()+"> schema:total_general ?totalgeneral . ";
+        strInsert =
+            "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                    "PREFIX schema: <http://schema.org/> "+
+                    "DELETE { "+
+                    consulta+
+                    "} INSERT { " +
+                    urlBase+"project/"+proyecto.getId()+"> j.2:title '"+proyecto.getTitulo()+"' . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:descripcion '"+proyecto.getDescripcion()+"' . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:objetivos '"+proyecto.getObjetivo()+"' . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:tipoproyecto "+urlBase+proyecto.getTipo()+"> . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:estadoproyecto "+urlBase+proyecto.getEstado()+"> . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:programa '"+proyecto.getPrograma()+"' . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:cobertura '"+proyecto.getCobertura()+"' . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:smartland '"+proyecto.getSmartland()+"' . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:fecha_inicio '"+proyecto.getFechainicio()+"' . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:fecha_fin '"+proyecto.getFechafin()+"' . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:reprogramado '"+proyecto.getReprogramado()+"' . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:avance '"+proyecto.getAvance()+"' . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:presupuesto '"+proyecto.getPresupuesto()+"' . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:fondo_utpl '"+proyecto.getFinanciamiento_utpl()+"' . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:fondo_externo '"+proyecto.getFinanciamiento_externo()+"' . "+
+                    urlBase+"project/"+proyecto.getId()+"> schema:total_general '"+proyecto.getFinanciamiento_general()+"' . "+
+                    "} WHERE { " +
+                    consulta+
+                     "}";
+
         RepositoryConnection repositoryConnection = con.getRepositoryConnection();
         repositoryConnection.begin();
         Update updateOperation = repositoryConnection.prepareUpdate(QueryLanguage.SPARQL, strInsert);
