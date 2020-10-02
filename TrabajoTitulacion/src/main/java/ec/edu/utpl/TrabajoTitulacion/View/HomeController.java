@@ -98,16 +98,13 @@ public class HomeController {
     @GetMapping("/getNameByEmail/{email}")
     public ResponseEntity<String> getNameByEmail(@PathVariable(value="email") String email) {
         appName = consultas.getNameByEmail(email);
-        System.out.println("Esto es: "+appName);
         return new ResponseEntity<String>(appName, HttpStatus.OK);
     }
 
     @PostMapping("/comentarioresponse")
     public void submitFormComment(@ModelAttribute("comentario") Comentario comentario, HttpServletResponse httpResponse) throws IOException{
-        System.out.println("Si antes"+comentario.getIdCom());
         estado = consultas.insertComentComment(comentario);
         idProyecto = consultas.getIDProject(comentario.getIdCom());
-        System.out.println("Si despues"+idProyecto);
         httpResponse.sendRedirect("/comentario/"+idProyecto);
     }
 

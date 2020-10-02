@@ -3,10 +3,22 @@
 <head th:insert="fragments/head :: header">
 </head>
 <body>
+<script>
+    window.onload=function() {
+        var tab = $('#tab').val();
+        console.log(tab);
+        if(tab==0){
+            $('.nav-tabs a[href="#home"]').tab('show');
+        }else{
+            $('.nav-tabs a[href="#profile"]').tab('show');
+        }
+    }
+</script>
 <nav th:insert="fragments/menu :: menu">
 </nav>
 <h3 style="text-align: center" class="p-1">Editar proyecto</h3>
 <br>
+<input type="text" id="tab" th:value="${tab}" hidden>
 <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item">
         <a class="nav-link active font-weight-bold" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Información general</a>
@@ -100,11 +112,14 @@
         </form>
     </div>
     <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+        <div th:if="${message}">
+            <h4 class="text-success" th:text="${message}"/>
+        </div>
         <div>
-            <form action="#" th:action="@{/upload}" enctype="multipart/form-data" method="post" th:object="${recurso}">
+            <form action="#" th:action="@{/upload}" enctype="multipart/form-data" method="post">
                 <div class="form-group">
                     <div class="form-row">
-                        <div class="form-group col-md-6">
+                        <div class="form-group col-md-5">
                             <input type="text" id="fileName" name="fileName" hidden>
                             <input type="text" id="id" name="id" hidden>
                             <label for="file"><strong>Subir nuevo recurso</strong></label>
@@ -114,23 +129,41 @@
                             <label for="licencia"><strong>Tipo de licencia</strong></label>
                             <input type="text" id="licencia" name="licencia" class="form-control">
                         </div>
+                        <div class="form-group col-md-1">
+                        </div>
                         <div class="form-group col-md-6">
                             <div>
-                                <label for="file" class="font-weight-bold">Lista de archivos cargados</label>
-                                <ul style="list-style: none">
-                                    <li th:each="file : ${files}">
-                                        <a th:href="${file}" th:text="${file}" />
-                                    </li>
-                                </ul>
+                                <label for="file" class="font-weight-bold text-center">Lista de archivos cargados</label>
+                                <table class="table table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">Nombre del recurso</th>
+                                        <th scope="col">Descripción</th>
+                                        <th scope="col">Licencia</th>
+                                        <th scope="col" class="text-center">Opciones</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="file : ${files}">
+                                        <td><a th:href="${file.nombrecompleto}" th:text="${file.nombrereal}"/></td>
+                                        <td th:text="${file.descripcion}"></td>
+                                        <td th:text="${file.tipo}"></td>
+                                        <td class="text-center">
+                                            <a title="Eliminar recurso" class="btn btn-sm btn-secondary"
+                                               th:href="@{'/eliminarRecurso/'+ ${file.id}}"><i class="fa fa-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <div th:if="${existe}">
+                                    <p class="text-info text-center" th:text="${existe}"/>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <button type="submit" class="form-control float-left btn btn-primary fa fa-upload col-4" value="Upload"> Subir recurso</button>
                 </div>
             </form>
-        </div>
-        <div th:if="${message}">
-            <h4 th:text="${message}"/>
         </div>
     </div>
 </div>

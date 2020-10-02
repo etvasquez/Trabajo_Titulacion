@@ -149,6 +149,87 @@ public class consultasBD{
         return contador;
     }
 
+    public Recurso getResouce(String id){
+        Recurso recurso = null;
+        String strQuery ="PREFIX schema: <http://schema.org/> " +
+                "SELECT ?id ?descripcion ?licencia ?nombrecompleto ?nombrereal " +
+                "WHERE { "+
+                "?idpro schema:Resource "+urlBase+"resourceProject/"+id+"> . "+
+                urlBase+"resourceProject/"+id+"> schema:descripcion ?descripcion . "+
+                urlBase+"resourceProject/"+id+"> schema:licencia ?licencia . "+
+                urlBase+"resourceProject/"+id+"> schema:nombrecompleto ?nombrecompleto . "+
+                urlBase+"resourceProject/"+id+"> schema:nombrereal ?nombrereal . "+
+                "?idpro schema:ide_project ?id . } ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral idrecurso =
+                        (SimpleLiteral)bindingSet.getValue("id");
+                SimpleLiteral descripcion =
+                        (SimpleLiteral)bindingSet.getValue("descripcion");
+                SimpleLiteral licencia =
+                        (SimpleLiteral)bindingSet.getValue("licencia");
+                SimpleLiteral nombrecompleto =
+                        (SimpleLiteral)bindingSet.getValue("nombrecompleto");
+                SimpleLiteral nombrereal =
+                        (SimpleLiteral)bindingSet.getValue("nombrereal");
+                recurso = new Recurso(idrecurso.stringValue(),nombrecompleto.stringValue(),nombrereal.stringValue(),descripcion.stringValue(),licencia.stringValue());
+            }
+        }
+        catch (QueryEvaluationException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return recurso;
+    }
+
+    public ArrayList<Recurso> getResouceProject(String idProject){
+        ArrayList<Recurso> listRecource = new ArrayList<>();
+        String strQuery ="PREFIX schema: <http://schema.org/> " +
+                "SELECT ?idrecurso ?descripcion ?licencia ?nombrecompleto ?nombrereal " +
+                "WHERE { "+
+                urlBase+"project/"+idProject+"> schema:Resource ?id . "+
+                "?id schema:idRecurso ?idrecurso . "+
+                "?id schema:descripcion ?descripcion . "+
+                "?id schema:licencia ?licencia . "+
+                "?id schema:nombrecompleto ?nombrecompleto . "+
+                "?id schema:nombrereal ?nombrereal . } ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral idrecurso =
+                        (SimpleLiteral)bindingSet.getValue("idrecurso");
+                SimpleLiteral descripcion =
+                        (SimpleLiteral)bindingSet.getValue("descripcion");
+                SimpleLiteral licencia =
+                        (SimpleLiteral)bindingSet.getValue("licencia");
+                SimpleLiteral nombrecompleto =
+                        (SimpleLiteral)bindingSet.getValue("nombrecompleto");
+                SimpleLiteral nombrereal =
+                        (SimpleLiteral)bindingSet.getValue("nombrereal");
+                Recurso recurso = new Recurso(idrecurso.stringValue(),nombrecompleto.stringValue(),nombrereal.stringValue(),descripcion.stringValue(),licencia.stringValue());
+                listRecource.add(recurso);
+            }
+        }
+        catch (QueryEvaluationException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return listRecource;
+    }
+
     public String getNameByEmail(String email){
         String name="";
         String strQuery ="PREFIX j.2: <http://xmlns.com/foaf/0.1/> " +
@@ -322,16 +403,16 @@ public class consultasBD{
     }
 
     public String insertResource(Recurso recurso, String id, String fileName) {
-        String uuid = UUID.randomUUID().toString();
         String strInsert = "";
-        String estado="Exito";
+        String estado="1";
         strInsert =
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
                         "PREFIX schema: <http://schema.org/> "+
                         "INSERT DATA { " +
                         urlBase + "project/" + id + "> schema:Resource " + urlBase + "resourceProject/" + fileName + "> . " +
-                        urlBase + "resourceProject/" + fileName + "> schema:nombrereal \"" + recurso.getNombrecompleto() + "\" . " +
-                        urlBase + "resourceProject/" + fileName + "> schema:nombrecompleto \"" + recurso.getNombrereal()+ "\" . " +
+                        urlBase + "resourceProject/" + fileName + "> schema:idRecurso \"" + fileName + "\" . " +
+                        urlBase + "resourceProject/" + fileName + "> schema:nombrereal \"" + recurso.getNombrereal() + "\" . " +
+                        urlBase + "resourceProject/" + fileName + "> schema:nombrecompleto \"" + recurso.getNombrecompleto()+ "\" . " +
                         urlBase + "resourceProject/" + fileName + "> schema:descripcion \"" + recurso.getDescripcion()+ "\" . " +
                         urlBase + "resourceProject/" + fileName + "> schema:licencia \"" + recurso.getTipo()+ "\" . } ";
         RepositoryConnection repositoryConnection = con.getRepositoryConnection();
@@ -346,6 +427,33 @@ public class consultasBD{
                 repositoryConnection.rollback();
         }
         return estado;
+    }
+
+    public String eliminarResource(Recurso recurso, String id) {
+        String strInsert = "";
+        String estado="1";
+        strInsert =
+                "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                        "PREFIX schema: <http://schema.org/> "+
+                        "DELETE DATA { " +
+                        urlBase + "project/" + recurso.getId() + "> schema:Resource " + urlBase + "resourceProject/" + id + "> . " +
+                        urlBase + "resourceProject/" + id + "> schema:idRecurso \"" + id + "\" . " +
+                        urlBase + "resourceProject/" + id + "> schema:nombrereal \"" + recurso.getNombrereal() + "\" . " +
+                        urlBase + "resourceProject/" + id + "> schema:nombrecompleto \"" + recurso.getNombrecompleto()+ "\" . " +
+                        urlBase + "resourceProject/" + id + "> schema:descripcion \"" + recurso.getDescripcion()+ "\" . " +
+                        urlBase + "resourceProject/" + id + "> schema:licencia \"" + recurso.getTipo()+ "\" . } ";
+        RepositoryConnection repositoryConnection = con.getRepositoryConnection();
+        repositoryConnection.begin();
+        Update updateOperation = repositoryConnection.prepareUpdate(QueryLanguage.SPARQL, strInsert);
+        updateOperation.execute();
+        try {
+            repositoryConnection.commit();
+        } catch (Exception e) {
+            estado="error";
+            if (repositoryConnection.isActive())
+                repositoryConnection.rollback();
+        }
+        return recurso.getId();
     }
 
     public String insertComent(Comentario comentario) {
@@ -396,7 +504,7 @@ public class consultasBD{
 
     public String updateProject(Proyecto proyecto) {
         String strInsert = "";
-        String estado="Exito";
+        String estado="0";
         String consulta = urlBase+"project/"+proyecto.getId()+"> j.2:title ?titleold . "+
                 urlBase+"project/"+proyecto.getId()+"> schema:descripcion ?desold . "+
                 urlBase+"project/"+proyecto.getId()+"> schema:objetivos ?objold . "+

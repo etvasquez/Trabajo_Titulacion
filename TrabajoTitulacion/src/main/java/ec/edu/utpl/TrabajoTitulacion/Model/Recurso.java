@@ -1,7 +1,7 @@
 package ec.edu.utpl.TrabajoTitulacion.Model;
 
 public class Recurso {
-
+    private String id;
     private String nombrecompleto;
     private String nombrereal;
     private String descripcion;
@@ -10,7 +10,8 @@ public class Recurso {
     public Recurso() {
     }
 
-    public Recurso(String nombrecompleto, String nombrereal, String descripcion, String tipo) {
+    public Recurso(String id,String nombrecompleto, String nombrereal, String descripcion, String tipo) {
+        this.id = id;
         this.nombrecompleto = nombrecompleto;
         this.nombrereal = nombrereal;
         this.descripcion = descripcion;
@@ -48,4 +49,14 @@ public class Recurso {
     public void setTipo(String tipo) {
         this.tipo = tipo;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+
 }

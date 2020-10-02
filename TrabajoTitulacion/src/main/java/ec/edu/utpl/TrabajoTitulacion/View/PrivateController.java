@@ -17,7 +17,6 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -25,12 +24,12 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 @Controller
 public class PrivateController {
     private final StorageService storageService;
     consultasBD consultas = new consultasBD();
+    String localicacion="";
 
     @Autowired
     public PrivateController(StorageService storageService) {
@@ -45,8 +44,17 @@ public class PrivateController {
         return "proyectos";
     }
 
+    @GetMapping("/eliminarRecurso/{id}")
+    public String editarRecurso(@PathVariable(value="id") String id, Model model){
+        Recurso recurso = consultas.getResouce(id);
+        String estado = consultas.eliminarResource(recurso,id);
+        model.addAttribute("tab",estado);
+        return "redirect:/editar_proyecto/"+recurso.getId();
+    }
+
     @GetMapping("/editar_proyecto/{id}")
-    public String comentario(Model model, @PathVariable(value="id") String id) {
+    public String comentario(Model model, @PathVariable(value="id") String id, RedirectAttributes redirectAttributes) {
+        ArrayList<Recurso> list = consultas.getResouceProject(id);
         String appName = consultas.InformacionProyecto(id);
         String tipoProyecto = consultas.BusquedaPorTipoProyecto();
         Gson gson = new Gson();
@@ -56,18 +64,26 @@ public class PrivateController {
         Proyecto proyecto = gson.fromJson(appName, Proyecto.class);
         model.addAttribute("proyecto",proyecto);
         model.addAttribute("tipoProyecto",objeto);
-        model.addAttribute("files", storageService.loadAll().map(
+        model.addAttribute("files",list);
+        if(list.size()==0){
+            model.addAttribute("existe","No existen recursos");
+        }
+        model.addAttribute("tab",localicacion);
+       /* model.addAttribute("files", storageService.loadAll().map(
                 path -> MvcUriComponentsBuilder.fromMethodName(PrivateController.class,
                         "serveFile", path.getFileName().toString()).build().toUri().toString())
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()));*/
+
         return "editar_proyecto";
     }
 
     @PostMapping("/proyecto")
-    public String submitForm(@ModelAttribute("proyecto") Proyecto proyecto) throws IOException {
+    public String submitForm(@ModelAttribute("proyecto") Proyecto proyecto, Model model) throws IOException {
         String estado = consultas.updateProject(proyecto);
+        localicacion=estado;
         return "redirect:/editar_proyecto/"+proyecto.getId();
     }
+
     @GetMapping("/files/{filename:.+}")
     @ResponseBody
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
@@ -79,7 +95,7 @@ public class PrivateController {
     @PostMapping("/upload")
     public String handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("fileName") String fileName,
                                    RedirectAttributes redirectAttributes, @RequestParam("id") String id,
-                                   @RequestParam("descripcion") String descripcion, @RequestParam("licencia") String licencia) {
+                                   @RequestParam("descripcion") String descripcion, @RequestParam("licencia") String licencia, Model model) {
         String filename = StringUtils.cleanPath(file.getOriginalFilename());
         int indexPunto = filename.indexOf( '.');
         String extension="";
@@ -87,17 +103,13 @@ public class PrivateController {
             extension = filename.substring(indexPunto,filename.length());
         }
         String baseUrl =
-                ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString().concat("/").concat(fileName).concat(extension);
-        System.out.println("Filename: "+fileName);
-        System.out.println("baseUrl: "+baseUrl);
-        System.out.println("Nombre real: "+filename);
-        System.out.println("descripcion: "+descripcion);
-        System.out.println("licencia: "+licencia);
-        Recurso recurso = new Recurso(baseUrl,filename,descripcion,licencia);
+                ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString().concat("/files/").concat(fileName).concat(extension);
+        Recurso recurso = new Recurso(fileName,baseUrl,filename,descripcion,licencia);
         storageService.store(file,fileName);
         String estado = consultas.insertResource(recurso,id,fileName);
         redirectAttributes.addFlashAttribute("message",
-                "You successfully uploaded " + file.getOriginalFilename() + "!");
+                "Archivo " + file.getOriginalFilename() + " subido correctamente!");
+        localicacion=estado;
         return "redirect:/editar_proyecto/"+id;
     }
 
