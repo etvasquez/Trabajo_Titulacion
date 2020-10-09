@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.UUID;
 
 public class consultasBD{
+
     private static String urlBase = "<http://192.168.10.90:7200/repositories/";
     private static Logger logger = LoggerFactory.getLogger(conectingGraphDB.class);
     private static final Marker WTF_MARKER = MarkerFactory.getMarker("WTF");
@@ -44,6 +45,7 @@ public class consultasBD{
         }
         return "";
     }
+
     public Usuario getUsuario(String identificador, boolean bandera){
         String strQuery ="";
         Usuario usuario = new Usuario();
@@ -1200,6 +1202,7 @@ public class consultasBD{
         }
         return tituloreducido;
     }
+
     public String TraduccionEspacios(String titulo) {
         String tituloreducido = "";
         int contador1 = 0;
@@ -1955,6 +1958,45 @@ public class consultasBD{
             result.close();
         }
         return json;
+    }
+
+    public ArrayList<Nodo> getProyectos() {
+        ArrayList<Nodo> list = new ArrayList<>();
+        String strQuery ="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+                "PREFIX schema: <http://schema.org/> "+
+                "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                "select distinct ?idproyecto ?titulo ?nombres ?area " +
+                "WHERE { "+
+                "?idper j.2:currentProject ?idpro . ?idper j.2:lastName ?nombre . ?idper j.2:firstName ?apellido . "+
+                "?idper schema:areaPerson ?arealabel . ?arealabel rdfs:label ?area . ?idpro schema:idProject ?id . "+
+                "?id schema:ide_project ?idproyecto . ?id j.2:title ?titulo . ?idpro schema:rolProyecto ?rollabel . "+
+                "?rollabel rdfs:label ?label . BIND(CONCAT(?nombre,' ',?apellido) AS ?nombres) "+
+                "FILTER (!regex(?label, 'Participación','i')) . } ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        Nodo nodo = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral idproyecto =
+                        (SimpleLiteral)bindingSet.getValue("idproyecto");
+                SimpleLiteral titulo =
+                        (SimpleLiteral)bindingSet.getValue("titulo");
+                SimpleLiteral nombres =
+                        (SimpleLiteral)bindingSet.getValue("nombres");
+                SimpleLiteral area =
+                        (SimpleLiteral)bindingSet.getValue("area");
+                nodo = new Nodo(idproyecto.stringValue(), titulo.stringValue(), nombres.stringValue(), area.stringValue());
+                list.add(nodo);
+            }
+        }
+        catch (QueryEvaluationException e) {
+        } finally {
+            result.close();
+        }
+        return list;
     }
 
 }

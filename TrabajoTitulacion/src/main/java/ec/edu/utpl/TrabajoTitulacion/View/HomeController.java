@@ -53,7 +53,10 @@ public class HomeController {
     }
 
     @GetMapping("/repositorio")
-    public String repositorio() {
+    public String repositorio(Model model) {
+        ArrayList<Nodo> proyectos = consultas.getProyectos();
+        System.out.println("Esto es : "+proyectos.size());
+        model.addAttribute("proyectos", proyectos);
         return "repositorio";
     }
 
