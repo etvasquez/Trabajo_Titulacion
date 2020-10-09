@@ -34,8 +34,8 @@
                    aria-haspopup="true" aria-expanded="false">
                     <span id="user" class="fas fa-user" th:inline="text"> [[${#httpServletRequest.remoteUser}]]</span></a>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <!--<a class="dropdown-item" href="#">Perfil</a>-->
                     <a class="dropdown-item" href="/proyectos">Mis proyectos</a>
+                    <a class="dropdown-item" th:href="@{'/usuario/' + ${#httpServletRequest.remoteUser}}">Mi perfil</a>
                     <form th:action="@{/logout}" method="post">
                         <button class="dropdown-item" type="submit">Cerrar sesión</button>
                     </form>

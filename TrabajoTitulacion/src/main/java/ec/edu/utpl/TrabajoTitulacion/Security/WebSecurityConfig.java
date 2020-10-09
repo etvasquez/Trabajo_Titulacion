@@ -45,10 +45,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/","/comentario/{id}","/listaBusquedaPersona/{id}","/projectID/{id}",
+                .antMatchers("/","/proyecto/{id}","/listaBusquedaPersona/{id}","/projectID/{id}",
                         "/personID/{id}","/project/{id}","/person/{id}","/getNameByEmail/{email}","/comentarioresponse",
                         "/comentario","/personperson/{id}","/listaBusquedaProyecto/{id}","/listaBusquedaArea","/listaBusquedaTipoProyecto",
-                        "/projectArea/{id}","/projectTipo/{id}","/estadisticas","/nosotros","/repositorio")
+                        "/projectArea/{id}","/projectTipo/{id}","/estadisticas","/nosotros","/repositorio","/usuario/{id}")
                 .permitAll()
                 .antMatchers ("/proyectos","/editar_proyecto/{id}","/login").authenticated ()
                 .anyRequest().authenticated()

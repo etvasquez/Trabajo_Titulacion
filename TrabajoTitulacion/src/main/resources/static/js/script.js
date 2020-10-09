@@ -910,7 +910,12 @@ function armarGrafo() {
     network.on('doubleClick', function (params) {
         doubleClickTime = new Date();
         var id = this.getNodeAt(params.pointer.DOM);
-        window.open(rutaBase + 'comentario/' + id, '_blank');
+        if(id==idnodobase){
+
+            window.open(rutaBase + 'usuario/'+id, '_blank');
+        }else{
+            window.open(rutaBase + 'proyecto/' + id, '_blank');
+        }
     });
     network.on("afterDrawing", function (ctx) {
         try {

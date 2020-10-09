@@ -103,11 +103,11 @@ public class Usuario {
         this.nacionalidad = nacionalidad;
     }
 
-    public String getExtensoion() {
+    public String getExtension() {
         return extension;
     }
 
-    public void setExtensoion(String extension) {
+    public void setExtension(String extension) {
         this.extension = extension;
     }
 

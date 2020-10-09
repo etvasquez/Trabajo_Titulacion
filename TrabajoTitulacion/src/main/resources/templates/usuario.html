@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:insert="fragments/head :: header">
+</head>
+<body>
+<script>
+    $(document).ready(function() {
+        var backgroundColor = ['#1ABC9C','#2ECC71','#9B59B6','#3498DB','#F1C40F','#E74C3C','#E67E22','#FB3CCF','#11C9C1','#36C869','#F72A71'];
+        var borderColor = ['#307D74','#269A56','#754086','#3C7DA8','#BD9C1E','#B1392D','#AA5F1F','#A73B90','#0EB0A9','#0EB046','#C22C60'];
+        var acumulador = 0, acumulador1 = 0, acumulador2 = 0, acumulador3 = 0;
+        var tipo = JSON.parse(document.getElementById('listaTipo').innerHTML);
+        var colaboraciones = JSON.parse(document.getElementById('listaCola').innerHTML);
+        var datos  = [], data = [], datos1  = [], data1 = [], datos2  = [], label1 = [], color1  = [],
+            datos3  = [], label2 = [], color2  = [];
+        $.each(tipo, function (key, value) {
+            data.push(value.nombre);
+            datos.push({"label":value.id,"data":data,"backgroundColor":backgroundColor[acumulador],"borderColor":borderColor[acumulador]});
+            data = [];
+            acumulador++;
+        });
+        $.each(colaboraciones, function (key, value) {
+            data1.push(value.nombre);
+            datos1.push({"label":value.id,"data":data1,"backgroundColor":backgroundColor[acumulador1],"borderColor":borderColor[acumulador1]});
+            data1 = [];
+            acumulador1++;
+        });
+        $.each(tipo, function (key, value) {
+            datos2.push(value.nombre);
+            label1.push(value.id);
+            color1.push(backgroundColor[acumulador2])
+            acumulador2++;
+        });
+        $.each(colaboraciones, function (key, value) {
+            datos3.push(value.nombre);
+            label2.push(value.id);
+            color2.push(backgroundColor[acumulador3])
+            acumulador3++;
+        });
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Tipos de proyectos'],
+                datasets: datos
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+        var ctx1 = document.getElementById('myChart1').getContext('2d');
+        var myChart1 = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ['Top proyectos'],
+                datasets: datos1
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+        new Chart(document.getElementById("pie-chart"), {
+            type: 'pie',
+            data: {
+                labels: label1,
+                datasets: [{
+                    label: "Top colaboradores",
+                    backgroundColor: color1,
+                    data: datos2
+                }]
+            }
+        });
+
+        new Chart(document.getElementById("pie-chart1"), {
+            type: 'pie',
+            data: {
+                labels: label2,
+                datasets: [{
+                    label: "Tipos de proyecto",
+                    backgroundColor: color2,
+                    data: datos3
+                }]
+            }
+        });
+    });
+</script>
+<nav th:insert="fragments/menu :: menu">
+</nav>
+<br/>
+<h1 th:text="${usuario.nombre}" class="text-center text-info font-weight-light"></h1>
+<br>
+<div class="container">
+    <div class="row">
+        <div class="col-xs-4 col-sm-4 col-md-4 col-xl-4 col-lg-4">
+            <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid mx-auto d-block center" width="200" height="200"/>
+            <p class="text-center"><span th:text="${usuario.nombre}"></span><br/><span th:text="${usuario.tipo}"></span><br/><span><a
+                    href="#" th:text="${usuario.mbox}"></a></span></p>
+        </div>
+        <div class="col-xs-4 col-sm-4 col-md-4 col-xl-4 col-lg-4">
+            <p>
+                <span class="text-secondary">Área:</span><br/>
+                <span th:text="${usuario.area}"></span><br/>
+                <span class="text-secondary">Departamento:</span><br/>
+                <span th:text="${usuario.departamento}"></span><br/>
+                <span class="text-secondary">Sección:</span><br/>
+                <span th:text="${usuario.seccion}"></span><br/>
+                <span class="text-secondary">Teléfono:</span><br/>
+                <span th:text="${usuario.telefono}"></span><br/>
+                <span class="text-secondary">Extensión:</span><br/>
+                <span th:text="${usuario.extension}"></span><br/>
+            </p>
+        </div>
+        <div class="col-xs-4 col-sm-4 col-md-4 col-xl-4 col-lg-4">
+            <p>
+                <span class="text-secondary">Nacionalidad:</span><br/>
+                <span th:text="${usuario.nacionalidad}"></span><br/>
+                <span class="text-secondary">Status:</span><br/>
+                <span th:text="${usuario.status}"></span>
+            </p>
+        </div>
+    </div>
+</div>
+<hr/>
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active font-weight-bold" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Proyectos</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link font-weight-bold" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Estadísticas</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link font-weight-bold" id="colaboradores-tab" data-toggle="tab" href="#colaborador" role="tab" aria-controls="colaborador" aria-selected="false">Colaboradores</a>
+    </li>
+</ul>
+<div class="tab-content p-4" id="myTabContent">
+    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <table id="tableProyectos" class="p-1 table table-sm table-striped table-hover table-bordered" style="width:100%">
+            <thead>
+            <tr>
+                <th hidden>ID</th>
+                <th>NOMBRE DEL PROYECTO</th>
+                <th>TIPO PROYECTO</th>
+                <th>ROL</th>
+                <th sec:authorize="isAuthenticated()">OPCIONES</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="lista : ${listaproyectos}">
+                <td hidden th:text="${lista.id}"></td>
+                <td><a th:href="@{'/proyecto/' + ${lista.id}}" th:text="${lista.titulo}" th:title="${lista.titulo}"></a></td>
+                <td th:text="${lista.tipo}"></td>
+                <td th:text="${lista.estado}"></td>
+                <td sec:authorize="isAuthenticated()">
+                    <a title="Ver proyecto" class="btn btn-sm btn-primary" th:attr="onclick='verProyecto(\'' + ${lista.id}+'\')'"><i class="fa fa-eye"></i></a>&nbsp;&nbsp;
+                    <a title="Editar proyecto" class="btn btn-sm btn-secondary" th:attr="onclick='editarProyecto(\'' + ${lista.id}+'\')'"><i class="fa fa-edit"></i></a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+        <p th:text="${listaTipo}" id="listaTipo" hidden></p>
+        <p th:text="${listaCola}" id="listaCola" hidden></p>
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="nav nav-pills mb-3 float-right" id="pills-tab3" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="pills-home-tab3" data-toggle="pill" href="#pills-home3" role="tab" aria-controls="pills-home" aria-selected="true"><i class="fas fa-chart-bar"></i></a>
+                    </li>
+                    <li class="nav-item fa fa-pie-chart">
+                        <a class="nav-link" id="pills-profile-tab3" data-toggle="pill" href="#pills-profile3" role="tab" aria-controls="pills-profile" aria-selected="false"><i class="fas fa-chart-pie"></i></a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="pills-tabContent3">
+                    <div class="tab-pane fade show active" id="pills-home3" role="tabpanel" aria-labelledby="pills-home-tab">
+                        <h4 class="text-secondary text-center font-italic">Top más colaboraciones</h4>
+                        <canvas id="myChart1" style="height:30vh; width:50vw"></canvas>
+                    </div>
+                    <div class="tab-pane fade" id="pills-profile3" role="tabpanel" aria-labelledby="pills-profile-tab">
+                        <br>
+                        <h4 class="text-secondary text-center font-italic">Top más colaboraciones</h4>
+                        <br>
+                        <canvas id="pie-chart1" style="height:30vh; width:50vw"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="nav nav-pills mb-3 float-right" id="pills-tab4" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="pills-home-tab4" data-toggle="pill" href="#pills-home4" role="tab" aria-controls="pills-home" aria-selected="true"><i class="fas fa-chart-bar"></i></a>
+                    </li>
+                    <li class="nav-item fa fa-pie-chart">
+                        <a class="nav-link" id="pills-profile-tab4" data-toggle="pill" href="#pills-profile4" role="tab" aria-controls="pills-profile" aria-selected="false"><i class="fas fa-chart-pie"></i></a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="pills-tabContent4">
+                    <div class="tab-pane fade show active" id="pills-home4" role="tabpanel" aria-labelledby="pills-home-tab">
+                        <h4 class="text-secondary text-center font-italic">Clasificación por tipo de proyecto</h4>
+                        <canvas id="myChart" style="height:30vh; width:50vw"></canvas>
+                    </div>
+                    <div class="tab-pane fade" id="pills-profile4" role="tabpanel" aria-labelledby="pills-profile-tab">
+                        <br>
+                        <h4 class="text-secondary text-center font-italic">Clasificación por tipo de proyecto</h4>
+                        <br>
+                        <canvas id="pie-chart" style="height:30vh; width:50vw"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="colaborador" role="tabpanel" aria-labelledby="profile-tab">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-4 col-sm-4 col-md-4 col-xl-4 col-lg-4" th:each="listaC : ${colaboraciones}">
+                    <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid mx-auto d-block" width="45" height="45"/>
+                    <p class="text-center text-secondary"><span><a
+                            th:href="@{'/usuario/' + ${listaC.idpersona}}" th:text="${listaC.nombre}" th:title="${listaC.nombre}"></a></span><br/>
+                        <span th:text="${listaC.area}"></span><br/>
+                        <span th:text="${listaC.correo}"></span><br>
+                        <span th:text="${listaC.relaciones}"></span><span> colaboraciones</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

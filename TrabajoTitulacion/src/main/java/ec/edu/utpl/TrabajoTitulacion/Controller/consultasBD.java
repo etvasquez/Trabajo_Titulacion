@@ -44,6 +44,110 @@ public class consultasBD{
         }
         return "";
     }
+    public Usuario getUsuario(String identificador, boolean bandera){
+        String strQuery ="";
+        Usuario usuario = new Usuario();
+        if(bandera){
+            identificador = identificador.concat("@utpl.edu.ec");
+            strQuery =
+                    "PREFIX schema: <http://schema.org/> "+
+                            "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
+                            "SELECT ?id ?nombre ?apellido ?area ?departamento ?seccion ?modalidad ?tipo ?status ?nacionalidad ?extension ?telefono ?email "+
+                            "WHERE { "+
+                            "?s schema:id_person ?id . "+
+                            "?s j.2:lastName ?nombre . "+
+                            "?s j.2:firstName ?apellido . "+
+                            "?s schema:areaPerson ?arealabel . "+
+                            "?arealabel rdfs:label ?area . "+
+                            "?s schema:depertamentPerson ?deplabel . "+
+                            "?deplabel rdfs:label ?departamento . "+
+                            "?s schema:seccionPerson ?seccionlabel . "+
+                            "?seccionlabel rdfs:label ?seccion . "+
+                            "?s schema:modalidadPerson ?modalabel . "+
+                            "?modalabel rdfs:label ?modalidad . "+
+                            "?s schema:tipoOcupationPerson ?oculabel . "+
+                            "?oculabel rdfs:label ?tipo . "+
+                            "?s schema:statusPerson ?statuslabel . "+
+                            "?statuslabel rdfs:label ?status . "+
+                            "?s schema:national ?nationalabel . "+
+                            "?nationalabel rdfs:label ?nacionalidad . "+
+                            "?s schema:extension ?extension . "+
+                            "?s j.2:phone ?telefono . ?s j.2:mbox ?email . "+
+                            "filter(regex(?email, '"+identificador+"','i')) }";
+        }else{
+            strQuery =
+                    "PREFIX schema: <http://schema.org/> "+
+                            "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
+                            "SELECT ?id ?nombre ?apellido ?area ?departamento ?seccion ?modalidad ?tipo ?status ?nacionalidad ?extension ?telefono ?email "+
+                            "WHERE { "+
+                            "?s schema:id_person ?id . "+
+                            "?s j.2:lastName ?nombre . "+
+                            "?s j.2:firstName ?apellido . "+
+                            "?s schema:areaPerson ?arealabel . "+
+                            "?arealabel rdfs:label ?area . "+
+                            "?s schema:depertamentPerson ?deplabel . "+
+                            "?deplabel rdfs:label ?departamento . "+
+                            "?s schema:seccionPerson ?seccionlabel . "+
+                            "?seccionlabel rdfs:label ?seccion . "+
+                            "?s schema:modalidadPerson ?modalabel . "+
+                            "?modalabel rdfs:label ?modalidad . "+
+                            "?s schema:tipoOcupationPerson ?oculabel . "+
+                            "?oculabel rdfs:label ?tipo . "+
+                            "?s schema:statusPerson ?statuslabel . "+
+                            "?statuslabel rdfs:label ?status . "+
+                            "?s schema:national ?nationalabel . "+
+                            "?nationalabel rdfs:label ?nacionalidad . "+
+                            "?s schema:extension ?extension . "+
+                            "?s j.2:phone ?telefono . ?s j.2:mbox ?email . "+
+                            "filter(regex(?id, '"+identificador+"','i')) }";
+        }
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral id =
+                        (SimpleLiteral)bindingSet.getValue("id");
+                SimpleLiteral nombre =
+                        (SimpleLiteral)bindingSet.getValue("nombre");
+                SimpleLiteral apellido =
+                        (SimpleLiteral)bindingSet.getValue("apellido");
+                SimpleLiteral area =
+                        (SimpleLiteral)bindingSet.getValue("area");
+                SimpleLiteral departamento =
+                        (SimpleLiteral)bindingSet.getValue("departamento");
+                SimpleLiteral seccion =
+                        (SimpleLiteral)bindingSet.getValue("seccion");
+                SimpleLiteral modalidad =
+                        (SimpleLiteral)bindingSet.getValue("modalidad");
+                SimpleLiteral tipo =
+                        (SimpleLiteral)bindingSet.getValue("tipo");
+                SimpleLiteral status =
+                        (SimpleLiteral)bindingSet.getValue("status");
+                SimpleLiteral nacionalidad =
+                        (SimpleLiteral)bindingSet.getValue("nacionalidad");
+                SimpleLiteral extension =
+                        (SimpleLiteral)bindingSet.getValue("extension");
+                SimpleLiteral telefono =
+                        (SimpleLiteral)bindingSet.getValue("telefono");
+                SimpleLiteral email =
+                        (SimpleLiteral)bindingSet.getValue("email");
+                usuario = new Usuario(id.stringValue(),nombre.stringValue().concat(" ").concat(apellido.stringValue()),area.stringValue(),
+                        departamento.stringValue(),seccion.stringValue(),modalidad.stringValue(),tipo.stringValue(),status.stringValue(),
+                        nacionalidad.stringValue(),extension.stringValue(),telefono.stringValue(),email.stringValue());
+            }
+        }catch (QueryEvaluationException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return usuario;
+    }
 
     public Usuario getUser(String xemail){
         Usuario usuario = new Usuario();
@@ -1113,6 +1217,106 @@ public class consultasBD{
         return tituloreducido;
     }
 
+    public ArrayList<Colaboradores> getColaboraciones(String id) {
+        ArrayList<Colaboradores> list = new ArrayList<>();
+        String strQuery ="PREFIX schema: <http://schema.org/> " +
+                    "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                    "SELECT ?idpersona (SAMPLE(?nombre) AS ?nombre) (SAMPLE(?apellido) AS ?apellido) (SAMPLE(?correo) AS ?correo) (SAMPLE(?area) AS ?area) (COUNT(?idpersona) as ?relaciones) " +
+                    "WHERE { "+
+                    "?s  schema:id_person '"+id+"' . "+
+                    "?s j.2:currentProject ?id . "+
+                    "?id schema:idProject ?idpro . "+
+                    "?project schema:idProject ?idpro . "+
+                    "?persona j.2:currentProject ?project . " +
+                    "?persona j.2:lastName ?nombre . "+
+                    "?persona j.2:firstName ?apellido . "+
+                    "?persona j.2:mbox ?correo . "+
+                    "?persona schema:areaPerson ?labelarea . "+
+                    "?labelarea rdfs:label ?area ."+
+                    "?persona schema:id_person ?idpersona ."+
+                    "} GROUP BY ?idpersona ORDER BY DESC (?total)";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        Relacion relacion = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral idPersona =
+                        (SimpleLiteral)bindingSet.getValue("idpersona");
+                SimpleLiteral nombre =
+                        (SimpleLiteral)bindingSet.getValue("nombre");
+                SimpleLiteral apellido =
+                        (SimpleLiteral)bindingSet.getValue("apellido");
+                SimpleLiteral correo =
+                        (SimpleLiteral)bindingSet.getValue("correo");
+                SimpleLiteral area =
+                        (SimpleLiteral)bindingSet.getValue("area");
+                SimpleLiteral relaciones =
+                        (SimpleLiteral)bindingSet.getValue("relaciones");
+                if(idPersona.stringValue().compareTo(id)!=0){
+                    Colaboradores colaboradores = new Colaboradores(idPersona.stringValue(),nombre.stringValue().concat("\n")
+                            .concat(apellido.stringValue()),correo.stringValue(),area.stringValue(),relaciones.stringValue());
+                    list.add(colaboradores);
+                }
+            }
+        }
+        catch (QueryEvaluationException e) {
+        } finally {
+            result.close();
+        }
+        return list;
+    }
+
+    public String ObtenerTopColaboradores(String id) {
+        ArrayList<Objeto> list = new ArrayList<>();
+        String strQuery ="PREFIX schema: <http://schema.org/> " +
+                    "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                    "SELECT ?label (COUNT(?idpersona) as ?total) " +
+                    "WHERE { "+
+                    "?s  schema:id_person '"+id+"' . "+
+                    "?s j.2:currentProject ?id . "+
+                    "?id schema:idProject ?idpro . "+
+                    "?project schema:idProject ?idpro . "+
+                    "?persona j.2:currentProject ?project . " +
+                    "?persona j.2:lastName ?nombre . "+
+                    "?persona j.2:firstName ?apellido . "+
+                    "?persona schema:id_person ?idpersona . "+
+                    "BIND(CONCAT(?nombre,' ',?apellido) AS ?label) "+
+                    "} GROUP BY ?label ORDER BY DESC (?total) LIMIT 4";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        Objeto objeto = null;
+        String json="";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        int aux = 0;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral label =
+                        (SimpleLiteral)bindingSet.getValue("label");
+                SimpleLiteral total =
+                        (SimpleLiteral)bindingSet.getValue("total");
+                objeto = new Objeto(label.stringValue(),total.stringValue());
+                if(aux==0){
+                    aux++;
+                }else{
+                    list.add(objeto);
+                }
+            }
+            json = mapper.writeValueAsString(list);
+        }
+        catch (QueryEvaluationException | JsonProcessingException e) {
+        } finally {
+            result.close();
+        }
+        return json;
+    }
+
     public String getGrapPersonPerson(String id) {
         ArrayList<Nodo> listNodos = new ArrayList<>();
         ArrayList<Relacion> listRelacion = new ArrayList<>();
@@ -1143,7 +1347,6 @@ public class consultasBD{
         Relacion relacion = null;
         try {
             result = tupleQuery.evaluate();
-            //int contador=0;
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idPersona =
@@ -1186,8 +1389,6 @@ public class consultasBD{
             //iguales
                 json = genson.serialize(nodoRelacion.get(0));
             }
-
-            System.out.println(json);
         }
         catch (QueryEvaluationException | JsonProcessingException qee) {
             logger.error(WTF_MARKER,
@@ -1379,6 +1580,7 @@ public class consultasBD{
         }
         return json;
     }
+
     public String BusquedaPorProyecto(String busqueda) {
         ArrayList<Objeto> listaPersona = new ArrayList<>();
         String json="";
@@ -1499,4 +1701,260 @@ public class consultasBD{
         }
         return json;
     }
+
+    public String ObtenerTotalTiposProyecto(int identificador) {
+        String strQuery="";
+        ArrayList<Objeto> listaArea = new ArrayList<>();
+        String json="";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        if(identificador==0){
+            strQuery ="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+                    "PREFIX schema: <http://schema.org/> "+
+                    "select (SAMPLE(?label) AS ?label) (COUNT(?tipo) as ?total) " +
+                    "where { "+
+                    "?s schema:tipoproyecto ?tipo ."+
+                    "?tipo rdfs:label ?label .  "+
+                    "} GROUP BY ?tipo ORDER BY ?tipo ";
+        }else{
+            strQuery ="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+                    "PREFIX schema: <http://schema.org/> "+
+                    "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                    "select (SAMPLE(?label) AS ?label) (COUNT(?tipo) as ?total) " +
+                    "where { "+
+                    "?idpro schema:idProject ?s . "+
+                    "?id j.2:currentProject ?idpro . "+
+                    "?id schema:id_person ?identificador . "+
+                    "?s schema:tipoproyecto ?tipo ."+
+                    "?tipo rdfs:label ?label .  "+
+                    "filter(regex(?identificador, '"+identificador+"','i'))"+
+                    "} GROUP BY ?tipo ORDER BY ?tipo ";
+        }
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral label =
+                        (SimpleLiteral) bindingSet.getValue("label");
+                SimpleLiteral total =
+                        (SimpleLiteral) bindingSet.getValue("total");
+                Objeto oarea = new Objeto(label.stringValue(),total.stringValue());
+                listaArea.add(oarea);
+
+            }
+            json = mapper.writeValueAsString(listaArea);
+        }
+        catch (QueryEvaluationException | JsonProcessingException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return json;
+    }
+
+    public String ObtenerTotalAreaProyecto() {
+        ArrayList<Objeto> listaArea = new ArrayList<>();
+        String json="";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        String strQuery ="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+                "PREFIX schema: <http://schema.org/> "+
+                "select (SAMPLE(?label) AS ?label) (COUNT(?tipo) as ?total) " +
+                "where { "+
+                "?s schema:area_conocimiento ?tipo ."+
+                "?tipo rdfs:label ?label .  "+
+                "} GROUP BY ?tipo ORDER BY ?tipo ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral label =
+                        (SimpleLiteral) bindingSet.getValue("label");
+                SimpleLiteral total =
+                        (SimpleLiteral) bindingSet.getValue("total");
+                String tipo = label.stringValue().substring(0,5);
+                Objeto oarea;
+                if(tipo.compareTo("http:")==0){
+                    oarea = new Objeto("SIN ASIGNAR",total.stringValue());
+                }else{
+                    oarea = new Objeto(label.stringValue(),total.stringValue());
+                }
+                listaArea.add(oarea);
+            }
+            System.out.println(json);
+            json = mapper.writeValueAsString(listaArea);
+        }
+        catch (QueryEvaluationException | JsonProcessingException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return json;
+    }
+
+    public String ObtenerProyectosEstado() {
+        ArrayList<Objeto> listaEstado = new ArrayList<>();
+        String json="";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        String strQuery ="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+                "PREFIX schema: <http://schema.org/> "+
+                "select (SAMPLE(?label) AS ?label) (COUNT(?tipo) as ?total) " +
+                "where { "+
+                "?s schema:estadoproyecto ?tipo . "+
+                "?tipo rdfs:label ?label .  "+
+                "} GROUP BY ?tipo ORDER BY ?tipo ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            int finalizado = 0;
+            Objeto estado = null;
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral label =
+                        (SimpleLiteral) bindingSet.getValue("label");
+                SimpleLiteral total =
+                        (SimpleLiteral) bindingSet.getValue("total");
+                String labelEstado = label.stringValue();
+                if(labelEstado.equals("anulado")){
+                    estado = new Objeto("ANULADO",total.stringValue());
+                }else if(labelEstado.equals("dado_de_baja")){
+                    estado = new Objeto("DADO DE BAJA",total.stringValue());
+                }else if(labelEstado.equals("ejecutandose")){
+                    estado = new Objeto("EJECUTÁNDOSE",total.stringValue());
+                }else if(labelEstado.equals("finalizado")){
+                    finalizado = finalizado + total.intValue();
+                }else{
+                    finalizado = finalizado + total.intValue();
+                }
+                if(estado!=null){
+                    if (listaEstado.contains(estado)==false){
+                        listaEstado.add(estado);
+                    }
+                }
+            }
+            estado = new Objeto("FINALIZADO",String.valueOf(finalizado));
+            listaEstado.add(estado);
+            System.out.println(json);
+            json = mapper.writeValueAsString(listaEstado);
+        }
+        catch (QueryEvaluationException | JsonProcessingException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return json;
+    }
+
+    public String ObtenerProyectosCobertura() {
+        ArrayList<Objeto> listaEstado = new ArrayList<>();
+        String json="";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        String strQuery ="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+                "PREFIX schema: <http://schema.org/> "+
+                "select (SAMPLE(?tipo) AS ?label) (COUNT(?tipo) as ?total) " +
+                "where { "+
+                "?s schema:cobertura ?tipo . "+
+                "} GROUP BY ?tipo ORDER BY ?tipo ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            Objeto estado = null;
+            int estadoproyecto = 0;
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral label =
+                        (SimpleLiteral) bindingSet.getValue("label");
+                SimpleLiteral total =
+                        (SimpleLiteral) bindingSet.getValue("total");
+                String labelEstado = label.stringValue();
+                if(labelEstado.equals("Internacional")||labelEstado.equals("Local")||labelEstado.equals("Nacional")){
+                    if(labelEstado.equals("Internacional")){
+                        estado = new Objeto("INTERNACIONAL",total.stringValue());
+                    }else if(labelEstado.equals("Local")){
+                        estado = new Objeto("LOCAL",total.stringValue());
+                    }else if(labelEstado.equals("Nacional")){
+                        estadoproyecto = estadoproyecto + total.intValue();
+                    }
+                }else{
+                    estadoproyecto = estadoproyecto + total.intValue();
+                }
+                if(estado!=null){
+                    if (listaEstado.contains(estado)==false){
+                        listaEstado.add(estado);
+                    }
+                }
+            }
+            estado = new Objeto("NACIONAL",String.valueOf(estadoproyecto));
+            listaEstado.add(estado);
+            System.out.println(json);
+            json = mapper.writeValueAsString(listaEstado);
+        }
+        catch (QueryEvaluationException | JsonProcessingException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return json;
+    }
+
+    public String ObtenerTopDocentes() {
+        String strQuery="";
+        ArrayList<Objeto> listaDocentes = new ArrayList<>();
+        String json="";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        strQuery ="";
+        strQuery ="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+                "PREFIX schema: <http://schema.org/> "+
+                "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                "select  ?label (COUNT(?s) as ?total) " +
+                "where { "+
+                "?s j.2:currentProject ?tipo . "+
+                "?s j.2:lastName ?nombre . "+
+                "?s j.2:firstName ?apellido ."+
+                "BIND(CONCAT(?nombre,' ',?apellido) AS ?label)"+
+                "} GROUP BY ?label ORDER BY DESC (?total) LIMIT 5 ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            Objeto nodo = null;
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral label =
+                        (SimpleLiteral) bindingSet.getValue("label");
+                SimpleLiteral total =
+                        (SimpleLiteral) bindingSet.getValue("total");
+                nodo = new Objeto(label.stringValue(),total.stringValue());
+                System.out.println(nodo.getNombre());
+                listaDocentes.add(nodo);
+            }
+            json = mapper.writeValueAsString(listaDocentes);
+        }
+        catch (QueryEvaluationException | JsonProcessingException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return json;
+    }
+
 }

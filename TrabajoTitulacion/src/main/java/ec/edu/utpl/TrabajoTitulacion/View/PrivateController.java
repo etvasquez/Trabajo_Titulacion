@@ -3,6 +3,7 @@ package ec.edu.utpl.TrabajoTitulacion.View;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import ec.edu.utpl.TrabajoTitulacion.Controller.consultasBD;
+import ec.edu.utpl.TrabajoTitulacion.Model.Colaboradores;
 import ec.edu.utpl.TrabajoTitulacion.Model.Objeto;
 import ec.edu.utpl.TrabajoTitulacion.Model.Proyecto;
 import ec.edu.utpl.TrabajoTitulacion.Model.Recurso;
@@ -52,13 +53,12 @@ public class PrivateController {
         return "redirect:/editar_proyecto/"+recurso.getId();
     }
 
-    @GetMapping("/editar_proyecto/{id}")
-    public String comentario(Model model, @PathVariable(value="id") String id, RedirectAttributes redirectAttributes) {
+    @GetMapping("/editar_proyecto/{id}" )
+    public String comentario(Model model, @PathVariable(value="id") String id) {
         ArrayList<Recurso> list = consultas.getResouceProject(id);
         String appName = consultas.InformacionProyecto(id);
         String tipoProyecto = consultas.BusquedaPorTipoProyecto();
         Gson gson = new Gson();
-        Gson gson1 = new Gson();
         Type listType = new TypeToken<ArrayList<Objeto>>(){}.getType();
         ArrayList<Objeto> objeto = gson.fromJson(tipoProyecto, listType);
         Proyecto proyecto = gson.fromJson(appName, Proyecto.class);

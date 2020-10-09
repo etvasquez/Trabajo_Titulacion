@@ -2,19 +2,19 @@ package ec.edu.utpl.TrabajoTitulacion.View;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ec.edu.utpl.TrabajoTitulacion.Controller.consultasBD;
-import ec.edu.utpl.TrabajoTitulacion.Model.Comentario;
-import ec.edu.utpl.TrabajoTitulacion.Model.ComentarioGlobal;
-import ec.edu.utpl.TrabajoTitulacion.Model.Usuario;
+import ec.edu.utpl.TrabajoTitulacion.Model.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.ArrayList;
 
 @Controller
@@ -38,7 +38,17 @@ public class HomeController {
     }
 
     @GetMapping("/estadisticas")
-    public String estadisticas() {
+    public String estadisticas(Model model) {
+        String listaproyectos = consultas.ObtenerTotalTiposProyecto(0);
+        String listaareas = consultas.ObtenerTotalAreaProyecto();
+        String listaestado = consultas.ObtenerProyectosEstado();
+        String listacobertura = consultas.ObtenerProyectosCobertura();
+        String listaDocentes = consultas.ObtenerTopDocentes();
+        model.addAttribute("listaproyectos",listaproyectos);
+        model.addAttribute("listaareas",listaareas);
+        model.addAttribute("listaestado",listaestado);
+        model.addAttribute("listacobertura",listacobertura);
+        model.addAttribute("listaDocentes",listaDocentes);
         return "estadisticas";
     }
 
@@ -52,7 +62,41 @@ public class HomeController {
         return "nosotros";
     }
 
-    @GetMapping("/comentario/{id}")
+    @GetMapping("/usuario/{id}")
+    public String usuario(@PathVariable(value="id") String id, Model model, HttpServletRequest request) throws IOException {
+        ArrayList<Colaboradores> listaAux = new ArrayList<>();
+        boolean bandera;
+        if(request.getRemoteUser()!=null){
+            bandera=true;
+        }else{
+             bandera=false;
+        }
+        Usuario usuario = consultas.getUsuario(id, bandera);
+        model.addAttribute("usuario",usuario);
+        ArrayList<Proyecto> listaProyectos = consultas.getProject(usuario.getMbox());
+        model.addAttribute("listaproyectos",listaProyectos);
+        String listaTipo = consultas.ObtenerTotalTiposProyecto(Integer.parseInt(usuario.getId()));
+        model.addAttribute("listaTipo",listaTipo);
+        String listaCola = consultas.ObtenerTopColaboradores(usuario.getId());
+        model.addAttribute("listaCola",listaCola);
+        ArrayList<Colaboradores> listaColaboradores = consultas.getColaboraciones(usuario.getId());
+        if(listaColaboradores.size()==0){
+            model.addAttribute("mensaje","No existen colaboradores");
+        }else if(listaColaboradores.size()<=10){
+            model.addAttribute("colaboraciones",listaColaboradores);
+        }else if(listaColaboradores.size()>10){
+            for(Colaboradores colaboradores:listaColaboradores) {
+                if(Integer.parseInt(colaboradores.getRelaciones())>=3){
+                    listaAux.add(colaboradores);
+                }
+            }
+            model.addAttribute("colaboraciones",listaAux);
+        }
+
+        return "usuario";
+    }
+
+    @GetMapping("/proyecto/{id}")
     public String comentario(HttpServletRequest request, Model model, HttpSession session, @PathVariable(value="id") String id) {
         if(request.getRemoteUser()!=null) {
             String user = request.getRemoteUser().concat("@utpl.edu.ec");
@@ -68,6 +112,11 @@ public class HomeController {
             Comentario comentario1 = new Comentario("","","","","");
             model.addAttribute("coment", coment);
             model.addAttribute("comentario", comentario1);
+        }
+        ArrayList<Recurso> list = consultas.getResouceProject(id);
+        model.addAttribute("files",list);
+        if(list.size()==0){
+            model.addAttribute("existe","No existen recursos");
         }
         appName = consultas.InformacionProyecto(id);
         personas = consultas.InformacionInvolucrados(id);
@@ -105,13 +154,13 @@ public class HomeController {
     public void submitFormComment(@ModelAttribute("comentario") Comentario comentario, HttpServletResponse httpResponse) throws IOException{
         estado = consultas.insertComentComment(comentario);
         idProyecto = consultas.getIDProject(comentario.getIdCom());
-        httpResponse.sendRedirect("/comentario/"+idProyecto);
+        httpResponse.sendRedirect("/proyecto/"+idProyecto);
     }
 
     @PostMapping("/comentario")
     public void submitForm(@ModelAttribute("coment") Comentario comentario, HttpServletResponse httpResponse) throws IOException {
         estado = consultas.insertComent(comentario);
-        httpResponse.sendRedirect("/comentario/"+comentario.getIdCom());
+        httpResponse.sendRedirect("/proyecto/"+comentario.getIdCom());
     }
 
     @GetMapping("/person/{id}")
