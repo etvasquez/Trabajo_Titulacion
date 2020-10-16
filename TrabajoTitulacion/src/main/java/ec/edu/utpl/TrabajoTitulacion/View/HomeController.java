@@ -30,11 +30,11 @@ public class HomeController {
 
     @GetMapping("/")
     public String homePage(HttpServletRequest request) {
-        if(request.getRemoteUser()!=null){
+        /*if(request.getRemoteUser()!=null){
             return "redirect:/proyectos";
-        }else{
+        }else{*/
             return "home";
-        }
+        //}
     }
 
     @GetMapping("/estadisticas")
@@ -54,8 +54,7 @@ public class HomeController {
 
     @GetMapping("/repositorio")
     public String repositorio(Model model) {
-        ArrayList<Nodo> proyectos = consultas.getProyectos();
-        System.out.println("Esto es : "+proyectos.size());
+        ArrayList<ListaProyecto> proyectos = consultas.getProyectos();
         model.addAttribute("proyectos", proyectos);
         return "repositorio";
     }

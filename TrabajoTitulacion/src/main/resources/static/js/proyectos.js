@@ -8,6 +8,16 @@ $(document).ready(function() {
     }catch (e) {
         
     }
+
+    try {
+        $('#tableRepository').DataTable({
+            ordering: false,
+            searching: true,
+            paging: true
+        });
+    }catch (e) {
+
+    }
 } );
 function verProyecto(str) {
     window.open(rutaBase + 'proyecto/' + str, '_blank');

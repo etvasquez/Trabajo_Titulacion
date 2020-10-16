@@ -73,7 +73,6 @@ public class PrivateController {
                 path -> MvcUriComponentsBuilder.fromMethodName(PrivateController.class,
                         "serveFile", path.getFileName().toString()).build().toUri().toString())
                 .collect(Collectors.toList()));*/
-
         return "editar_proyecto";
     }
 

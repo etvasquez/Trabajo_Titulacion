@@ -5,15 +5,48 @@
 <body>
 <nav th:insert="fragments/menu :: menu">
 </nav>
-</body>
 <h3 class="text-primary font-italic text-center m-2">Repositorio de Proyectos</h3>
-<div class="container">
-    <div class="row">
-        <div class="col-xs-4 col-sm-4 col-md-4 col-xl-4 col-lg-4" th:each="proyecto : ${proyectos}">
-            <h6 th:text="${proyecto.label}"></h6>
-        </div>
-    </div>
-</div>
+<table id="tableRepository" class="p-1 table table-sm" style="width:100%">
+    <thead hidden>
+    <tr>
+        <th>ID</th>
+        <th>ID</th>
+        <th>ID</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="proyecto : ${proyectos}">
+        <td th:if="${proyecto.nodo1.id!=null}">
+                <div class="card" style="height: 250px; width: 400px">
+                    <div class="card-body text-center">
+                        <h6 th:text="${proyecto.nodo1.label}"></h6>
+                        <p><img class='img1' src='../static/img/user.png' alt='coordinador'><span th:text="${proyecto.nodo1.group}"> </span></p>
+                        <a th:href="@{'/proyecto/' + ${proyecto.nodo1.id}}" class="btn btn-primary stretched-link mb-2" th:text="${proyecto.nodo1.title}"></a>
+                    </div>
+                </div>
+        </td>
+        <td th:if="${proyecto.nodo2.id!=null}">
+                <div class="card" style="height: 250px; width: 400px">
+                    <div class="card-body text-center">
+                        <h6 th:text="${proyecto.nodo2.label}"></h6>
+                        <p><img class='img1' src='../static/img/user.png' alt='coordinador'><span th:text="${proyecto.nodo2.group}"> </span></p>
+                        <a th:href="@{'/proyecto/' + ${proyecto.nodo2.id}}" class="btn btn-primary stretched-link mb-2 float-" th:text="${proyecto.nodo2.title}"></a>
+                    </div>
+                </div>
+        </td>
+        <td th:if="${proyecto.nodo3.id!=null}">
+                <div class="card" style="height: 250px; width: 400px">
+                    <div class="card-body text-center">
+                        <h6 th:text="${proyecto.nodo3.label}"></h6>
+                        <p><img class='img1' src='../static/img/user.png' alt='coordinador'><span th:text="${proyecto.nodo3.group}"> </span></p>
+                        <a th:href="@{'/proyecto/' + ${proyecto.nodo3.id}}" class="btn btn-primary stretched-link mb-2" th:text="${proyecto.nodo3.title}"></a>
+                    </div>
+                </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
 <footer th:insert="fragments/footer :: footer">
 </footer>
+</body>
 </html>

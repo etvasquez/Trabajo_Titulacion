@@ -1960,8 +1960,9 @@ public class consultasBD{
         return json;
     }
 
-    public ArrayList<Nodo> getProyectos() {
-        ArrayList<Nodo> list = new ArrayList<>();
+    public ArrayList<ListaProyecto> getProyectos() {
+        ArrayList<ListaProyecto> list = new ArrayList<>();
+        ArrayList<Nodo> nodolista = new ArrayList<>();
         String strQuery ="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
                 "PREFIX schema: <http://schema.org/> "+
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
@@ -1971,7 +1972,7 @@ public class consultasBD{
                 "?idper schema:areaPerson ?arealabel . ?arealabel rdfs:label ?area . ?idpro schema:idProject ?id . "+
                 "?id schema:ide_project ?idproyecto . ?id j.2:title ?titulo . ?idpro schema:rolProyecto ?rollabel . "+
                 "?rollabel rdfs:label ?label . BIND(CONCAT(?nombre,' ',?apellido) AS ?nombres) "+
-                "FILTER (!regex(?label, 'Participación','i')) . } ";
+                "FILTER (!regex(?label, 'Participación','i')) . } ORDER BY DESC (?nombres) ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
         TupleQueryResult result = null;
@@ -1988,9 +1989,33 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("nombres");
                 SimpleLiteral area =
                         (SimpleLiteral)bindingSet.getValue("area");
-                nodo = new Nodo(idproyecto.stringValue(), titulo.stringValue(), nombres.stringValue(), area.stringValue());
-                list.add(nodo);
+                String tipoarea = area.stringValue().substring(0,5);
+                if(tipoarea.compareTo("http:")==0){
+                    nodo = new Nodo(idproyecto.stringValue(), titulo.stringValue(), nombres.stringValue(), "SIN ASIGNAR");
+                    nodolista.add(nodo);
+                }else{
+                    nodo = new Nodo(idproyecto.stringValue(), titulo.stringValue(), nombres.stringValue(), area.stringValue());
+                    nodolista.add(nodo);
+                }
             }
+            ListaProyecto listaCompleta = null;
+            for(int i=0; i<nodolista.size(); i+=3){
+                Nodo nodo1 = new Nodo("","","","");
+                Nodo nodo2 = new Nodo("","","","");
+                Nodo nodo3 = new Nodo("","","","");
+                if(i<nodolista.size()){
+                    nodo1 = new Nodo(nodolista.get(i).getId(),nodolista.get(i).getLabel(),nodolista.get(i).getGroup(),nodolista.get(i).getTitle());
+                }
+                if(i+1<nodolista.size()){
+                    nodo2 = new Nodo(nodolista.get(i+1).getId(),nodolista.get(i+1).getLabel(),nodolista.get(i+1).getGroup(),nodolista.get(i+1).getTitle());
+                }
+                if(i+2<nodolista.size()){
+                    nodo3 = new Nodo(nodolista.get(i+2).getId(),nodolista.get(i+2).getLabel(),nodolista.get(i+2).getGroup(),nodolista.get(i+2).getTitle());
+                }
+                listaCompleta = new ListaProyecto(nodo1,nodo2,nodo3);
+                list.add(listaCompleta);
+            }
+
         }
         catch (QueryEvaluationException e) {
         } finally {
