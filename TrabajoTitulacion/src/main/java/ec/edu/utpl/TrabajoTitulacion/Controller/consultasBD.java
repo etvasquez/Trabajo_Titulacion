@@ -2015,7 +2015,6 @@ public class consultasBD{
                 listaCompleta = new ListaProyecto(nodo1,nodo2,nodo3);
                 list.add(listaCompleta);
             }
-
         }
         catch (QueryEvaluationException e) {
         } finally {
@@ -2024,4 +2023,87 @@ public class consultasBD{
         return list;
     }
 
+    public ArrayList<ListaProyecto> getProyectosFiltrados(ArrayList<String> lista, String busqueda) {
+        System.out.println("Buscqueda:"+busqueda);
+        System.out.println("Lista:"+lista);
+        ArrayList<ListaProyecto> list = new ArrayList<>();
+        ArrayList<Nodo> nodolista = new ArrayList<>();
+        String strQuery ="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+                "PREFIX schema: <http://schema.org/> "+
+                "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                "select distinct ?idproyecto ?titulo ?nombres ?area " +
+                "WHERE { "+
+                "?idper j.2:currentProject ?idpro . ?idper j.2:lastName ?nombre . ?idper j.2:firstName ?apellido . "+
+                "?idper schema:areaPerson ?arealabel . ?arealabel rdfs:label ?area . ?idpro schema:idProject ?id . "+
+                "?id schema:ide_project ?idproyecto . ?id j.2:title ?titulo . ?idpro schema:rolProyecto ?rollabel . "+
+                "?rollabel rdfs:label ?label . BIND(CONCAT(?nombre,' ',?apellido) AS ?nombres) "+
+                "FILTER (!regex(?label, 'Participación','i') ";
+        String strQueryMedio=" && ( ?area IN ( ";
+        String strQueryMedio1=" && (regex(?nombres, '"+busqueda+"','i') || regex(?titulo, '"+busqueda+"','i')) ";
+        String strQueryFin=" } ORDER BY DESC (?area) ";
+        if(lista.get(0).equals("todo")==false){
+            for (int i=0; i<lista.size();i++){
+                if(lista.size()==i+1){
+                    strQuery = strQuery.concat(strQueryMedio).concat("'").concat(lista.get(i)).concat("'))");
+                }else{
+                    strQuery = strQuery.concat(strQueryMedio).concat("'").concat(lista.get(i)).concat("',");
+                }
+            }
+        }
+        if(busqueda.equals("vacio")==false){
+            strQuery=strQuery.concat(strQueryMedio1);
+
+        }
+        strQuery=strQuery.concat(" )} ORDER BY DESC (?nombres)");
+        System.out.println(strQuery);
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        Nodo nodo = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral idproyecto =
+                        (SimpleLiteral)bindingSet.getValue("idproyecto");
+                SimpleLiteral titulo =
+                        (SimpleLiteral)bindingSet.getValue("titulo");
+                SimpleLiteral nombres =
+                        (SimpleLiteral)bindingSet.getValue("nombres");
+                SimpleLiteral area =
+                        (SimpleLiteral)bindingSet.getValue("area");
+                String tipoarea = area.stringValue().substring(0,5);
+                if(tipoarea.compareTo("http:")==0){
+                    nodo = new Nodo(idproyecto.stringValue(), titulo.stringValue(), nombres.stringValue(), "SIN ASIGNAR");
+                    nodolista.add(nodo);
+                }else{
+                    nodo = new Nodo(idproyecto.stringValue(), titulo.stringValue(), nombres.stringValue(), area.stringValue());
+                    nodolista.add(nodo);
+                }
+            }
+            ListaProyecto listaCompleta = null;
+            for(int i=0; i<nodolista.size(); i+=3){
+                Nodo nodo1 = new Nodo("","","","");
+                Nodo nodo2 = new Nodo("","","","");
+                Nodo nodo3 = new Nodo("","","","");
+                if(i<nodolista.size()){
+                    nodo1 = new Nodo(nodolista.get(i).getId(),nodolista.get(i).getLabel(),nodolista.get(i).getGroup(),nodolista.get(i).getTitle());
+                }
+                if(i+1<nodolista.size()){
+                    nodo2 = new Nodo(nodolista.get(i+1).getId(),nodolista.get(i+1).getLabel(),nodolista.get(i+1).getGroup(),nodolista.get(i+1).getTitle());
+                }
+                if(i+2<nodolista.size()){
+                    nodo3 = new Nodo(nodolista.get(i+2).getId(),nodolista.get(i+2).getLabel(),nodolista.get(i+2).getGroup(),nodolista.get(i+2).getTitle());
+                }
+                listaCompleta = new ListaProyecto(nodo1,nodo2,nodo3);
+                list.add(listaCompleta);
+            }
+
+        }catch (QueryEvaluationException e) {
+        } finally {
+            result.close();
+        }
+
+        return list;
+    }
 }

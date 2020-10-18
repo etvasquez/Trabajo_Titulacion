@@ -911,7 +911,6 @@ function armarGrafo() {
         doubleClickTime = new Date();
         var id = this.getNodeAt(params.pointer.DOM);
         if(id==idnodobase){
-
             window.open(rutaBase + 'usuario/'+id, '_blank');
         }else{
             window.open(rutaBase + 'proyecto/' + id, '_blank');

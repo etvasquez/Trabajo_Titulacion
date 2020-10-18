@@ -59,6 +59,14 @@ public class HomeController {
         return "repositorio";
     }
 
+    @GetMapping("/repositorio/{id}/{busqueda}")
+    public ResponseEntity<ArrayList<ListaProyecto>> repositoriofiltro(Model model, @PathVariable(value="id") ArrayList<String> id, @PathVariable(value="busqueda") String busqueda) {
+        ArrayList<ListaProyecto> proyectos = consultas.getProyectosFiltrados(id,busqueda);
+        return new ResponseEntity<ArrayList<ListaProyecto>>(proyectos, HttpStatus.OK);
+        //model.addAttribute("proyectos", proyectos);
+        //return "repositorio";
+    }
+
     @GetMapping("/nosotros")
     public String nosotros() {
         return "nosotros";

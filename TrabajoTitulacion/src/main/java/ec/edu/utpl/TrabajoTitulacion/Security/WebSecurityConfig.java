@@ -48,7 +48,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/","/proyecto/{id}","/listaBusquedaPersona/{id}","/projectID/{id}",
                         "/personID/{id}","/project/{id}","/person/{id}","/getNameByEmail/{email}","/comentarioresponse",
                         "/comentario","/personperson/{id}","/listaBusquedaProyecto/{id}","/listaBusquedaArea","/listaBusquedaTipoProyecto",
-                        "/projectArea/{id}","/projectTipo/{id}","/estadisticas","/nosotros","/repositorio","/usuario/{id}")
+                        "/projectArea/{id}","/projectTipo/{id}","/estadisticas","/nosotros","/repositorio","/usuario/{id}","/repositorio/{id}/{busqueda}")
                 .permitAll()
                 .antMatchers ("/proyectos","/editar_proyecto/{id}","/login").authenticated ()
                 .anyRequest().authenticated()
