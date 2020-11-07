@@ -5,7 +5,11 @@ import ec.edu.utpl.TrabajoTitulacion.ConnectionDB.conectingGraphDB;
 import ec.edu.utpl.TrabajoTitulacion.Model.*;
 import org.eclipse.rdf4j.model.impl.SimpleLiteral;
 import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -14,6 +18,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,11 +27,30 @@ import java.util.UUID;
 
 public class consultasBD{
 
-    private static String urlBase = "<http://192.168.10.90:7200/repositories/";
+    private static String urlBase = "<http://utpl.edu.ec/data/";
+    //private static String urlBase = "<http://192.168.10.90:7200/repositories/";
     private static Logger logger = LoggerFactory.getLogger(conectingGraphDB.class);
     private static final Marker WTF_MARKER = MarkerFactory.getMarker("WTF");
 
     conectingGraphDB con = new conectingGraphDB();
+
+    public void loadDataSet()
+            throws RDFParseException, RepositoryException, IOException {
+        RepositoryConnection repositoryConnection = null;
+        repositoryConnection = con.getRepositoryConnection();
+        Repository repository = repositoryConnection.getRepository();
+        logger.debug("loading dataset...");
+        File dataset = new File("/Users/eriiv/OneDrive/Escritorio/TT/V2/Implementacion/v1/repositorio-rdf.rdf");
+        String datasetFile = "/Users/eriiv/OneDrive/Escritorio/TT/V2/Implementacion/v1/repositorio-rdf.rdf";
+        RepositoryConnection con = repository.getConnection();
+        try {
+            //con.clear();
+            con.add(dataset, "http://utpl.edu.ec/data/", Rio.getParserFormatForFileName(datasetFile).orElseThrow(Rio.unsupportedFormat(datasetFile)));
+        } finally {
+            con.close();
+        }
+        logger.debug("dataset loaded.");
+    }
 
     public String insertNewLike(String idProject){
         int numeroActualLike = getCountLike(idProject) + 1;
@@ -824,13 +849,14 @@ public class consultasBD{
         String strQuery ="PREFIX schema: <http://schema.org/> " +
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
-                "SELECT ?rol ?nombre ?apellido ?area " +
+                "SELECT ?rol ?nombre ?apellido ?area ?idpersona " +
                 "WHERE {"+
                 "?s schema:ide_project '"+idProject+"' . "+
                 "?id schema:idProject ?s . "+
                 "?id schema:rolProyecto ?labelrol . "+
                 "?labelrol rdfs:label ?rol . "+
                 "?project j.2:currentProject ?id . "+
+                "?project schema:id_person ?idpersona . "+
                 "?project j.2:lastName ?nombre . "+
                 "?project j.2:firstName ?apellido . "+
                 "?project schema:areaPerson ?labelarea . "+
@@ -843,6 +869,8 @@ public class consultasBD{
             result = tupleQuery.evaluate();
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
+                SimpleLiteral id =
+                        (SimpleLiteral)bindingSet.getValue("idpersona");
                 SimpleLiteral rol =
                         (SimpleLiteral)bindingSet.getValue("rol");
                 SimpleLiteral nombre =
@@ -851,7 +879,7 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("apellido");
                 SimpleLiteral area =
                         (SimpleLiteral)bindingSet.getValue("area");
-                persona = new Persona(nombre.stringValue(),apellido.stringValue(),rol.stringValue(),area.stringValue());
+                persona = new Persona(id.stringValue(),nombre.stringValue(),apellido.stringValue(),rol.stringValue(),area.stringValue());
                 listapersona.add(persona);
             }
             json = mapper.writeValueAsString(listapersona);

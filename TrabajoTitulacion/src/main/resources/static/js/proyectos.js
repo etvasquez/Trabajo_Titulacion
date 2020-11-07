@@ -5,7 +5,14 @@ $(document).ready(function() {
         $('#tableProyectos').DataTable({
             order: [[2, 'asc']],
             searching: true,
-            paging: true
+            paging: true,
+            language: {
+                info: "Mostrando _PAGE_ de _PAGES_ registros",
+                paginate: {
+                    previous: "Anterior",
+                    next: "Siguiente"
+                }
+            }
         });
     }catch (e) {
         
@@ -13,12 +20,11 @@ $(document).ready(function() {
     try {
         $('#tableRepository').DataTable({
             ordering: false,
-            searching: true,
+            searching: false,
             paging: true,
             pageLength: 3,
             lengthChange: false,
             language: {
-                search: "Buscador: ",
                 info: "Mostrando _PAGE_ de _PAGES_ registros",
                 paginate: {
                     previous: "Anterior",

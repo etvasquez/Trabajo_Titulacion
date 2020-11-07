@@ -3,7 +3,6 @@ package ec.edu.utpl.TrabajoTitulacion.View;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import ec.edu.utpl.TrabajoTitulacion.Controller.consultasBD;
-import ec.edu.utpl.TrabajoTitulacion.Model.Colaboradores;
 import ec.edu.utpl.TrabajoTitulacion.Model.Objeto;
 import ec.edu.utpl.TrabajoTitulacion.Model.Proyecto;
 import ec.edu.utpl.TrabajoTitulacion.Model.Recurso;

@@ -2,19 +2,21 @@ package ec.edu.utpl.TrabajoTitulacion.View;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import ec.edu.utpl.TrabajoTitulacion.Controller.consultasBD;
+import ec.edu.utpl.TrabajoTitulacion.Controller.trasformacionRDF;
 import ec.edu.utpl.TrabajoTitulacion.Model.*;
+import ec.edu.utpl.TrabajoTitulacion.TrabajoTitulacionApplication;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.Principal;
 import java.util.ArrayList;
 
 @Controller
@@ -27,6 +29,9 @@ public class HomeController {
     ArrayList<Comentario> listacomentarios = new ArrayList<>();
     ArrayList<ComentarioGlobal> listacomentarioGlobal = new ArrayList<>();
     consultasBD consultas = new consultasBD();
+
+    @Autowired
+    TrabajoTitulacionApplication trabajoTitulacionApplication = new TrabajoTitulacionApplication();
 
     @GetMapping("/")
     public String homePage(HttpServletRequest request) {
@@ -70,6 +75,22 @@ public class HomeController {
     @GetMapping("/nosotros")
     public String nosotros() {
         return "nosotros";
+    }
+
+    @PostMapping("/admin")
+    public String admin(@ModelAttribute("admin") Administracion administracion) throws IOException {
+        System.out.println(administracion.getDominio());
+        trasformacionRDF t = new trasformacionRDF();
+        t.obtenerDatosBase(administracion);
+        consultas.loadDataSet();
+        return "redirect:/admin";
+    }
+
+    @GetMapping("/admin")
+    public String admin(HttpServletRequest request, Model model){
+        Administracion administracion = new Administracion();
+        model.addAttribute("admin",administracion);
+        return "admin";
     }
 
     @GetMapping("/usuario/{id}")
@@ -165,12 +186,23 @@ public class HomeController {
         estado = consultas.insertComentComment(comentario);
         idProyecto = consultas.getIDProject(comentario.getIdCom());
         httpResponse.sendRedirect("/proyecto/"+idProyecto);
+        /*String url="http://localhost:8888/proyecto/"+comentario.getIdCom();
+        String contenido = "Estimad@, \nLe notificamos que su proyecto ha sido comentado por \n"+comentario.getNombre()+" con la siguiente " +
+                "descripción:\n\t \""+comentario.getComentarios()+"\"\nIr a proyecto: "+url;
+        Mail mail = new Mail("eriivasquez.ev.ev@gmail.com","Comentario Proyecto",contenido);
+        trabajoTitulacionApplication.sendEmail(mail);*/
     }
 
     @PostMapping("/comentario")
     public void submitForm(@ModelAttribute("coment") Comentario comentario, HttpServletResponse httpResponse) throws IOException {
+        String url="http://localhost:8888/proyecto/"+comentario.getIdCom();
         estado = consultas.insertComent(comentario);
         httpResponse.sendRedirect("/proyecto/"+comentario.getIdCom());
+        String contenido = "Estimad@, \nLe notificamos que su proyecto fue comentado por \n"+comentario.getNombre()+" con la siguiente " +
+                "descripción:\n\t \""+comentario.getComentarios()+"\"\nVer comentario: "+url;
+        Mail mail = new Mail("eriivasquez.ev.ev@gmail.com","Comentario Proyecto",contenido);
+        trabajoTitulacionApplication.sendEmail(mail);
+
     }
 
     @GetMapping("/person/{id}")

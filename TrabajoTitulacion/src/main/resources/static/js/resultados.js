@@ -11,9 +11,9 @@ $(document).ready(function () {
                 arryAreas.push(value.area);
             }
             if (value.rol == 'Dirección' || value.rol == 'Codirección' || value.rol == 'Director (E)') {
-                $("#coordinador").append("<span><img id='img' src='../static/img/user.png' alt='coordinador'>" + value.nombre + " " + value.apellido + "</span><br>");
+                $("#coordinador").append("<span><img id='img' src='../static/img/user.png' alt='coordinador'><a style='list-style: none' href='/usuario/"+value.identificacion+"'>" + value.nombre + " " + value.apellido + "</a></span><br>");
             } else {
-                $("#participante").append("<span><img id='img' src='../static/img/participante.png'alt='participante'>" + value.nombre + " " + value.apellido + "</span><br>");
+                $("#participante").append("<span><img id='img' src='../static/img/participante.png'alt='participante'><a style='list-style: none' href='/usuario/"+value.identificacion+"'>" + value.nombre + " " + value.apellido + "</a></span><br>");
             }
         });
         var contador = 0;

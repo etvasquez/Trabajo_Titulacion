@@ -31,9 +31,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .password(encoder.encode("123"))
                 .roles("USER")
                 .and()
+                .withUser("dijara")
+                .password(encoder.encode("123"))
+                .roles("USER")
+                .and()
                 .withUser("admin")
                 .password(encoder.encode("admin"))
-                .roles("USER", "ADMIN");
+                .roles("ADMIN");
     }
 
     @Override
@@ -45,12 +49,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/","/proyecto/{id}","/listaBusquedaPersona/{id}","/projectID/{id}",
+                .antMatchers("/","/proyecto/{id}","/listaBusquedaPersona/{id}","/projectID/{id}","/files/{filename:.+}",
                         "/personID/{id}","/project/{id}","/person/{id}","/getNameByEmail/{email}","/comentarioresponse",
                         "/comentario","/personperson/{id}","/listaBusquedaProyecto/{id}","/listaBusquedaArea","/listaBusquedaTipoProyecto",
-                        "/projectArea/{id}","/projectTipo/{id}","/estadisticas","/nosotros","/repositorio","/usuario/{id}","/repositorio/{id}/{busqueda}")
+                        "/projectArea/{id}","/projectTipo/{id}","/estadisticas",/*"/nosotros",*/"/repositorio","/usuario/{id}","/repositorio/{id}/{busqueda}")
                 .permitAll()
-                .antMatchers ("/proyectos","/editar_proyecto/{id}","/login").authenticated ()
+                .antMatchers ("/proyectos","/editar_proyecto/{id}","/login").hasRole("USER")
+                //.anyRequest().authenticated()
+                .antMatchers ("/admin").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().loginPage("/login")

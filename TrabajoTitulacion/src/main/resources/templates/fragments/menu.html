@@ -20,9 +20,12 @@
             <li class="nav-item">
                 <a class="nav-link" href="/repositorio">Repositorio</a>
             </li>
-            <li class="nav-item" sec:authorize="!isAuthenticated()">
-                <a class="nav-link" href="/nosotros">Nosotros</a>
+            <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                <a class="nav-link" href="/admin">Administrar</a>
             </li>
+            <!--<li class="nav-item" sec:authorize="!isAuthenticated()">
+                <a class="nav-link" href="/nosotros">Nosotros</a>
+            </li>-->
         </ul>
         <ul class="navbar-nav justify-content-end">
             <li class="nav-item" sec:authorize="!isAuthenticated()">
