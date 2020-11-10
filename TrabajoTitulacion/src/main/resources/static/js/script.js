@@ -7,6 +7,7 @@ var grafoinicial; //primer resultado del grafo
 var titulo;
 var ruta;
 var nodoseleccionado;
+var foto="";
 $(document).ready(function () {
     try {
         inicializarSelectPersona();
@@ -287,7 +288,7 @@ function agrandarGrafo(idProject) {
                 actualizarJSONHTML(JSON.stringify(datapresentar), JSON.stringify(dataRepetidos));
                 armarGrafo();
             } else {
-                console.log("No contiene participantes");
+                alert("Proyecto seleccionado no contiene participantes");
             }
         });
 }
@@ -403,8 +404,6 @@ function armarGrafo() {
         },
         groups: {
             participante: {
-                shape: "circularImage",
-                image: "../static/img/participante.png",
                 color: {
                     border: "#4D4D4D",
                     background: "#FFFFFF",
@@ -427,8 +426,6 @@ function armarGrafo() {
                 }
             },
             director: {
-                shape: "circularImage",
-                image: "../static/img/user.png",
                 borderWidth: 4,
                 color: {
                     border: "#4D4D4D",
@@ -444,8 +441,6 @@ function armarGrafo() {
                 }
             },
             buscado: {
-                shape: "circularImage",
-                image: "../static/img/usersearch.png",
                 color: {
                     border: "#4D4D4D",
                     background: "#FFFFFF",
@@ -524,6 +519,7 @@ function armarGrafo() {
         } else {
             if (idnodobase == data.nodes[i].id) {
                 nodoseleccionado = data.nodes[i].label;
+                foto = data.nodes[i].image;
             }
         }
     }
@@ -604,26 +600,36 @@ function armarGrafo() {
         switch (data.nodes[i].group) {
             case 'buscado':
                 if (arrayLegend.indexOf(1011) == -1) {
-                    if (selected == "Nombre" || selected == "Persona") {
+                    if (selected == "Nombre") {
                         dataleyenda.push({
                             id: 1011,
                             x: x,
                             y: yacumulador,
                             label: nodoseleccionado,
-                            group: "buscado",
+                            shape: "circularImage",
+                            image: data.nodes[i].image,
+                            color: {
+                                border: "#4D4D4D",
+                                background: "#FFFFFF",
+                            },
                             value: 1,
                             fixed: true,
                             physics: false,
                         });
                         arrayLegend.push(1011);
                         acumulador++;
-                    } else {
+                    }else if (selected == "Persona") {
                         dataleyenda.push({
                             id: 1011,
                             x: x,
                             y: yacumulador,
-                            label: "Persona buscada",
-                            group: "buscado",
+                            label: nodoseleccionado,
+                            shape: "circularImage",
+                            image: foto,
+                            color: {
+                                border: "#4D4D4D",
+                                background: "#FFFFFF",
+                            },
                             value: 1,
                             fixed: true,
                             physics: false,
@@ -795,26 +801,18 @@ function armarGrafo() {
                 break;
             case 'participante':
                 if (arrayLegend.indexOf(1008) == -1) {
-                    if (selected == "Nombre") {
+                    if (selected == "Proyecto") {
                         dataleyenda.push({
                             id: 1008,
                             x: x,
                             y: yacumulador,
-                            label: "Participante",
-                            group: "participante",
-                            value: 1,
-                            fixed: true,
-                            physics: false,
-                        });
-                        arrayLegend.push(1008);
-                        acumulador++;
-                    } else if (selected == "Proyecto") {
-                        dataleyenda.push({
-                            id: 1008,
-                            x: x,
-                            y: yacumulador,
-                            label: "Participante (" + totalParticipante + ")",
-                            group: "participante",
+                            label: "Participante(s) (" + totalParticipante + ")",
+                            shape: "circularImage",
+                            image: "n",
+                            color: {
+                                border: "#4D4D4D",
+                                background: "#FFFFFF",
+                            },
                             value: 1,
                             fixed: true,
                             physics: false,
@@ -826,8 +824,13 @@ function armarGrafo() {
                             id: 1008,
                             x: x,
                             y: yacumulador,
-                            label: "Persona (" + totalParticipante + ")",
-                            group: "participante",
+                            label: "Colaborador(es) (" + totalParticipante + ")",
+                            shape: "circularImage",
+                            image: "n",
+                            color: {
+                                border: "#4D4D4D",
+                                background: "#FFFFFF",
+                            },
                             value: 1,
                             fixed: true,
                             physics: false,
@@ -844,7 +847,13 @@ function armarGrafo() {
                         x: x,
                         y: y + acumulador * step,
                         label: "Director (" + totalDirector + ")",
-                        group: "director",
+                        shape: "circularImage",
+                        image: "n",
+                        borderWidth: 4,
+                        color: {
+                            border: "#4D4D4D",
+                            background: "#FFFFFF",
+                        },
                         value: 1,
                         fixed: true,
                         physics: false,
@@ -910,7 +919,7 @@ function armarGrafo() {
     network.on('doubleClick', function (params) {
         doubleClickTime = new Date();
         var id = this.getNodeAt(params.pointer.DOM);
-        if(id==idnodobase){
+        if(id.length>5){
             window.open(rutaBase + 'usuario/'+id, '_blank');
         }else{
             window.open(rutaBase + 'proyecto/' + id, '_blank');

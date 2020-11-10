@@ -103,9 +103,11 @@
 <div class="container">
     <div class="row">
         <div class="col-xs-4 col-sm-4 col-md-4 col-xl-4 col-lg-4">
-            <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid mx-auto d-block center" width="200" height="200"/>
-            <p class="text-center"><span th:text="${usuario.nombre}"></span><br/><span th:text="${usuario.tipo}"></span><br/><span><a
-                    href="#" th:text="${usuario.mbox}"></a></span></p>
+            <div class="text-center">
+                <img th:src="${usuario.foto}" class="rounded-circle border border-info" width="250" height="250"/>
+                <p class="text-center"><span th:text="${usuario.nombre}"></span><br/><span th:text="${usuario.tipo}"></span><br/><span><a
+                        href="#" th:text="${usuario.mbox}"></a></span></p>
+            </div>
         </div>
         <div class="col-xs-4 col-sm-4 col-md-4 col-xl-4 col-lg-4">
             <p>
@@ -225,13 +227,15 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-4 col-sm-4 col-md-4 col-xl-4 col-lg-4" th:each="listaC : ${colaboraciones}">
-                    <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid mx-auto d-block" width="45" height="45"/>
-                    <p class="text-center text-secondary"><span><a
-                            th:href="@{'/usuario/' + ${listaC.idpersona}}" th:text="${listaC.nombre}" th:title="${listaC.nombre}"></a></span><br/>
-                        <span th:text="${listaC.area}"></span><br/>
-                        <span th:text="${listaC.correo}"></span><br>
-                        <span th:text="${listaC.relaciones}"></span><span> colaboraciones</span>
-                    </p>
+                    <div class="text-center">
+                        <img th:src="${listaC.foto}" class="rounded-circle border border-info" width="75" height="75"/>
+                        <p class="text-center text-secondary"><span><a
+                                th:href="@{'/usuario/' + ${listaC.idpersona}}" th:text="${listaC.nombre}" th:title="${listaC.nombre}"></a></span><br/>
+                            <span th:text="${listaC.area}"></span><br/>
+                            <span th:text="${listaC.correo}"></span><br>
+                            <span th:text="${listaC.relaciones}"></span><span> colaboraciones</span>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

@@ -6,8 +6,19 @@ public class Nodo {
     private String label;
     private String group;
     private String title;
+    private String image;
+    private String shape;
 
     public Nodo() {
+    }
+
+    public Nodo(String id, String label, String group, String title, String image,String shape) {
+        this.id = id;
+        this.label = label;
+        this.group = group;
+        this.title = title;
+        this.image = image;
+        this.shape = shape;
     }
 
     public Nodo(String id, String label, String group, String title) {
@@ -48,4 +59,21 @@ public class Nodo {
     public void setTitle(String title) {
         this.title = title;
     }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getShape() {
+        return shape;
+    }
+
+    public void setShape(String shape) {
+        this.shape = shape;
+    }
+
 }

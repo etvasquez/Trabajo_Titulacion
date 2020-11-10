@@ -67,11 +67,7 @@ public class PrivateController {
         if(list.size()==0){
             model.addAttribute("existe","No existen recursos");
         }
-        model.addAttribute("tab",localicacion);
-       /* model.addAttribute("files", storageService.loadAll().map(
-                path -> MvcUriComponentsBuilder.fromMethodName(PrivateController.class,
-                        "serveFile", path.getFileName().toString()).build().toUri().toString())
-                .collect(Collectors.toList()));*/
+        //model.addAttribute("tab",localicacion);
         return "editar_proyecto";
     }
 

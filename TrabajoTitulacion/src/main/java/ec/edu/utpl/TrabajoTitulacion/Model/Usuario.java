@@ -13,10 +13,11 @@ public class Usuario {
     private String extension;
     private String telefono;
     private String mbox;
+    private String foto;
 
     public Usuario(){}
 
-    public Usuario(String id, String nombre, String area, String departamento, String seccion, String modalidad, String tipo, String status, String nacionalidad, String extension, String telefono, String mbox) {
+    public Usuario(String id, String nombre, String area, String departamento, String seccion, String modalidad, String tipo, String status, String nacionalidad, String extension, String telefono, String mbox, String foto) {
         this.id = id;
         this.nombre = nombre;
         this.area = area;
@@ -29,6 +30,7 @@ public class Usuario {
         this.extension = extension;
         this.telefono = telefono;
         this.mbox = mbox;
+        this.foto = foto;
     }
 
     public String getId() {
@@ -125,5 +127,13 @@ public class Usuario {
 
     public void setMbox(String mbox) {
         this.mbox = mbox;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
     }
 }

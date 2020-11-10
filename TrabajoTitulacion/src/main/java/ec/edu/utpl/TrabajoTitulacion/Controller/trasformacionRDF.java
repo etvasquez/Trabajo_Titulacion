@@ -408,19 +408,18 @@ public class trasformacionRDF {
 
             //Recurso area proyecto
             Resource areaproyecto = model.createResource(area_conocimiento)
-                    .addProperty(RDF.type, dboModel.getResource(schema + "areaproyecto"))
+                    .addProperty(RDF.type, dboModel.getResource(schema + "area_conocimiento"))
                     .addProperty(RDFS.label, area_conocimiento);
 
             //Recurso proyecto
             project = model.createResource(projectURI)
                     .addProperty(RDF.type, FOAF.Project)
-                    .addProperty(dboModel.getProperty(schema + "area_conocimiento"), areaproyecto)
                     .addProperty(FOAF.title, nombre_proyecto)
                     .addProperty(dboModel.getProperty(schema + "ide_project"), ide_Project)
                     .addProperty(dboModel.getProperty(schema + "fecha_inicio"), fecha_inicio)
                     .addProperty(dboModel.getProperty(schema + "fecha_fin"), fecha_fin)
                     .addProperty(dboModel.getProperty(schema + "codigo_proyecto"), codigo_proyecto)
-                    .addProperty(dboModel.getProperty(schema + "area_conocimiento"), areaproyecto)
+                    .addProperty(dboModel.getProperty(schema + "areaproyecto"), areaproyecto)
                     .addProperty(dboModel.getProperty(schema + "sub_area_conocimiento"), sub_area_conocimiento)
                     .addProperty(dboModel.getProperty(schema + "area_conocimiento_especifica"), area_conocimiento_especifica)
                     .addProperty(dboModel.getProperty(schema + "descripcion"), descripcion)

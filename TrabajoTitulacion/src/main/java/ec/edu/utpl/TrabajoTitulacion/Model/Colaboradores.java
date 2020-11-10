@@ -7,17 +7,19 @@ public class Colaboradores {
     private String correo;
     private String area;
     private String relaciones;
+    private String foto;
 
     public Colaboradores(){
 
     }
 
-    public Colaboradores(String idpersona, String nombre, String correo, String area, String relaciones) {
+    public Colaboradores(String idpersona, String nombre, String correo, String area, String relaciones,String foto) {
         this.idpersona = idpersona;
         this.nombre = nombre;
         this.correo = correo;
         this.area = area;
         this.relaciones = relaciones;
+        this.foto = foto;
     }
 
     public String getIdpersona() {
@@ -58,5 +60,13 @@ public class Colaboradores {
 
     public void setRelaciones(String relaciones) {
         this.relaciones = relaciones;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
     }
 }

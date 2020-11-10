@@ -17,7 +17,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.UUID;
 
 @Controller
 public class HomeController {
@@ -65,11 +68,9 @@ public class HomeController {
     }
 
     @GetMapping("/repositorio/{id}/{busqueda}")
-    public ResponseEntity<ArrayList<ListaProyecto>> repositoriofiltro(Model model, @PathVariable(value="id") ArrayList<String> id, @PathVariable(value="busqueda") String busqueda) {
+    public ResponseEntity<ArrayList<ListaProyecto>> repositoriofiltro(@PathVariable(value="id") ArrayList<String> id, @PathVariable(value="busqueda") String busqueda) {
         ArrayList<ListaProyecto> proyectos = consultas.getProyectosFiltrados(id,busqueda);
         return new ResponseEntity<ArrayList<ListaProyecto>>(proyectos, HttpStatus.OK);
-        //model.addAttribute("proyectos", proyectos);
-        //return "repositorio";
     }
 
     @GetMapping("/nosotros")
@@ -79,17 +80,29 @@ public class HomeController {
 
     @PostMapping("/admin")
     public String admin(@ModelAttribute("admin") Administracion administracion) throws IOException {
+        String uuid = UUID.randomUUID().toString();
         System.out.println(administracion.getDominio());
         trasformacionRDF t = new trasformacionRDF();
         t.obtenerDatosBase(administracion);
         consultas.loadDataSet();
+        Date objDate = new Date();
+        String strDateFormat = "hh: mm: ss a dd-MMM-yyyy";
+        SimpleDateFormat objSDF = new SimpleDateFormat(strDateFormat);
+        System.out.println(objSDF.format(objDate));
+        Administracion administracion1 = new Administracion(administracion.getDominio(),administracion.getPuerto(),administracion.getNombreBD(),administracion.getUser(),objSDF.format(objDate));
+        consultas.insertActualizacion(administracion1,uuid);
         return "redirect:/admin";
     }
 
     @GetMapping("/admin")
-    public String admin(HttpServletRequest request, Model model){
+    public String admin(Model model){
         Administracion administracion = new Administracion();
         model.addAttribute("admin",administracion);
+        ArrayList<Administracion> list = consultas.getAdministracion();
+        model.addAttribute("administracion",list);
+        if(list.size()==0){
+            model.addAttribute("existe","No existen actualizaciones");
+        }
         return "admin";
     }
 

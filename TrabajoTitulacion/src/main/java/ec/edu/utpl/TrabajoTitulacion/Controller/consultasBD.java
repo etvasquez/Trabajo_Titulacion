@@ -1,5 +1,6 @@
 package ec.edu.utpl.TrabajoTitulacion.Controller;
 
+import com.google.gson.*;
 import com.owlike.genson.Genson;
 import ec.edu.utpl.TrabajoTitulacion.ConnectionDB.conectingGraphDB;
 import ec.edu.utpl.TrabajoTitulacion.Model.*;
@@ -20,18 +21,18 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 
 public class consultasBD{
 
     private static String urlBase = "<http://utpl.edu.ec/data/";
-    //private static String urlBase = "<http://192.168.10.90:7200/repositories/";
     private static Logger logger = LoggerFactory.getLogger(conectingGraphDB.class);
     private static final Marker WTF_MARKER = MarkerFactory.getMarker("WTF");
-
     conectingGraphDB con = new conectingGraphDB();
 
     public void loadDataSet()
@@ -44,7 +45,6 @@ public class consultasBD{
         String datasetFile = "/Users/eriiv/OneDrive/Escritorio/TT/V2/Implementacion/v1/repositorio-rdf.rdf";
         RepositoryConnection con = repository.getConnection();
         try {
-            //con.clear();
             con.add(dataset, "http://utpl.edu.ec/data/", Rio.getParserFormatForFileName(datasetFile).orElseThrow(Rio.unsupportedFormat(datasetFile)));
         } finally {
             con.close();
@@ -80,11 +80,12 @@ public class consultasBD{
                     "PREFIX schema: <http://schema.org/> "+
                             "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
                             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
-                            "SELECT ?id ?nombre ?apellido ?area ?departamento ?seccion ?modalidad ?tipo ?status ?nacionalidad ?extension ?telefono ?email "+
+                            "SELECT ?id ?nombre ?apellido ?area ?departamento ?seccion ?modalidad ?tipo ?status ?nacionalidad ?extension ?telefono ?email ?image "+
                             "WHERE { "+
                             "?s schema:id_person ?id . "+
                             "?s j.2:lastName ?nombre . "+
                             "?s j.2:firstName ?apellido . "+
+                            "?s j.2:img ?image . "+
                             "?s schema:areaPerson ?arealabel . "+
                             "?arealabel rdfs:label ?area . "+
                             "?s schema:depertamentPerson ?deplabel . "+
@@ -107,11 +108,12 @@ public class consultasBD{
                     "PREFIX schema: <http://schema.org/> "+
                             "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
                             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
-                            "SELECT ?id ?nombre ?apellido ?area ?departamento ?seccion ?modalidad ?tipo ?status ?nacionalidad ?extension ?telefono ?email "+
+                            "SELECT ?id ?nombre ?apellido ?area ?departamento ?seccion ?modalidad ?tipo ?status ?nacionalidad ?extension ?telefono ?email ?image "+
                             "WHERE { "+
                             "?s schema:id_person ?id . "+
                             "?s j.2:lastName ?nombre . "+
                             "?s j.2:firstName ?apellido . "+
+                            "?s j.2:img ?image . "+
                             "?s schema:areaPerson ?arealabel . "+
                             "?arealabel rdfs:label ?area . "+
                             "?s schema:depertamentPerson ?deplabel . "+
@@ -163,9 +165,15 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("telefono");
                 SimpleLiteral email =
                         (SimpleLiteral)bindingSet.getValue("email");
+                SimpleLiteral image =
+                        (SimpleLiteral)bindingSet.getValue("image");
+                String imagen = image.stringValue();
+                if(imagen.equals("n")||imagen==null||image.equals("")){
+                    imagen = "https://image.ibb.co/jw55Ex/def_face.jpg";
+                }
                 usuario = new Usuario(id.stringValue(),nombre.stringValue().concat(" ").concat(apellido.stringValue()),area.stringValue(),
                         departamento.stringValue(),seccion.stringValue(),modalidad.stringValue(),tipo.stringValue(),status.stringValue(),
-                        nacionalidad.stringValue(),extension.stringValue(),telefono.stringValue(),email.stringValue());
+                        nacionalidad.stringValue(),extension.stringValue(),telefono.stringValue(),email.stringValue(),imagen);
             }
         }catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
@@ -182,11 +190,12 @@ public class consultasBD{
                 "PREFIX schema: <http://schema.org/> "+
                         "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
-                        "SELECT ?id ?nombre ?apellido ?area ?departamento ?seccion ?modalidad ?tipo ?status ?nacionalidad ?extension ?telefono ?email "+
+                        "SELECT ?id ?nombre ?apellido ?area ?departamento ?seccion ?modalidad ?tipo ?status ?nacionalidad ?extension ?telefono ?email ?image "+
                         "WHERE { "+
                         "?s schema:id_person ?id . "+
                         "?s j.2:lastName ?nombre . "+
                         "?s j.2:firstName ?apellido . "+
+                        "?s j.2:img ?image . "+
                         "?s schema:areaPerson ?arealabel . "+
                         "?arealabel rdfs:label ?area . "+
                         "?s schema:depertamentPerson ?deplabel . "+
@@ -237,9 +246,15 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("telefono");
                 SimpleLiteral email =
                         (SimpleLiteral)bindingSet.getValue("email");
+                SimpleLiteral image =
+                        (SimpleLiteral)bindingSet.getValue("image");
+                String imagen = image.stringValue();
+                if(imagen.equals("n")||imagen==null||image.equals("")){
+                    imagen = "https://image.ibb.co/jw55Ex/def_face.jpg";
+                }
                 usuario = new Usuario(id.stringValue(),nombre.stringValue().concat(" ").concat(apellido.stringValue()),area.stringValue(),
                         departamento.stringValue(),seccion.stringValue(),modalidad.stringValue(),tipo.stringValue(),status.stringValue(),
-                        nacionalidad.stringValue(),extension.stringValue(),telefono.stringValue(),email.stringValue());
+                        nacionalidad.stringValue(),extension.stringValue(),telefono.stringValue(),email.stringValue(),imagen);
             }
         }catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
@@ -388,7 +403,46 @@ public class consultasBD{
         }
         return name;
     }
-
+    public ArrayList<Administracion> getAdministracion(){
+        ArrayList<Administracion> listAdminsitracion = new ArrayList<>();
+        String strQuery ="PREFIX schema: <http://schema.org/> " +
+                "SELECT ?dominio ?puerto ?nombreDB ?user ?date " +
+                "WHERE { "+
+                urlBase+"upgrade> schema:Upgrade ?id ." +
+                "?id schema:dominio ?dominio . "+
+                "?id schema:puerto ?puerto . "+
+                "?id schema:nombreDB ?nombreDB . "+
+                "?id schema:user ?user . "+
+                "?id schema:date ?date . } ";
+        TupleQuery tupleQuery = con.getRepositoryConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
+        TupleQueryResult result = null;
+        try {
+            result = tupleQuery.evaluate();
+            while (result.hasNext()) {
+                BindingSet bindingSet = result.next();
+                SimpleLiteral dominio =
+                        (SimpleLiteral)bindingSet.getValue("dominio");
+                SimpleLiteral puerto =
+                        (SimpleLiteral)bindingSet.getValue("puerto");
+                SimpleLiteral nombreDB =
+                        (SimpleLiteral)bindingSet.getValue("nombreDB");
+                SimpleLiteral user =
+                        (SimpleLiteral)bindingSet.getValue("user");
+                SimpleLiteral date =
+                        (SimpleLiteral)bindingSet.getValue("date");
+                Administracion administracion = new Administracion(dominio.stringValue(),puerto.stringValue(),nombreDB.stringValue(),user.stringValue(),date.stringValue());
+                listAdminsitracion.add(administracion);
+            }
+        }
+        catch (QueryEvaluationException qee) {
+            logger.error(WTF_MARKER,
+                    qee.getStackTrace().toString(), qee);
+        } finally {
+            result.close();
+        }
+        return listAdminsitracion;
+    }
     public ArrayList<Proyecto> getProject(String correo){
         ArrayList<Proyecto> listaProyectos = new ArrayList<>();
         String strQuery ="PREFIX schema: <http://schema.org/> " +
@@ -546,6 +600,31 @@ public class consultasBD{
                         urlBase + "resourceProject/" + fileName + "> schema:nombrecompleto \"" + recurso.getNombrecompleto()+ "\" . " +
                         urlBase + "resourceProject/" + fileName + "> schema:descripcion \"" + recurso.getDescripcion()+ "\" . " +
                         urlBase + "resourceProject/" + fileName + "> schema:licencia \"" + recurso.getTipo()+ "\" . } ";
+        RepositoryConnection repositoryConnection = con.getRepositoryConnection();
+        repositoryConnection.begin();
+        Update updateOperation = repositoryConnection.prepareUpdate(QueryLanguage.SPARQL, strInsert);
+        updateOperation.execute();
+        try {
+            repositoryConnection.commit();
+        } catch (Exception e) {
+            estado="error";
+            if (repositoryConnection.isActive())
+                repositoryConnection.rollback();
+        }
+        return estado;
+    }
+
+    public String insertActualizacion(Administracion administracion, String id) {
+        String estado="1";
+        String strInsert = "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
+                        "PREFIX schema: <http://schema.org/> "+
+                        "INSERT DATA { " +
+                        urlBase + "upgrade> schema:Upgrade " + urlBase + "upgradeRepository/" + id + "> . " +
+                        urlBase + "upgradeRepository/" + id + "> schema:dominio \"" + administracion.getDominio() + "\" . " +
+                        urlBase + "upgradeRepository/" + id + "> schema:puerto \"" + administracion.getPuerto() + "\" . " +
+                        urlBase + "upgradeRepository/" + id + "> schema:nombreDB \"" + administracion.getNombreBD()+ "\" . " +
+                        urlBase + "upgradeRepository/" + id + "> schema:user \"" + administracion.getUser()+ "\" . " +
+                        urlBase + "upgradeRepository/" + id + "> schema:date \"" + administracion.getPassword()+ "\" . } ";
         RepositoryConnection repositoryConnection = con.getRepositoryConnection();
         repositoryConnection.begin();
         Update updateOperation = repositoryConnection.prepareUpdate(QueryLanguage.SPARQL, strInsert);
@@ -771,14 +850,15 @@ public class consultasBD{
         ArrayList<Nodo> listNodos = new ArrayList<>();
         ArrayList<Relacion> listRelacion = new ArrayList<>();
         ArrayList<NodoRelacion> nodoRelacion = new ArrayList<>();
-        Genson genson = new Genson.Builder().exclude("value", Relacion.class).exclude("title",Relacion.class).create();
+        Gson genson = new GsonBuilder().registerTypeHierarchyAdapter(
+                Collection.class, new CollectionAdapter()).create();
         String json="";
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         String strQuery ="PREFIX schema: <http://schema.org/> " +
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
-                "SELECT ?idpersona ?nombre ?apellido ?id_project ?titulo ?area ?correo " +
+                "SELECT ?idpersona ?nombre ?apellido ?id_project ?titulo ?area ?correo ?image " +
                 "WHERE {"+
                 "?s schema:ide_project '"+idProject+"' . "+
                 "?id schema:idProject ?s . "+
@@ -786,6 +866,7 @@ public class consultasBD{
                 "?project j.2:currentProject ?id. "+
                 "?project j.2:lastName ?nombre. "+
                 "?project j.2:firstName ?apellido. "+
+                "?project j.2:img ?image. "+
                 "?project j.2:mbox ?correo . "+
                 "?project schema:areaPerson ?labelarea . "+
                 "?labelarea rdfs:label ?area ."+
@@ -806,6 +887,8 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("nombre");
                 SimpleLiteral apellido =
                         (SimpleLiteral)bindingSet.getValue("apellido");
+                SimpleLiteral image =
+                        (SimpleLiteral)bindingSet.getValue("image");
                 SimpleLiteral area =
                         (SimpleLiteral)bindingSet.getValue("area");
                 SimpleLiteral correo =
@@ -816,7 +899,7 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("titulo");
                 String titlePersona = nombre.stringValue().concat(" ").concat(apellido.stringValue().concat("<br>").concat("Área: ").
                         concat(area.stringValue()).concat("<br>").concat("Correo: ").concat(correo.stringValue()));
-                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"participante",titlePersona);
+                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"participante",titlePersona,image.stringValue(),"circularImage");
                 Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),titulo.stringValue(),"projects",titulo.stringValue());
                 Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue());
                 if(contador==0){
@@ -828,7 +911,7 @@ public class consultasBD{
             }
             NodoRelacion nr = new NodoRelacion(listNodos,listRelacion);
             nodoRelacion.add(nr);
-            json = genson.serialize(nodoRelacion.get(0));
+            json = genson.toJson(nodoRelacion.get(0));
             System.out.println(json);
         }
         catch (QueryEvaluationException qee) {
@@ -1061,7 +1144,8 @@ public class consultasBD{
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"+
                 "select ?titulo ?id ?tipo " +
                 "WHERE { "+
-                "?s schema:area_conocimiento '"+xarea+"' . "+
+                "?s schema:areaproyecto ?sa . "+
+                "?sa rdfs:label '"+xarea+"' . "+
                 "?s j.2:title ?titulo . "+
                 "?s schema:ide_project ?id . "+
                 "?s schema:tipoproyecto ?labeltipo . " +
@@ -1110,7 +1194,8 @@ public class consultasBD{
         ArrayList<Nodo> listNodos = new ArrayList<>();
         ArrayList<Relacion> listRelacion = new ArrayList<>();
         ArrayList<NodoRelacion> nodoRelacion = new ArrayList<>();
-        Genson genson = new Genson.Builder().exclude("value", Relacion.class).exclude("title",Relacion.class).create();
+        Gson genson = new GsonBuilder().registerTypeHierarchyAdapter(
+                Collection.class, new CollectionAdapter()).create();
         String json="";
         // Create ObjectMapper object.
         ObjectMapper mapper = new ObjectMapper();
@@ -1118,7 +1203,7 @@ public class consultasBD{
         String strQuery ="PREFIX schema: <http://schema.org/> " +
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
-                "SELECT ?idpersona ?nombre ?apellido ?id_project ?titulo ?rol ?tipo ?correo ?area " +
+                "SELECT ?idpersona ?nombre ?apellido ?id_project ?titulo ?rol ?tipo ?correo ?area ?image " +
                 "WHERE {"+
                 "?s schema:ide_project '"+xproyecto+"' . "+
                 "?id schema:idProject ?s . "+
@@ -1130,6 +1215,7 @@ public class consultasBD{
                 "?project j.2:currentProject ?id. "+
                 "?project j.2:lastName ?nombre. "+
                 "?project j.2:firstName ?apellido. "+
+                "?project j.2:img ?image. "+
                 "?project j.2:mbox ?correo . "+
                 "?project schema:areaPerson ?labelarea . "+
                 "?labelarea rdfs:label ?area ."+
@@ -1160,6 +1246,8 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("correo");
                 SimpleLiteral area =
                         (SimpleLiteral)bindingSet.getValue("area");
+                SimpleLiteral image =
+                        (SimpleLiteral)bindingSet.getValue("image");
                 SimpleLiteral tipo =
                         (SimpleLiteral)bindingSet.getValue("tipo");
                 String rolP =(rol.stringValue().equalsIgnoreCase("Participación"))?"participante":"director";
@@ -1168,7 +1256,7 @@ public class consultasBD{
                 String grupo = clasificacion(tipo.stringValue());
                 String tituloreducido = TraduccionTitulo(titulo.stringValue());
                 String tituloespacios = TraduccionEspacios(titulo.stringValue());
-                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),rolP,titlePersona);
+                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),rolP,titlePersona,image.stringValue(),"circularImage");
                 Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),tituloreducido.toUpperCase(),grupo,tituloespacios.toUpperCase());
                 Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue());
                 if(contador==0){
@@ -1180,7 +1268,7 @@ public class consultasBD{
             }
             NodoRelacion nr = new NodoRelacion(listNodos,listRelacion);
             nodoRelacion.add(nr);
-            json = genson.serialize(nodoRelacion.get(0));
+            json = genson.toJson(nodoRelacion.get(0));
             System.out.println(json);
         }
         catch (QueryEvaluationException qee) {
@@ -1252,7 +1340,7 @@ public class consultasBD{
         ArrayList<Colaboradores> list = new ArrayList<>();
         String strQuery ="PREFIX schema: <http://schema.org/> " +
                     "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
-                    "SELECT ?idpersona (SAMPLE(?nombre) AS ?nombre) (SAMPLE(?apellido) AS ?apellido) (SAMPLE(?correo) AS ?correo) (SAMPLE(?area) AS ?area) (COUNT(?idpersona) as ?relaciones) " +
+                    "SELECT ?idpersona (SAMPLE(?nombre) AS ?nombre) (SAMPLE(?apellido) AS ?apellido) (SAMPLE(?correo) AS ?correo) (SAMPLE(?image) AS ?image) (SAMPLE(?area) AS ?area) (COUNT(?idpersona) as ?relaciones) " +
                     "WHERE { "+
                     "?s  schema:id_person '"+id+"' . "+
                     "?s j.2:currentProject ?id . "+
@@ -1261,6 +1349,7 @@ public class consultasBD{
                     "?persona j.2:currentProject ?project . " +
                     "?persona j.2:lastName ?nombre . "+
                     "?persona j.2:firstName ?apellido . "+
+                    "?persona j.2:img ?image . "+
                     "?persona j.2:mbox ?correo . "+
                     "?persona schema:areaPerson ?labelarea . "+
                     "?labelarea rdfs:label ?area ."+
@@ -1286,9 +1375,15 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("area");
                 SimpleLiteral relaciones =
                         (SimpleLiteral)bindingSet.getValue("relaciones");
+                SimpleLiteral image =
+                        (SimpleLiteral)bindingSet.getValue("image");
+                String imagen = image.stringValue();
+                if(imagen.equals("n")||imagen==null||image.equals("")){
+                    imagen = "https://image.ibb.co/jw55Ex/def_face.jpg";
+                }
                 if(idPersona.stringValue().compareTo(id)!=0){
                     Colaboradores colaboradores = new Colaboradores(idPersona.stringValue(),nombre.stringValue().concat("\n")
-                            .concat(apellido.stringValue()),correo.stringValue(),area.stringValue(),relaciones.stringValue());
+                            .concat(apellido.stringValue()),correo.stringValue(),area.stringValue(),relaciones.stringValue(),imagen);
                     list.add(colaboradores);
                 }
             }
@@ -1352,13 +1447,14 @@ public class consultasBD{
         ArrayList<Nodo> listNodos = new ArrayList<>();
         ArrayList<Relacion> listRelacion = new ArrayList<>();
         ArrayList<NodoRelacion> nodoRelacion = new ArrayList<>();
-        Genson genson = new Genson.Builder().exclude("value", Relacion.class).create();
+        Gson genson = new GsonBuilder().registerTypeHierarchyAdapter(
+                Collection.class, new CollectionAdapter()).create();
         String json="";
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         String strQuery ="PREFIX schema: <http://schema.org/> " +
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
-                "SELECT ?idpersona (SAMPLE(?nombre) AS ?nombre) (SAMPLE(?apellido) AS ?apellido) (SAMPLE(?correo) AS ?correo) (SAMPLE(?area) AS ?area) (COUNT(?idpersona) as ?relaciones) " +
+                "SELECT ?idpersona (SAMPLE(?nombre) AS ?nombre) (SAMPLE(?apellido) AS ?apellido) (SAMPLE(?correo) AS ?correo) (SAMPLE(?area) AS ?area) (SAMPLE(?image) AS ?image) (COUNT(?idpersona) as ?relaciones) " +
                 "WHERE { "+
                 "?s  schema:id_person '"+id+"' . "+
                 "?s j.2:currentProject ?id . "+
@@ -1367,6 +1463,7 @@ public class consultasBD{
                 "?persona j.2:currentProject ?project . " +
                 "?persona j.2:lastName ?nombre . "+
                 "?persona j.2:firstName ?apellido . "+
+                "?persona j.2:img ?image . "+
                 "?persona j.2:mbox ?correo . "+
                 "?persona schema:areaPerson ?labelarea . "+
                 "?labelarea rdfs:label ?area ."+
@@ -1392,17 +1489,19 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("area");
                 SimpleLiteral relaciones =
                         (SimpleLiteral)bindingSet.getValue("relaciones");
+                SimpleLiteral image =
+                        (SimpleLiteral)bindingSet.getValue("image");
                 Nodo nodoPersona;
                 String titlePersona = nombre.stringValue().concat(" ").concat(apellido.stringValue().concat("<br>").concat("Área: ").
                         concat(area.stringValue()).concat("<br>").concat("Correo: ").concat(correo.stringValue()));
                 if(idPersona.stringValue().equals(id)){
-                    nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"buscado",titlePersona);
+                    nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"buscado",titlePersona,image.stringValue(),"circularImage");
                 }else{
-                    nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"participante",titlePersona);
+                    nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"participante",titlePersona,image.stringValue(),"circularImage");
                 }
                 listNodos.add(nodoPersona);
                 if(idPersona.stringValue().compareTo(id)!=0){
-                    relacion = new Relacion(id,idPersona.stringValue(),relaciones.intValue(),relaciones.stringValue().concat(" proyectos realizados"));
+                    relacion = new Relacion(id,idPersona.stringValue(),relaciones.stringValue(),relaciones.stringValue().concat(" proyectos realizados"));
                     listRelacion.add(relacion);
                 }
             }
@@ -1411,14 +1510,15 @@ public class consultasBD{
             ArrayList<Integer> list = new ArrayList<>() ;
             for(int i=0;i<listRelacion.size();i++){
                 if(list.indexOf(listRelacion.get(i).getValue())!=0){
-                    list.add(listRelacion.get(i).getValue());
+                    list.add(Integer.parseInt(listRelacion.get(i).getValue()));
                 }
             }
             if(list.size()>1){
                 json = mapper.writeValueAsString(nodoRelacion.get(0));
             }else{
             //iguales
-                json = genson.serialize(nodoRelacion.get(0));
+                json = genson.toJson(nodoRelacion.get(0));
+                //json = genson.serialize(nodoRelacion.get(0));
             }
         }
         catch (QueryEvaluationException | JsonProcessingException qee) {
@@ -1429,12 +1529,30 @@ public class consultasBD{
         }
         return json;
     }
+    static class CollectionAdapter implements JsonSerializer<Collection<Nodo>> {
 
+        @Override
+        public JsonElement serialize(Collection<Nodo> src, Type type, JsonSerializationContext jsonSerializationContext) {
+            if (src == null)
+                return null;
+
+            JsonArray array = new JsonArray();
+
+            for (Object child : src) {
+                JsonElement element = jsonSerializationContext.serialize(child);
+                array.add(element);
+            }
+
+            return array;
+        }
+    }
     public String getGrapPerson(String id) {
         ArrayList<Nodo> listNodos = new ArrayList<>();
         ArrayList<Relacion> listRelacion = new ArrayList<>();
         ArrayList<NodoRelacion> nodoRelacion = new ArrayList<>();
-        Genson genson = new Genson.Builder().exclude("value", Relacion.class).exclude("title",Relacion.class).create();
+        //Genson genson = new Genson.Builder().exclude("value", Relacion.class).exclude("title",Relacion.class).create();
+        Gson builder = new GsonBuilder().registerTypeHierarchyAdapter(
+                Collection.class, new CollectionAdapter()).create();
         String json="";
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -1442,13 +1560,14 @@ public class consultasBD{
                 "PREFIX people: <http://utpl.edu.ec/data/people/> "+
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"+
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
-                "SELECT ?id ?idpersona ?nombre ?apellido ?title ?tipo ?correo ?area " +
+                "SELECT ?id ?idpersona ?nombre ?apellido ?title ?tipo ?correo ?area ?image " +
                 "WHERE {"+
                 "?s  schema:id_person '"+id+"' . "+
                 "?s  j.2:currentProject ?current . "+
                 "?s j.2:lastName ?nombre . "+
                 "?s j.2:firstName ?apellido . "+
                 "?s j.2:mbox ?correo . "+
+                "?s j.2:img ?image . "+
                 "?s schema:areaPerson ?labelarea . "+
                 "?labelarea rdfs:label ?area ."+
                 "?s schema:id_person ?idpersona . " +
@@ -1472,6 +1591,8 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("nombre");
                 SimpleLiteral apellido =
                         (SimpleLiteral)bindingSet.getValue("apellido");
+                SimpleLiteral image =
+                        (SimpleLiteral)bindingSet.getValue("image");
                 SimpleLiteral idProyecto =
                         (SimpleLiteral)bindingSet.getValue("id");
                 SimpleLiteral titulo =
@@ -1484,7 +1605,7 @@ public class consultasBD{
                         (SimpleLiteral)bindingSet.getValue("area");
                 String titlePersona = nombre.stringValue().concat(" ").concat(apellido.stringValue().concat("<br>").concat("Área: ").
                         concat(area.stringValue()).concat("<br>").concat("Correo: ").concat(correo.stringValue()));
-                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"buscado",titlePersona);
+                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"buscado",titlePersona, image.stringValue(),"circularImage");
                 String grupo=clasificacion(tipo.stringValue());
                 Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),"",grupo,TraduccionEspacios(titulo.stringValue()).toUpperCase());
                 Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue());
@@ -1497,7 +1618,7 @@ public class consultasBD{
             }
             NodoRelacion nr = new NodoRelacion(listNodos,listRelacion);
             nodoRelacion.add(nr);
-            json = genson.serialize(nodoRelacion.get(0));
+            json = builder.toJson(nodoRelacion.get(0));
             System.out.println(json);
         }
         catch (QueryEvaluationException  qee) {
@@ -1696,11 +1817,12 @@ public class consultasBD{
         String json="";
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
         String strQuery ="PREFIX onto:<http://www.ontotext.com/> " +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
                 "select ?area " +
                 "from onto:disable-sameAs { "+
-                "?s a <http://schema.org/areaproyecto> . "+
+                "?s a <http://schema.org/area_conocimiento> . "+
                 "?s rdfs:label ?area . } ORDER BY ?area ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);

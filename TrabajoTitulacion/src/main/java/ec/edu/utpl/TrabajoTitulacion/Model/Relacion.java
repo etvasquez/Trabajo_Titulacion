@@ -3,13 +3,13 @@ package ec.edu.utpl.TrabajoTitulacion.Model;
 public class Relacion {
     private String from;
     private String to;
-    private int value;
+    private String value;
     private String title;
 
     public Relacion() {
     }
 
-    public Relacion(String from, String to, int value, String title) {
+    public Relacion(String from, String to, String value, String title) {
         this.from = from;
         this.to = to;
         this.value = value;
@@ -37,11 +37,11 @@ public class Relacion {
         this.to = to;
     }
 
-    public int getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
