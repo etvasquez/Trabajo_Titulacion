@@ -1,6 +1,7 @@
 package ec.edu.utpl.TrabajoTitulacion.Model;
 
 public class Relacion {
+
     private String from;
     private String to;
     private String value;

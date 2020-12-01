@@ -45,7 +45,8 @@ public class consultasBD{
         String datasetFile = "/Users/eriiv/OneDrive/Escritorio/TT/V2/Implementacion/v1/repositorio-rdf.rdf";
         RepositoryConnection con = repository.getConnection();
         try {
-            con.add(dataset, "http://utpl.edu.ec/data/", Rio.getParserFormatForFileName(datasetFile).orElseThrow(Rio.unsupportedFormat(datasetFile)));
+            con.add(dataset, "http://utpl.edu.ec/data/", Rio.getParserFormatForFileName(datasetFile).
+                    orElseThrow(Rio.unsupportedFormat(datasetFile)));
         } finally {
             con.close();
         }
@@ -75,7 +76,6 @@ public class consultasBD{
         String strQuery ="";
         Usuario usuario = new Usuario();
         if(bandera){
-            identificador = identificador.concat("@utpl.edu.ec");
             strQuery =
                     "PREFIX schema: <http://schema.org/> "+
                             "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
@@ -103,7 +103,8 @@ public class consultasBD{
                             "?s schema:extension ?extension . "+
                             "?s j.2:phone ?telefono . ?s j.2:mbox ?email . "+
                             "filter(regex(?email, '"+identificador+"','i')) }";
-        }else{
+            identificador = identificador.concat("@utpl.edu.ec");
+         }else{
             strQuery =
                     "PREFIX schema: <http://schema.org/> "+
                             "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
@@ -617,14 +618,14 @@ public class consultasBD{
     public String insertActualizacion(Administracion administracion, String id) {
         String estado="1";
         String strInsert = "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
-                        "PREFIX schema: <http://schema.org/> "+
-                        "INSERT DATA { " +
-                        urlBase + "upgrade> schema:Upgrade " + urlBase + "upgradeRepository/" + id + "> . " +
-                        urlBase + "upgradeRepository/" + id + "> schema:dominio \"" + administracion.getDominio() + "\" . " +
-                        urlBase + "upgradeRepository/" + id + "> schema:puerto \"" + administracion.getPuerto() + "\" . " +
-                        urlBase + "upgradeRepository/" + id + "> schema:nombreDB \"" + administracion.getNombreBD()+ "\" . " +
-                        urlBase + "upgradeRepository/" + id + "> schema:user \"" + administracion.getUser()+ "\" . " +
-                        urlBase + "upgradeRepository/" + id + "> schema:date \"" + administracion.getPassword()+ "\" . } ";
+                "PREFIX schema: <http://schema.org/> "+
+                "INSERT DATA { " +
+                urlBase + "upgrade> schema:Upgrade " + urlBase + "upgradeRepository/" + id + "> . " +
+                urlBase + "upgradeRepository/" + id + "> schema:dominio \"" + administracion.getDominio() + "\" . " +
+                urlBase + "upgradeRepository/" + id + "> schema:puerto \"" + administracion.getPuerto() + "\" . " +
+                urlBase + "upgradeRepository/" + id + "> schema:nombreDB \"" + administracion.getNombreBD()+ "\" . " +
+                urlBase + "upgradeRepository/" + id + "> schema:user \"" + administracion.getUser()+ "\" . " +
+                urlBase + "upgradeRepository/" + id + "> schema:date \"" + administracion.getPassword()+ "\" . } ";
         RepositoryConnection repositoryConnection = con.getRepositoryConnection();
         repositoryConnection.begin();
         Update updateOperation = repositoryConnection.prepareUpdate(QueryLanguage.SPARQL, strInsert);
@@ -1191,15 +1192,6 @@ public class consultasBD{
     }
 
     public String getGrapProject(String xproyecto) {
-        ArrayList<Nodo> listNodos = new ArrayList<>();
-        ArrayList<Relacion> listRelacion = new ArrayList<>();
-        ArrayList<NodoRelacion> nodoRelacion = new ArrayList<>();
-        Gson genson = new GsonBuilder().registerTypeHierarchyAdapter(
-                Collection.class, new CollectionAdapter()).create();
-        String json="";
-        // Create ObjectMapper object.
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
         String strQuery ="PREFIX schema: <http://schema.org/> " +
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "+
@@ -1222,6 +1214,14 @@ public class consultasBD{
                 "?project schema:id_person ?idpersona ."+
                 " ?s j.2:title ?titulo . " +
                 "} ";
+        ArrayList<Nodo> listNodos = new ArrayList<>();
+        ArrayList<Relacion> listRelacion = new ArrayList<>();
+        ArrayList<NodoRelacion> nodoRelacion = new ArrayList<>();
+        Gson genson = new GsonBuilder().registerTypeHierarchyAdapter(
+                Collection.class, new CollectionAdapter()).create();
+        String json="";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
         TupleQueryResult result = null;
@@ -1856,6 +1856,7 @@ public class consultasBD{
     }
 
     public String ObtenerTotalTiposProyecto(int identificador) {
+        System.out.println("ESTO ES"+identificador);
         String strQuery="";
         ArrayList<Objeto> listaArea = new ArrayList<>();
         String json="";
@@ -1918,7 +1919,7 @@ public class consultasBD{
                 "PREFIX schema: <http://schema.org/> "+
                 "select (SAMPLE(?label) AS ?label) (COUNT(?tipo) as ?total) " +
                 "where { "+
-                "?s schema:area_conocimiento ?tipo ."+
+                "?s schema:areaproyecto ?tipo ."+
                 "?tipo rdfs:label ?label .  "+
                 "} GROUP BY ?tipo ORDER BY ?tipo ";
         TupleQuery tupleQuery = con.getRepositoryConnection()

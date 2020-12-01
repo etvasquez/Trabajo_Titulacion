@@ -9,8 +9,6 @@ import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.SKOS;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.sql.*;
@@ -19,8 +17,15 @@ import java.util.regex.Pattern;
 
 public class trasformacionRDF {
 
+    public void obtenerCSV(String docente, String proyecto, String codificacion) throws FileNotFoundException {
+            String [][] docentes = leerDocentesCSV(docente, codificacion);
+            String [][] proyectos = leerProyectosCSV(proyecto, codificacion);
+            crearOntologia(docentes,proyectos,docentes.length,proyectos.length);
+    }
+
     public void obtenerDatosBase(Administracion administracion){
-        String jdbcURL = "jdbc:mysql://"+administracion.getDominio()+":"+administracion.getPuerto()+"/"+administracion.getNombreBD()+
+        String jdbcURL = "jdbc:mysql://"+administracion.getDominio()+":"+administracion.getPuerto()
+                +"/"+administracion.getNombreBD()+
                 "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
         String username = administracion.getUser();
         String password = administracion.getPassword();
@@ -30,7 +35,8 @@ public class trasformacionRDF {
             String sql = "SELECT * FROM _docentes";
             Statement statement = connection.createStatement();
             ResultSet result = statement.executeQuery(sql);
-            BufferedWriter fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(csvFileDocente), "ISO-8859-15"));
+            BufferedWriter fileWriter = new BufferedWriter(new OutputStreamWriter
+                    (new FileOutputStream(csvFileDocente), "ISO-8859-15"));
             int contadorDocente = 0;
             while (result.next()) {
                 if(contadorDocente != 0){
@@ -140,6 +146,72 @@ public class trasformacionRDF {
 
     }
 
+    public String[][] leerDocentesCSV(String nombre, String codificacion){
+        String[][] atributos = new String[2017][27];
+        int limite = 0;
+        BufferedReader readPerson = null;
+        try {
+            // Abrir el .csv en buffer de lectura
+            String archivo = "/Users/eriiv/OneDrive/Escritorio/TT/V2/Implementacion/v1/Trabajo_Titulacion/TrabajoTitulacion/src/data-docente-export.csv";
+            readPerson = new BufferedReader(new FileReader(archivo));
+            readPerson = new BufferedReader (new InputStreamReader (new FileInputStream(archivo), codificacion));
+            // Leer una linea del archivo
+            String linea = readPerson.readLine();
+            while (linea != null) {
+                // Sepapar la linea leída con el separador definido previamente
+                atributos[limite] = linea.split(Pattern.quote("|"),-1);
+                // Volver a leer otra línea del fichero
+                linea = readPerson.readLine();
+                limite = limite + 1;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // Cierro el buffer de lectura
+            if (readPerson  != null) {
+                try {
+                    readPerson.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return atributos;
+    }
+
+    public String[][] leerProyectosCSV(String proyecto, String codificacion){
+        String[][] atributos = new String[5857][32];
+        int limite = 0;
+        BufferedReader readPerson = null;
+        try {
+            // Abrir el .csv en buffer de lectura
+            String archivo = "/Users/eriiv/OneDrive/Escritorio/TT/V2/Implementacion/v1/Trabajo_Titulacion/TrabajoTitulacion/src/data-proyecto-export.csv";
+            readPerson = new BufferedReader(new FileReader(archivo));
+            readPerson = new BufferedReader (new InputStreamReader (new FileInputStream(archivo), codificacion));
+            // Leer una linea del archivo
+            String linea = readPerson.readLine();
+            while (linea != null) {
+                // Sepapar la linea leída con el separador definido previamente
+                atributos[limite] = linea.split(Pattern.quote("|"),-1);
+                // Volver a leer otra línea del fichero
+                linea = readPerson.readLine();
+                limite = limite + 1;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            // Cierro el buffer de lectura
+            if (readPerson  != null) {
+                try {
+                    readPerson.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return atributos;
+    }
+
     public String[][] leerDocentes(int contadorFilas, int contadorColumnas){
         String[][] atributos = new String[contadorFilas][contadorColumnas];
         int limite = 0;
@@ -206,8 +278,10 @@ public class trasformacionRDF {
         return atributos_proyectos;
     }
 
-    public void crearOntologia(String[][] atributos, String[][] atributos_proyectos, int limite, int limite_proyectos) throws FileNotFoundException {
-        File f = new File("/Users/eriiv/OneDrive/Escritorio/TT/V2/Implementacion/v1/repositorio-rdf.rdf"); //definición del fichero donde insertaremos los datos RDF
+    public void crearOntologia(String[][] atributos, String[][] atributos_proyectos, int limite, int limite_proyectos)
+            throws FileNotFoundException {
+        //definición del fichero donde insertaremos los datos RDF
+        File f = new File("/Users/eriiv/OneDrive/Escritorio/TT/V2/Implementacion/v1/repositorio-rdf.rdf");
         FileOutputStream os = new FileOutputStream(f);
         Model model = ModelFactory.createDefaultModel();
         //Fijar prefijo de la ontología
@@ -236,7 +310,6 @@ public class trasformacionRDF {
         Resource project  = model.createResource("");
         //Crear tripletas personas
         for (int i = 0; i < limite; i++) {
-            System.out.println("id:"+atributos);
             //Obtener datos
             String personURI = prefixPeople + atributos[i][1];
             String id_person = atributos[i][1];
@@ -351,7 +424,6 @@ public class trasformacionRDF {
         }
        //Crear tripletas proyectos
         for (int i = 0; i < limite_proyectos; i++) {
-            System.out.println("esto es: "+i);
             //Obtener datos projectos
             String ide_Project = atributos_proyectos[i][6];
             String projectURI = prefixProject + atributos_proyectos[i][6];

@@ -10,7 +10,8 @@ public class Administracion {
 
     public Administracion(){}
 
-    public Administracion(String dominio, String puerto, String nombreBD, String user, String password) {
+    public Administracion(String dominio, String puerto, String nombreBD,
+                          String user, String password) {
         this.dominio = dominio;
         this.puerto = puerto;
         this.nombreBD = nombreBD;

@@ -3,6 +3,8 @@ package ec.edu.utpl.TrabajoTitulacion.View;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import ec.edu.utpl.TrabajoTitulacion.Controller.consultasBD;
+import ec.edu.utpl.TrabajoTitulacion.Controller.trasformacionRDF;
+import ec.edu.utpl.TrabajoTitulacion.Model.Administracion;
 import ec.edu.utpl.TrabajoTitulacion.Model.Objeto;
 import ec.edu.utpl.TrabajoTitulacion.Model.Proyecto;
 import ec.edu.utpl.TrabajoTitulacion.Model.Recurso;
@@ -21,9 +23,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.UUID;
 
 @Controller
 public class PrivateController {
@@ -89,7 +95,8 @@ public class PrivateController {
     @PostMapping("/upload")
     public String handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("fileName") String fileName,
                                    RedirectAttributes redirectAttributes, @RequestParam("id") String id,
-                                   @RequestParam("descripcion") String descripcion, @RequestParam("licencia") String licencia, Model model) {
+                                   @RequestParam("descripcion") String descripcion, @RequestParam("licencia")
+                                               String licencia, Model model) {
         String filename = StringUtils.cleanPath(file.getOriginalFilename());
         int indexPunto = filename.indexOf( '.');
         String extension="";
@@ -105,6 +112,29 @@ public class PrivateController {
                 "Archivo " + file.getOriginalFilename() + " subido correctamente!");
         localicacion=estado;
         return "redirect:/editar_proyecto/"+id;
+    }
+
+    @PostMapping("/uploadfile")
+    public String FileUploadUpload(@RequestParam("file1") MultipartFile filedoc, @RequestParam("file2") MultipartFile filepro,
+                                   RedirectAttributes redirectAttributes, @RequestParam("codificacion") String codificacion) throws IOException {
+        String filename = StringUtils.cleanPath("data_docente-export");
+        String filename1 = StringUtils.cleanPath("data-proyecto-export");
+        String uuid = UUID.randomUUID().toString();
+        System.out.println(filename);
+        System.out.println(filename1);
+        trasformacionRDF t = new trasformacionRDF();
+        t.obtenerCSV(filename.concat(".csv"),filename1.concat(".csv"),codificacion);
+        consultas.loadDataSet();
+        Date objDate = new Date();
+        String strDateFormat = "hh: mm: ss a dd-MMM-yyyy";
+        SimpleDateFormat objSDF = new SimpleDateFormat(strDateFormat);
+        Administracion administracion1 = new Administracion("archivo","-","-","admin",objSDF.format(objDate));
+        consultas.insertActualizacion(administracion1,uuid);
+        redirectAttributes.addFlashAttribute("message1",
+                "Archivo " + filedoc.getOriginalFilename() + " subido correctamente!");
+        redirectAttributes.addFlashAttribute("message2",
+                "Archivo " + filepro.getOriginalFilename() + " subido correctamente!");
+        return "redirect:/admin";
     }
 
     @ExceptionHandler(StorageFileNotFoundException.class)

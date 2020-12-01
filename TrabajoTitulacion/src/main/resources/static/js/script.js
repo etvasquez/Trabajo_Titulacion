@@ -287,9 +287,9 @@ function agrandarGrafo(idProject) {
                 };
                 actualizarJSONHTML(JSON.stringify(datapresentar), JSON.stringify(dataRepetidos));
                 armarGrafo();
-            } else {
+            } /*else {
                 alert("Proyecto seleccionado no contiene participantes");
-            }
+            }*/
         });
 }
 

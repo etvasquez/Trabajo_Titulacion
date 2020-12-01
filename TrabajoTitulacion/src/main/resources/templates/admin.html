@@ -4,37 +4,90 @@
     <script type="text/javascript" src="../static/js/script.js"></script>
 </head>
 <body>
+<script>
+    $(document).ready(function() {
+        $("#sel1").change(function (){
+            if($('#sel1').val()=="1"){
+                $("#tipo1").css("display","block");
+                $("#tipo2").css("display","none");
+            }else{
+                $("#tipo2").css("display","block");
+                $("#tipo1").css("display","none");
+            }
+        });
+    });
+</script>
 <nav th:insert="fragments/menu :: menu">
 </nav>
 <h4></h4>
 <div class="tab-content p-2" id="myTabContent">
     <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-        <h5 class="text-center text-info">Agregar nueva información al grafo de conocimiento</h5>
+        <h5 class="text-center text-primary">Agregar nueva información al grafo de conocimiento</h5>
         <div class="form-row">
-            <div class="form-group col-md-4">
+            <!--<div class="form-group col-md-4">
                 <br>
                 <strong class="m-2 text-info">¿Cómo funciona?</strong>
                 <p class="m-2">1. Se realiza la conexión a base con la finalidad de exportar la información a formato csv.</p>
                 <p class="m-2">2. Con el conjunto de dataset exportados se crea el grafo de conocimiento seguiendo el esquema definido utilizando los vocablos SKOS, SCHEMA y FOAF</p>
                 <p class="m-2">3. Finalmente, se importa el nuevo conjunto de datos en formato rdf a la base de datos semántica.</p>
-            </div>
-            <div class="form-group col-md-3">
-                <p class="m-2">Llene el siguiente formulario con la información de conexión a la base de datos.</p>
-                <form action="#" th:action="@{/admin}" method="post" th:object="${admin}">
-                    <div class="form-group">
-                        <label for="FormControlTextDominio"><strong>Dominio: </strong></label>
-                        <input type="text" class="form-control" id="FormControlTextDominio" th:field="*{dominio}">
-                        <label for="FormControlTextPuerto"><strong>Puerto: </strong></label>
-                        <input type="text" class="form-control" id="FormControlTextPuerto" th:field="*{puerto}">
-                        <label for="FormControlTextnombreBD"><strong>Nombre de la Base de Datos: </strong></label>
-                        <input type="text" class="form-control" id="FormControlTextnombreBD" th:field="*{nombreBD}">
-                        <label for="FormControlTextUser"><strong>Usuario: </strong></label>
-                        <input type="text" class="form-control" id="FormControlTextUser" th:field="*{user}">
-                        <label for="FormControlTexPass"><strong>Contraseña: </strong></label>
-                        <input type="password" class="form-control" id="FormControlTexPass" th:field="*{password}">
+            </div>-->
+            <div class="form-group col-md-6">
+                <div class="form-group">
+                    <label for="sel1">Seleccione método de actualización: </label>
+                    <select class="form-control" id="sel1">
+                        <option value="1">Cargar archivos csv</option>
+                        <option value="2">Conexión directa a base de datos</option>
+                    </select>
+                </div>
+                <div id="tipo1" >
+                    <div th:if="${message1}">
+                        <h5 class="text-primary" th:text="${message1}"/>
                     </div>
-                    <button type="submit" class="form-control btn btn-primary fa fa-network-wired"> Actualizar</button>
-                </form>
+                    <div th:if="${message2}">
+                        <h5 class="text-primary" th:text="${message2}"/>
+                    </div>
+                    <form action="#" th:action="@{/uploadfile}" enctype="multipart/form-data" method="post">
+                        <div class="form-group">
+                            <div class="form-row">
+                                <div class="form-group col-md-5 ml-6">
+                                    <h4 class="m-2 text-primary"><b>1. </b>Cargar archivos</h4>
+                                    <label for="file1" class="text-secondary"><strong>1.1. Cargar datos de usuarios</strong></label>
+                                    <input type="file" class="form-control-file" id="file1" name="file1" accept=".csv">
+                                    <br>
+                                    <label for="file2" class="text-secondary"><strong>1.2. Cargar datos de proyectos</strong></label>
+                                    <input type="file" class="form-control-file" id="file2" name="file2" accept=".csv">
+                                    <h4 class="m-2 text-primary"><b>2. </b>Elegir codificación</h4>
+                                    <label for="codificacion"><strong>Codificación: </strong></label>
+                                    <select class="form-control" id="codificacion" name="codificacion">
+                                        <option value="UTF-8">UTF-8</option>
+                                        <option value="ISO 8859-15">ISO 8859-15</option>
+                                        <option value="ISO 8859-1">ISO 8859-1</option>
+                                        <option value="ANSI">ANSI</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="form-control btn btn-primary fa fa-network-wired"> Actualizar</button>
+                        </div>
+                    </form>
+                </div>
+                <div id="tipo2" style="display: none">
+                    <p class="m-2">Llene el siguiente formulario con la información de conexión a la base de datos.</p>
+                    <form action="#" th:action="@{/admin}" method="post" th:object="${admin}" class="m-2">
+                        <div class="form-group">
+                            <label for="FormControlTextDominio"><strong>Dominio: </strong></label>
+                            <input type="text" class="form-control" id="FormControlTextDominio" th:field="*{dominio}">
+                            <label for="FormControlTextPuerto"><strong>Puerto: </strong></label>
+                            <input type="text" class="form-control" id="FormControlTextPuerto" th:field="*{puerto}">
+                            <label for="FormControlTextnombreBD"><strong>Nombre de la Base de Datos: </strong></label>
+                            <input type="text" class="form-control" id="FormControlTextnombreBD" th:field="*{nombreBD}">
+                            <label for="FormControlTextUser"><strong>Usuario: </strong></label>
+                            <input type="text" class="form-control" id="FormControlTextUser" th:field="*{user}">
+                            <label for="FormControlTexPass"><strong>Contraseña: </strong></label>
+                            <input type="password" class="form-control" id="FormControlTexPass" th:field="*{password}">
+                        </div>
+                        <button type="submit" class="form-control btn btn-primary fa fa-network-wired"> Actualizar</button>
+                    </form>
+                </div>
             </div>
             <div class="form-group col-md-5">
                 <div>
