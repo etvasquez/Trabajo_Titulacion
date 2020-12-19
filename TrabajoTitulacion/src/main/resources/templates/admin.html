@@ -1,7 +1,9 @@
 <!doctype html>
-<html xmlns:th="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.w3.org/1999/xhtml" lang="es">
 <head th:insert="fragments/head :: header">
-    <script type="text/javascript" src="../static/js/script.js"></script>
+    <title>Administración</title>
+    <meta charset="UTF-8">
+    <script src="../static/js/script.js"></script>
 </head>
 <body>
 <script>
@@ -19,7 +21,6 @@
 </script>
 <nav th:insert="fragments/menu :: menu">
 </nav>
-<h4></h4>
 <div class="tab-content p-2" id="myTabContent">
     <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
         <h5 class="text-center text-primary">Agregar nueva información al grafo de conocimiento</h5>
@@ -41,10 +42,10 @@
                 </div>
                 <div id="tipo1" >
                     <div th:if="${message1}">
-                        <h5 class="text-primary" th:text="${message1}"/>
+                        <p class="text-primary" th:text="${message1}"></p>
                     </div>
                     <div th:if="${message2}">
-                        <h5 class="text-primary" th:text="${message2}"/>
+                        <p class="text-primary" th:text="${message2}"></p>
                     </div>
                     <form action="#" th:action="@{/uploadfile}" enctype="multipart/form-data" method="post">
                         <div class="form-group">
@@ -113,7 +114,7 @@
                         </tbody>
                     </table>
                     <div th:if="${existe}">
-                        <p class="text-info text-center" th:text="${existe}"/>
+                        <p class="text-info text-center" th:text="${existe}"></p>
                     </div>
                 </div>
             </div>

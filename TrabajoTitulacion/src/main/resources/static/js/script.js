@@ -828,7 +828,7 @@ function armarGrafo() {
                             shape: "circularImage",
                             image: "n",
                             color: {
-                                border: "#4D4D4D",
+                                border: "#FFFFFF",
                                 background: "#FFFFFF",
                             },
                             value: 1,

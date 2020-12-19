@@ -1,6 +1,9 @@
 <!doctype html>
+<meta charset="UTF-8">
 <html xmlns:th="http://www.w3.org/1999/xhtml">
 <head th:insert="fragments/head :: header">
+    <meta charset="UTF-8">s
+    <title>Editar proyecto</title>
 </head>
 <body>
 <script>
@@ -120,21 +123,24 @@
                 <div class="form-group">
                     <div class="form-row">
                         <div class="form-group col-md-5">
-                            <input type="text" id="fileName" name="fileName" hidden>
-                            <input type="text" id="id" name="id" hidden>
-                            <label for="file"><strong>Subir nuevo recurso</strong></label>
-                            <input type="file" class="form-control-file" id="file" name="file" onclick="generarUID()">
-                            <label for="descripcion"><strong>Descripción del recurso</strong></label>
-                            <textarea class="form-control" required rows="3" id="descripcion" name="descripcion"></textarea>
-                            <label for="licencia"><strong>Tipo de licencia</strong></label>
-                            <!--<input type="text" id="licencia" name="licencia" class="form-control">-->
-                            <select class="js-example-basic-single" id="licencia">
-                                <option value="ccby">CC BY</option>
-                                <option value="ccbync">CC BY-NC</option>
-                                <option value="ccbyncsa">CC BY-NC-SA</option>
-                                <option value="ccbynd">CC BY-ND</option>
-                                <option value="ccbyncnd">CC BY-NC-ND</option>
-                            </select>
+                            <div class="form-group">
+                                <input type="text" id="fileName" name="fileName" hidden>
+                                <input type="text" id="id" name="id" hidden>
+                                <label for="file"><strong>Subir nuevo recurso</strong></label>
+                                <input type="file" class="form-control-file" id="file" name="file" onclick="generarUID()">
+                                <label for="descripcion"><strong>Descripción del recurso</strong></label>
+                                <textarea class="form-control" required rows="3" id="descripcion" name="descripcion"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="licencia"><strong>Tipo de licencia</strong></label>
+                                <select class="js-example-basic-single" id="licencia" name="licencia">
+                                    <option value="ccby">CC BY</option>
+                                    <option value="ccbync">CC BY-NC</option>
+                                    <option value="ccbyncsa">CC BY-NC-SA</option>
+                                    <option value="ccbynd">CC BY-ND</option>
+                                    <option value="ccbyncnd">CC BY-NC-ND</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-group col-md-1">
                         </div>
