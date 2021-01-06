@@ -1,5 +1,5 @@
 <!doctype html>
-<html xmlns:th="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.w3.org/1999/xhtml" lang="es">
 <head th:insert="fragments/head :: header">
     <meta charset="UTF-8">
     <title>Repositorio</title>
@@ -42,7 +42,7 @@
                 <td>
                         <div class="card" style="height: 250px; width: 400px" th:if="${proyecto.nodo1.id!=''}">
                             <div class="card-body text-center">
-                                <h6 th:text="${proyecto.nodo1.label}"></h6>
+                                <b th:text="${proyecto.nodo1.label}"></b>
                                 <p><img class='img1' src='../static/img/user.png' alt='coordinador'><span th:text="${proyecto.nodo1.group}"> </span></p>
                                 <a th:href="@{'/proyecto/' + ${proyecto.nodo1.id}}" class="btn btn-primary stretched-link mb-2" th:text="${proyecto.nodo1.title}"></a>
                             </div>
@@ -51,7 +51,7 @@
                 <td>
                         <div class="card" style="height: 250px; width: 400px" th:if="${proyecto.nodo2.id!=''}">
                             <div class="card-body text-center">
-                                <h6 th:text="${proyecto.nodo2.label}"></h6>
+                                <b th:text="${proyecto.nodo2.label}"></b>
                                 <p><img class='img1' src='../static/img/user.png' alt='coordinador'><span th:text="${proyecto.nodo2.group}"> </span></p>
                                 <a th:href="@{'/proyecto/' + ${proyecto.nodo2.id}}" class="btn btn-primary stretched-link mb-2 float-" th:text="${proyecto.nodo2.title}"></a>
                             </div>
@@ -60,7 +60,7 @@
                 <td>
                         <div class="card" style="height: 250px; width: 400px" th:if="${proyecto.nodo3.id!=''}">
                             <div class="card-body text-center">
-                                <h6 th:text="${proyecto.nodo3.label}"></h6>
+                                <b th:text="${proyecto.nodo3.label}"></b>
                                 <p><img class='img1' src='../static/img/user.png' alt='coordinador'><span th:text="${proyecto.nodo3.group}"> </span></p>
                                 <a th:href="@{'/proyecto/' + ${proyecto.nodo3.id}}" class="btn btn-primary stretched-link mb-2" th:text="${proyecto.nodo3.title}"></a>
                             </div>
@@ -71,7 +71,5 @@
         </table>
     </div>
 </div>
-<footer th:insert="fragments/footer :: footer">
-</footer>
 </body>
 </html>

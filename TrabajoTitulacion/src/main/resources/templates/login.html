@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" lang="es">
 <head th:insert="fragments/head :: header">
     <meta charset="UTF-8">
     <title>Login</title>
@@ -8,7 +8,7 @@
 <div class="container">
     <div class="container theme-showcase" role="main">
         <hr class="featurette-divider">
-        <img src="../static/img/login.png" width="136" height="136" class="center">
+        <img src="../static/img/login.png" alt="Imagen" width="136" height="136" class="center">
         <form class="form-signin" th:action="@{/login}" method="post">
             <h3 class="form-signin-heading text-center">Iniciar Sesión</h3>
             <label for="username" class="sr-only">Usuario</label>
@@ -20,6 +20,5 @@
         </form>
     </div>
 </div>
-</footer>
 </body>
 </html>
