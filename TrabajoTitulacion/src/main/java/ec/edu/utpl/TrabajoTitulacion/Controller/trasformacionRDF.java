@@ -12,7 +12,6 @@ import org.apache.jena.vocabulary.SKOS;
 
 import java.io.*;
 import java.sql.*;
-import java.sql.Statement;
 import java.util.regex.Pattern;
 
 public class trasformacionRDF {
@@ -146,7 +145,7 @@ public class trasformacionRDF {
 
     }
 
-    public String[][] leerDocentesCSV(String nombre, String codificacion){
+    private String[][] leerDocentesCSV(String nombre, String codificacion){
         String[][] atributos = new String[2017][27];
         int limite = 0;
         BufferedReader readPerson = null;
@@ -179,7 +178,7 @@ public class trasformacionRDF {
         return atributos;
     }
 
-    public String[][] leerProyectosCSV(String proyecto, String codificacion){
+    private String[][] leerProyectosCSV(String proyecto, String codificacion){
         String[][] atributos = new String[5857][32];
         int limite = 0;
         BufferedReader readPerson = null;
@@ -212,7 +211,7 @@ public class trasformacionRDF {
         return atributos;
     }
 
-    public String[][] leerDocentes(int contadorFilas, int contadorColumnas){
+    private String[][] leerDocentes(int contadorFilas, int contadorColumnas){
         String[][] atributos = new String[contadorFilas][contadorColumnas];
         int limite = 0;
         BufferedReader readPerson = null;
@@ -245,7 +244,7 @@ public class trasformacionRDF {
         return atributos;
     }
 
-    public String[][] leerProyectos(int contadorFilas, int contadorColumnas){
+    private String[][] leerProyectos(int contadorFilas, int contadorColumnas){
        String[][] atributos_proyectos = new String[contadorFilas][contadorColumnas];
         int limite_proyectos = 0;
         BufferedReader readProjects = null;
@@ -278,7 +277,7 @@ public class trasformacionRDF {
         return atributos_proyectos;
     }
 
-    public void crearOntologia(String[][] atributos, String[][] atributos_proyectos, int limite, int limite_proyectos)
+    private void crearOntologia(String[][] atributos, String[][] atributos_proyectos, int limite, int limite_proyectos)
             throws FileNotFoundException {
         //definición del fichero donde insertaremos los datos RDF
         File f = new File("/Users/eriiv/OneDrive/Escritorio/TT/V2/Implementacion/v1/repositorio-rdf.rdf");

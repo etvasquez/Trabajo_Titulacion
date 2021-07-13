@@ -7,17 +7,27 @@
 <body>
 <script>
     $(document).ready(function() {
-        var backgroundColor = ['#1ABC9C','#2ECC71','#9B59B6','#3498DB','#F1C40F','#E74C3C','#E67E22','#FB3CCF','#11C9C1','#36C869','#F72A71'];
-        var borderColor = ['#307D74','#269A56','#754086','#3C7DA8','#BD9C1E','#B1392D','#AA5F1F','#A73B90','#0EB0A9','#0EB046','#C22C60'];
-        var acumulador = 0, acumulador1 = 0, acumulador2 = 0, acumulador3 = 0, acumulador4 = 0, acumulador5 = 0, acumulador6 = 0
+        const backgroundColor = ['#1ABC9C', '#2ECC71', '#9B59B6', '#3498DB', '#F1C40F', '#E74C3C', '#E67E22', '#FB3CCF', '#11C9C1', '#36C869', '#F72A71'];
+        const borderColor = ['#307D74', '#269A56', '#754086', '#3C7DA8', '#BD9C1E', '#B1392D', '#AA5F1F', '#A73B90', '#0EB0A9', '#0EB046', '#C22C60'];
+        let acumulador = 0, acumulador1 = 0, acumulador2 = 0, acumulador3 = 0, acumulador4 = 0, acumulador5 = 0,
+            acumulador6 = 0
             , acumulador7 = 0, acumulador8 = 0, acumulador9 = 0;
-        var tipo = JSON.parse(document.getElementById('listaproyectos').innerHTML);
-        var area = JSON.parse(document.getElementById('listaareas').innerHTML);
-        var estado = JSON.parse(document.getElementById('listaestado').innerHTML);
-        var cobertura = JSON.parse(document.getElementById('listacobertura').innerHTML);
-        var topdocentes = JSON.parse(document.getElementById('listaDocentes').innerHTML);
-        var datos  = [], data = [], datos1  = [], data1 = [], datos2  = [], data2 = [], datos3  = [], data3 = [], datos4  = [],
-            data4 = [], datos5 = [], label = [], color = [], datos6 = [], label1 = [], color1 = [], datos7 = [], label2 = []
+        const tipo = JSON.parse(document.getElementById('listaproyectos').innerHTML);
+        const area = JSON.parse(document.getElementById('listaareas').innerHTML);
+        const estado = JSON.parse(document.getElementById('listaestado').innerHTML);
+        const cobertura = JSON.parse(document.getElementById('listacobertura').innerHTML);
+        const topdocentes = JSON.parse(document.getElementById('listaDocentes').innerHTML);
+        const datos = [];
+        let data = [];
+        const datos1 = [];
+        let data1 = [];
+        const datos2 = [];
+        let data2 = [];
+        const datos3 = [];
+        let data3 = [];
+        const datos4 = [];
+        let data4 = [];
+        const datos5 = [], label = [], color = [], datos6 = [], label1 = [], color1 = [], datos7 = [], label2 = []
             , color2 = [], datos8 = [], label3 = [], color3 = [], datos9 = [], label4 = [], color4 = [];
         $.each(tipo, function (key, value) {
             data.push(value.nombre);
@@ -52,35 +62,35 @@
         $.each(tipo, function (key, value) {
             datos9.push(value.nombre);
             label4.push(value.id);
-            color4.push(backgroundColor[acumulador9])
+            color4.push(backgroundColor[acumulador9]);
             acumulador9++;
         });
         $.each(area, function (key, value) {
             datos8.push(value.nombre);
             label3.push(value.id);
-            color3.push(backgroundColor[acumulador8])
+            color3.push(backgroundColor[acumulador8]);
             acumulador8++;
         });
         $.each(estado, function (key, value) {
             datos7.push(value.nombre);
             label2.push(value.id);
-            color2.push(backgroundColor[acumulador7])
+            color2.push(backgroundColor[acumulador7]);
             acumulador7++;
         });
         $.each(cobertura, function (key, value) {
             datos6.push(value.nombre);
             label1.push(value.id);
-            color1.push(backgroundColor[acumulador6])
+            color1.push(backgroundColor[acumulador6]);
             acumulador6++;
         });
         $.each(topdocentes, function (key, value) {
             datos5.push(value.nombre);
             label.push(value.id);
-            color.push(backgroundColor[acumulador5])
+            color.push(backgroundColor[acumulador5]);
             acumulador5++;
         });
-        var ctx = document.getElementById('myChart').getContext('2d');
-        var myChart = new Chart(ctx, {
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: ['Tipos de proyectos'],
@@ -96,8 +106,8 @@
                 }
             }
         });
-        var ctx1 = document.getElementById('myChart1').getContext('2d');
-        var myChart1 = new Chart(ctx1, {
+        const ctx1 = document.getElementById('myChart1').getContext('2d');
+        const myChart1 = new Chart(ctx1, {
             type: 'bar',
             data: {
                 labels: ['Áreas de proyectos'],
@@ -113,8 +123,8 @@
                 }
             }
         });
-        var ctx2 = document.getElementById('myChart2').getContext('2d');
-        var myChart2 = new Chart(ctx2, {
+        const ctx2 = document.getElementById('myChart2').getContext('2d');
+        const myChart2 = new Chart(ctx2, {
             type: 'bar',
             data: {
                 labels: ['Estado de proyectos'],
@@ -130,8 +140,8 @@
                 }
             }
         });
-        var ctx3 = document.getElementById('myChart3').getContext('2d');
-        var myChart3 = new Chart(ctx3, {
+        const ctx3 = document.getElementById('myChart3').getContext('2d');
+        const myChart3 = new Chart(ctx3, {
             type: 'bar',
             data: {
                 labels: ['Estado de proyectos'],
@@ -147,8 +157,8 @@
                 }
             }
         });
-        var ctx4 = document.getElementById('myChart4').getContext('2d');
-        var myChart4 = new Chart(ctx4, {
+        const ctx4 = document.getElementById('myChart4').getContext('2d');
+        const myChart4 = new Chart(ctx4, {
             type: 'bar',
             data: {
                 labels: ['Top 5 docentes con más proyectos'],
@@ -253,10 +263,10 @@
             <div class="col-md-12">
                 <ul class="nav nav-pills mb-3 float-right" id="pills-tab" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true"><i class="fas fa-chart-bar"></i></a>
+                        <a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true"><em class="fas fa-chart-bar"></em></a>
                     </li>
                     <li class="nav-item fa fa-pie-chart">
-                        <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false"><i class="fas fa-chart-pie"></i></a>
+                        <a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false"><em class="fas fa-chart-pie"></em></a>
                     </li>
                 </ul>
                 <div class="tab-content" id="pills-tabContent">
@@ -281,10 +291,10 @@
             <div class="col-md-12">
                 <ul class="nav nav-pills mb-3 float-right" id="pills-tab1" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active" id="pills-home-tab1" data-toggle="pill" href="#pills-home1" role="tab" aria-controls="pills-home" aria-selected="true"><i class="fas fa-chart-bar"></i></a>
+                        <a class="nav-link active" id="pills-home-tab1" data-toggle="pill" href="#pills-home1" role="tab" aria-controls="pills-home" aria-selected="true"><em class="fas fa-chart-bar"></em></a>
                     </li>
                     <li class="nav-item fa fa-pie-chart">
-                        <a class="nav-link" id="pills-profile-tab1" data-toggle="pill" href="#pills-profile1" role="tab" aria-controls="pills-profile" aria-selected="false"><i class="fas fa-chart-pie"></i></a>
+                        <a class="nav-link" id="pills-profile-tab1" data-toggle="pill" href="#pills-profile1" role="tab" aria-controls="pills-profile" aria-selected="false"><em class="fas fa-chart-pie"></em></a>
                     </li>
                 </ul>
                 <div class="tab-content" id="pills-tabContent1">
@@ -309,10 +319,10 @@
             <div class="col-md-12">
                 <ul class="nav nav-pills mb-3 float-right" id="pills-tab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active" id="pills-home-tab2" data-toggle="pill" href="#pills-home2" role="tab" aria-controls="pills-home" aria-selected="true"><i class="fas fa-chart-bar"></i></a>
+                        <a class="nav-link active" id="pills-home-tab2" data-toggle="pill" href="#pills-home2" role="tab" aria-controls="pills-home" aria-selected="true"><em class="fas fa-chart-bar"></em></a>
                     </li>
                     <li class="nav-item fa fa-pie-chart">
-                        <a class="nav-link" id="pills-profile-tab2" data-toggle="pill" href="#pills-profile2" role="tab" aria-controls="pills-profile" aria-selected="false"><i class="fas fa-chart-pie"></i></a>
+                        <a class="nav-link" id="pills-profile-tab2" data-toggle="pill" href="#pills-profile2" role="tab" aria-controls="pills-profile" aria-selected="false"><em class="fas fa-chart-pie"></em></a>
                     </li>
                 </ul>
                 <div class="tab-content" id="pills-tabContent2">
@@ -337,10 +347,10 @@
             <div class="col-md-12">
                 <ul class="nav nav-pills mb-3 float-right" id="pills-tab3" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active" id="pills-home-tab3" data-toggle="pill" href="#pills-home3" role="tab" aria-controls="pills-home" aria-selected="true"><i class="fas fa-chart-bar"></i></a>
+                        <a class="nav-link active" id="pills-home-tab3" data-toggle="pill" href="#pills-home3" role="tab" aria-controls="pills-home" aria-selected="true"><em class="fas fa-chart-bar"></em></a>
                     </li>
                     <li class="nav-item fa fa-pie-chart">
-                        <a class="nav-link" id="pills-profile-tab3" data-toggle="pill" href="#pills-profile3" role="tab" aria-controls="pills-profile" aria-selected="false"><i class="fas fa-chart-pie"></i></a>
+                        <a class="nav-link" id="pills-profile-tab3" data-toggle="pill" href="#pills-profile3" role="tab" aria-controls="pills-profile" aria-selected="false"><em class="fas fa-chart-pie"></em></a>
                     </li>
                 </ul>
                 <div class="tab-content" id="pills-tabContent3">
@@ -365,10 +375,10 @@
             <div class="col-md-12">
                 <ul class="nav nav-pills mb-3 float-right" id="pills-tab4" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active" id="pills-home-tab4" data-toggle="pill" href="#pills-home4" role="tab" aria-controls="pills-home" aria-selected="true"><i class="fas fa-chart-bar"></i></a>
+                        <a class="nav-link active" id="pills-home-tab4" data-toggle="pill" href="#pills-home4" role="tab" aria-controls="pills-home" aria-selected="true"><em class="fas fa-chart-bar"></em></a>
                     </li>
                     <li class="nav-item fa fa-pie-chart">
-                        <a class="nav-link" id="pills-profile-tab4" data-toggle="pill" href="#pills-profile4" role="tab" aria-controls="pills-profile" aria-selected="false"><i class="fas fa-chart-pie"></i></a>
+                        <a class="nav-link" id="pills-profile-tab4" data-toggle="pill" href="#pills-profile4" role="tab" aria-controls="pills-profile" aria-selected="false"><em class="fas fa-chart-pie"></em></a>
                     </li>
                 </ul>
                 <div class="tab-content" id="pills-tabContent4">

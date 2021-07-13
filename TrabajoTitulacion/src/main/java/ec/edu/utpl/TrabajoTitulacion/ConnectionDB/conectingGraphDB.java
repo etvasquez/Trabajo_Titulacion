@@ -21,8 +21,6 @@ public class conectingGraphDB {
         Repository repository = new HTTPRepository(
                 GRAPHDB_SERVER, REPOSITORY_ID);
         repository.initialize();
-        RepositoryConnection repositoryConnection =
-                repository.getConnection();
-        return repositoryConnection;
+        return repository.getConnection();
     }
 }

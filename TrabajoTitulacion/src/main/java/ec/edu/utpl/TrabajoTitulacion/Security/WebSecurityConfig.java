@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+class mWebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {

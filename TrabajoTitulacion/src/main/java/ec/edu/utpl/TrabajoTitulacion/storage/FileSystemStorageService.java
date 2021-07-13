@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +30,11 @@ public class FileSystemStorageService implements StorageService {
 
     @Override
     public void store(MultipartFile file,String fileName) {
-        String filename = StringUtils.cleanPath(file.getOriginalFilename());
+        String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
         int indexPunto = filename.indexOf( '.');
         String extension="";
         if(indexPunto!=-1){
-            extension = filename.substring(indexPunto,filename.length());
+            extension = filename.substring(indexPunto);
         }
         filename = fileName.concat(extension);
         try {

@@ -21,12 +21,12 @@
     <tbody>
     <tr th:each="lista : ${listaproyectos}">
         <td hidden th:text="${lista.id}"></td>
-        <td><a th:href="@{'/proyecto/' + ${lista.id}}" th:text="${lista.titulo}" th:title="${lista.titulo}"></a></td>
+        <td><a style="color: #0049c3" th:href="@{'/proyecto/' + ${lista.id}}" th:text="${lista.titulo}" th:title="${lista.titulo}"></a></td>
         <td th:text="${lista.tipo}"></td>
         <td th:text="${lista.estado}"></td>
         <td>
-            <a title="Ver proyecto" class="btn btn-sm btn-primary" th:attr="onclick='verProyecto(\'' + ${lista.id}+'\')'"><i class="fa fa-eye"></i></a>&nbsp;&nbsp;
-            <a title="Editar proyecto" class="btn btn-sm btn-secondary" th:attr="onclick='editarProyecto(\'' + ${lista.id}+'\')'"><i class="fa fa-edit"></i></a>
+            <a title="Ver proyecto" class="btn btn-sm btn-primary" th:attr="onclick='verProyecto(\'' + ${lista.id}+'\')'"><em class="fa fa-eye"></em></a>&nbsp;&nbsp;
+            <a title="Editar proyecto" class="btn btn-sm btn-secondary" th:attr="onclick='editarProyecto(\'' + ${lista.id}+'\')'"><em class="fa fa-edit"></em></a>
         </td>
     </tr>
     </tbody>

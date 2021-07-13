@@ -12,26 +12,26 @@
 <div class="container" id="divtitulo">
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12 col-xl-12 col-lg-12">
-            <p id="titulo"></p>
+            <p id="titulo" class="h2"></p>
         </div>
     </div>
 </div>
 <div class="container">
     <div class="row">
         <div class="col-xs-3 col-sm-3 col-md-3 col-xl-3 col-lg-3">
-            <p><b>Tipo de Proyecto</b></p>
+            <p><strong>Tipo de Proyecto</strong></p>
             <p><span id="tipo_proyecto"></span></p>
-            <p><b>Áreas involucradas</b></p>
+            <p><strong>Áreas involucradas</strong></p>
             <p><span id="areas"></span></p>
-            <p><b>Coordinador(es)</b><br><span id="coordinador"></span></p>
-            <p><b>Participante(s)</b><br><span id="participante"></span></p>
-            <p id="ejecucion"><b>Periiodo academico de ejecucion </b><br><span id="inicio"><b>Fecha inicio: </b></span>
-                <br><span id="fin"><b>Fecha fin: </b></span></p>
-            <p id="reprogramado"><b>Proyecto reprogramado </b><br></p>
-            <p id="avance"><b>Avance </b><br></p>
-            <p id="estado"><b>Estado </b><br></p>
-            <p id="programa"><b>Programa </b><br></p>
-            <p id="recursos"><b>Recursos </b><br></p>
+            <p><strong>Coordinador(es)</strong><br><span id="coordinador"></span></p>
+            <p><strong>Participante(s)</strong><br><span id="participante"></span></p>
+            <p id="ejecucion"><strong>Periodo académico de ejecucion </strong><br><span id="inicio"><strong>Fecha inicio: </strong></span>
+                <br><span id="fin"><strong>Fecha fin: </strong></span></p>
+            <p id="reprogramado"><strong>Proyecto reprogramado </strong><br></p>
+            <p id="avance"><strong>Avance </strong><br></p>
+            <p id="estado"><strong>Estado </strong><br></p>
+            <p id="programa"><strong>Programa </strong><br></p>
+            <p id="recursos"><strong>Recursos </strong><br></p>
             <div>
                 <ul style="list-style: none;">
                     <li th:each="file : ${files}">
@@ -41,12 +41,12 @@
                 </ul>
             </div>
             <div th:if="${existe}">
-                <p class="text-info text-center" th:text="${existe}"></p>
+                <p style="color: #0049c3" class="text-center" th:text="${existe}"></p>
             </div>
         </div>
         <div class="col-xs-9 col-sm-9 col-md-9 col-xl-9 col-lg-9">
-            <p id="descripcion"><b>Descripción </b><br></p>
-            <p id="objetivo"><b>Objetivos </b><br></p>
+            <p id="descripcion"><strong>Descripción </strong><br></p>
+            <p id="objetivo"><strong>Objetivos </strong><br></p>
             <div class="card">
                 <div class="card-body" th:style="${tamanio}">
                     <div class="container">
@@ -66,7 +66,7 @@
                                 </div>
                                 <div>
                                         <a class="float-right btn btn-outline-primary btn-sm ml-2 mb-1 mt-1" data-toggle="modal" data-target="#exampleModal"
-                                           th:attr="onclick='inicializarFormulario(\'' + ${lista.comentario.idCom}+'\')'"> <i class="fa fa-reply"></i><span class="responder"></span> Responder</a>
+                                           th:attr="onclick='inicializarFormulario(\'' + ${lista.comentario.idCom}+'\')'"> <em class="fa fa-reply"></em><span class="responder"></span> Responder</a>
                                         <!--<a class="float-right btn text-white btn-secondary"> <i class="fa fa-heart"></i> <span class="like">0</span> Me gusta</a>-->
                                 </div>
                             </div>
@@ -97,7 +97,7 @@
                     <h5>Deja tu comentario</h5>
                     <form action="#" th:action="@{/comentario}" method="post" th:object="${coment}">
                         <div class="form-group" style="display: none">
-                            <input type="text" class="form-control" id="idCom" th:field="*{idCom}" name="idCom">
+                            <label for="idCom" hidden>ID Comentario</label><input type="text" class="form-control" id="idCom" th:field="*{idCom}" name="idCom">
                         </div>
                         <div class="form-group" sec:authorize="!isAuthenticated()">
                             <label for="InputEmail1">Correo electrónico</label>
@@ -116,6 +116,7 @@
                             <input type="text" class="form-control" required id="InputNameuser" placeholder="Escribe tu nombre o anónimo" th:field="*{nombre}">
                         </div>
                         <div class="form-group">
+                            <label for="FormControlTextarea" hidden>Comentario</label>
                             <textarea class="form-control" required id="FormControlTextarea" rows="3" placeholder="Escribe tu comentario ..." th:field="*{comentarios}"></textarea>
                         </div>
                         <button type="submit" class="float-right btn btn-danger">Enviar</button>
@@ -133,18 +134,18 @@
                                 <div class="modal-body">
                                     <form action="#" th:action="@{/comentarioresponse}" method="post" th:object="${comentario}">
                                         <div class="form-group" style="display: none">
-                                            <input type="text" class="form-control" id="idCom1" th:field="*{idCom}" name="idCom1">
+                                            <label for="idCom1" hidden>Identificador</label><input type="text" class="form-control" id="idCom1" th:field="*{idCom}" name="idCom1">
                                         </div>
                                         <div class="form-group" sec:authorize="!isAuthenticated()">
-                                            <label for="InputEmail1">Correo electrónico</label>
-                                            <input type="email" class="form-control" id="InputEmail11" required placeholder="Escribe tu correo" th:field="*{correo}">
+                                            <label for="InputEmail12">Correo electrónico</label>
+                                            <input type="email" class="form-control" id="InputEmail12" required placeholder="Escribe tu correo" th:field="*{correo}">
                                         </div>
                                         <div class="form-group" sec:authorize="isAuthenticated()" hidden>
-                                            <label for="InputEmail1user">Correo electrónico</label>
+                                            <label for="InputEmail11user" hidden>Correo</label>
                                             <input type="email" class="form-control" id="InputEmail11user" required placeholder="Escribe tu correo" th:field="*{correo}">
                                         </div>
                                         <div class="form-group" sec:authorize="!isAuthenticated()">
-                                            <label for="InputName">Nombre</label>
+                                            <label for="InputName1">Nombre</label>
                                             <input type="text" class="form-control" required id="InputName1" placeholder="Escribe tu nombre o anónimo" th:field="*{nombre}">
                                         </div>
                                         <div class="form-group" sec:authorize="isAuthenticated()" hidden>
@@ -152,6 +153,7 @@
                                             <input type="text" class="form-control" required id="InputName1user" placeholder="Escribe tu nombre o anónimo" th:field="*{nombre}">
                                         </div>
                                         <div class="form-group">
+                                            <label for="FormControlTextarea1" hidden>Comentarios</label>
                                             <textarea class="form-control" required id="FormControlTextarea1" rows="3" placeholder="Escribe tu comentario ..." th:field="*{comentarios}"></textarea>
                                         </div>
                                         <button type="submit" class="float-right btn btn-danger">Enviar</button>

@@ -40,31 +40,43 @@
             <tbody>
             <tr th:each="proyecto : ${proyectos}">
                 <td>
-                        <div class="card" style="height: 250px; width: 400px" th:if="${proyecto.nodo1.id!=''}">
-                            <div class="card-body text-center">
-                                <b th:text="${proyecto.nodo1.label}"></b>
-                                <p><img class='img1' src='../static/img/user.png' alt='coordinador'><span th:text="${proyecto.nodo1.group}"> </span></p>
-                                <a th:href="@{'/proyecto/' + ${proyecto.nodo1.id}}" class="btn btn-primary stretched-link mb-2" th:text="${proyecto.nodo1.title}"></a>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-xl-12 col-lg-12">
+                            <div class="card" style="height: 250px; width: 400px" th:if="${proyecto.nodo1.id!=''}">
+                                <div class="card-body text-center">
+                                    <strong th:text="${proyecto.nodo1.label}"></strong>
+                                    <p><img class='img1' src='../static/img/user.png' alt='coordinador'><span th:text="${proyecto.nodo1.group}"> </span></p>
+                                    <a th:href="@{'/proyecto/' + ${proyecto.nodo1.id}}" class="btn btn-primary stretched-link mb-2" th:text="${proyecto.nodo1.title}"></a>
+                                </div>
                             </div>
                         </div>
+                    </div>
                 </td>
                 <td>
-                        <div class="card" style="height: 250px; width: 400px" th:if="${proyecto.nodo2.id!=''}">
-                            <div class="card-body text-center">
-                                <b th:text="${proyecto.nodo2.label}"></b>
-                                <p><img class='img1' src='../static/img/user.png' alt='coordinador'><span th:text="${proyecto.nodo2.group}"> </span></p>
-                                <a th:href="@{'/proyecto/' + ${proyecto.nodo2.id}}" class="btn btn-primary stretched-link mb-2 float-" th:text="${proyecto.nodo2.title}"></a>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-xl-12 col-lg-12">
+                            <div class="card" style="height: 250px; width: 400px" th:if="${proyecto.nodo2.id!=''}">
+                                <div class="card-body text-center">
+                                    <strong th:text="${proyecto.nodo2.label}"></strong>
+                                    <p><img class='img1' src='../static/img/user.png' alt='coordinador'><span th:text="${proyecto.nodo2.group}"> </span></p>
+                                    <a th:href="@{'/proyecto/' + ${proyecto.nodo2.id}}" class="btn btn-primary stretched-link mb-2 float-" th:text="${proyecto.nodo2.title}"></a>
+                                </div>
                             </div>
                         </div>
+                    </div>
                 </td>
                 <td>
-                        <div class="card" style="height: 250px; width: 400px" th:if="${proyecto.nodo3.id!=''}">
-                            <div class="card-body text-center">
-                                <b th:text="${proyecto.nodo3.label}"></b>
-                                <p><img class='img1' src='../static/img/user.png' alt='coordinador'><span th:text="${proyecto.nodo3.group}"> </span></p>
-                                <a th:href="@{'/proyecto/' + ${proyecto.nodo3.id}}" class="btn btn-primary stretched-link mb-2" th:text="${proyecto.nodo3.title}"></a>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-xl-12 col-lg-12">
+                            <div class="card" style="height: 250px; width: 400px" th:if="${proyecto.nodo3.id!=''}">
+                                <div class="card-body text-center">
+                                    <strong th:text="${proyecto.nodo3.label}"></strong>
+                                    <p><img class='img1' src='../static/img/user.png' alt='coordinador'><span th:text="${proyecto.nodo3.group}"> </span></p>
+                                    <a th:href="@{'/proyecto/' + ${proyecto.nodo3.id}}" class="btn btn-primary stretched-link mb-2" th:text="${proyecto.nodo3.title}"></a>
+                                </div>
                             </div>
                         </div>
+                    </div>
                 </td>
             </tr>
             </tbody>

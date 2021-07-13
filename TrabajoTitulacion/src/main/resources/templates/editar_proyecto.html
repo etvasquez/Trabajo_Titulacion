@@ -43,7 +43,8 @@
                     <br/>
                 </div>
                 <div class="form-group">
-                    <input type="text" class="form-control" id="idCom" th:field="*{id}" name="idCom" hidden>
+                    <label for="FormControlTextTitulo" hidden><strong>Identificador</strong></label>
+                    <label for="idCom" hidden>ID</label><input type="text" class="form-control" id="idCom" th:field="*{id}" name="idCom" hidden>
                     <label for="FormControlTextTitulo"><strong>Título del proyecto</strong></label>
                     <textarea class="form-control" required id="FormControlTextTitulo" rows="1" th:field="*{titulo}"></textarea>
                 </div>
@@ -123,8 +124,10 @@
                     <div class="form-row">
                         <div class="form-group col-md-5">
                             <div class="form-group">
-                                <input type="text" id="fileName" name="fileName" hidden>
-                                <input type="text" id="id" name="id" hidden>
+                                <label for="file" hidden><strong>File</strong></label>
+                                <label for="fileName" hidden>fileName</label><input type="text" id="fileName" name="fileName" hidden>
+                                <label for="file" hidden><strong>Identificador</strong></label>
+                                <label for="id" hidden>id</label><input type="text" id="id" name="id" hidden>
                                 <label for="file"><strong>Subir nuevo recurso</strong></label>
                                 <input type="file" class="form-control-file" id="file" name="file" onclick="generarUID()">
                                 <label for="descripcion"><strong>Descripción del recurso</strong></label>
@@ -162,7 +165,7 @@
                                         <td th:text="${file.tipo}"></td>
                                         <td class="text-center">
                                             <a title="Eliminar recurso" class="btn btn-sm btn-secondary"
-                                               th:href="@{'/eliminarRecurso/'+ ${file.id}}"><i class="fa fa-trash"></i></a>
+                                               th:href="@{'/eliminarRecurso/'+ ${file.id}}"><em class="fa fa-trash"></em></a>
                                         </td>
                                     </tr>
                                     </tbody>

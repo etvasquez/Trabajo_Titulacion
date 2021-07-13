@@ -3,8 +3,8 @@ package ec.edu.utpl.TrabajoTitulacion.Model;
 import java.util.ArrayList;
 
 public class NodoRelacion {
-    private ArrayList<Nodo> nodes = new ArrayList<>();
-    private ArrayList<Relacion> edges = new ArrayList<>();
+    private ArrayList<Nodo> nodes;
+    private ArrayList<Relacion> edges;
 
     public NodoRelacion(ArrayList<Nodo> nodes, ArrayList<Relacion> edges) {
         this.nodes = nodes;

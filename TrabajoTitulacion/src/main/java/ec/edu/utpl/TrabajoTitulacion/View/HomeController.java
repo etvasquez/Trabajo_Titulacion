@@ -1,6 +1,5 @@
 package ec.edu.utpl.TrabajoTitulacion.View;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import ec.edu.utpl.TrabajoTitulacion.Controller.consultasBD;
 import ec.edu.utpl.TrabajoTitulacion.Controller.trasformacionRDF;
 import ec.edu.utpl.TrabajoTitulacion.Model.*;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,14 +22,14 @@ import java.util.UUID;
 
 @Controller
 public class HomeController {
-    String appName;
-    String personas;
-    String estado;
-    String idProyecto;
-    String tamanioLista;
-    ArrayList<Comentario> listacomentarios = new ArrayList<>();
-    ArrayList<ComentarioGlobal> listacomentarioGlobal = new ArrayList<>();
-    consultasBD consultas = new consultasBD();
+    private String appName;
+    private String personas;
+    private String estado;
+    private String idProyecto;
+    private String tamanioLista;
+    private ArrayList<Comentario> listacomentarios = new ArrayList<>();
+    private ArrayList<ComentarioGlobal> listacomentarioGlobal = new ArrayList<>();
+    private final consultasBD consultas = new consultasBD();
 
     @Autowired
     TrabajoTitulacionApplication trabajoTitulacionApplication = new TrabajoTitulacionApplication();
@@ -70,7 +68,7 @@ public class HomeController {
     @GetMapping("/repositorio/{id}/{busqueda}")
     public ResponseEntity<ArrayList<ListaProyecto>> repositoriofiltro(@PathVariable(value="id") ArrayList<String> id, @PathVariable(value="busqueda") String busqueda) {
         ArrayList<ListaProyecto> proyectos = consultas.getProyectosFiltrados(id,busqueda);
-        return new ResponseEntity<ArrayList<ListaProyecto>>(proyectos, HttpStatus.OK);
+        return new ResponseEntity<>(proyectos, HttpStatus.OK);
     }
 
     @GetMapping("/nosotros")
@@ -107,14 +105,10 @@ public class HomeController {
     }
 
     @GetMapping("/usuario/{id}")
-    public String usuario(@PathVariable(value="id") String id, Model model, HttpServletRequest request) throws IOException {
+    public String usuario(@PathVariable(value="id") String id, Model model, HttpServletRequest request) {
         ArrayList<Colaboradores> listaAux = new ArrayList<>();
         boolean bandera;
-        if(request.getRemoteUser()!=null){
-            bandera=true;
-        }else{
-             bandera=false;
-        }
+        bandera= request.getRemoteUser() != null;
         Usuario usuario = consultas.getUsuario(id, bandera);
         model.addAttribute("usuario",usuario);
         ArrayList<Proyecto> listaProyectos = consultas.getProject(usuario.getMbox());
@@ -128,7 +122,7 @@ public class HomeController {
             model.addAttribute("mensaje","No existen colaboradores");
         }else if(listaColaboradores.size()<=10){
             model.addAttribute("colaboraciones",listaColaboradores);
-        }else if(listaColaboradores.size()>10){
+        }else {
             for(Colaboradores colaboradores:listaColaboradores) {
                 if(Integer.parseInt(colaboradores.getRelaciones())>=3){
                     listaAux.add(colaboradores);
@@ -164,13 +158,14 @@ public class HomeController {
         }
         appName = consultas.InformacionProyecto(id);
         personas = consultas.InformacionInvolucrados(id);
+        System.out.println("ESTO ES: "+appName);
         model.addAttribute("appName",appName);
         model.addAttribute("personas",personas);
         listacomentarios = consultas.getComment(id);
         listacomentarioGlobal = consultas.getCommentGloblal(listacomentarios);
         int tamanio =listacomentarios.size();
-        for(int i=0;i<listacomentarioGlobal.size();i++){
-            tamanio=tamanio+listacomentarioGlobal.get(i).getListaComentario().size();
+        for (ComentarioGlobal comentarioGlobal : listacomentarioGlobal) {
+            tamanio = tamanio + comentarioGlobal.getListaComentario().size();
         }//
         if(tamanio==0){
             tamanioLista="display: none";
@@ -191,7 +186,7 @@ public class HomeController {
     @GetMapping("/getNameByEmail/{email}")
     public ResponseEntity<String> getNameByEmail(@PathVariable(value="email") String email) {
         appName = consultas.getNameByEmail(email);
-        return new ResponseEntity<String>(appName, HttpStatus.OK);
+        return new ResponseEntity<>(appName, HttpStatus.OK);
     }
 
     @PostMapping("/comentarioresponse")
@@ -219,68 +214,68 @@ public class HomeController {
     }
 
     @GetMapping("/person/{id}")
-    public ResponseEntity<String> busquedaPersona(@PathVariable(value="id") String id) throws JsonProcessingException {
+    public ResponseEntity<String> busquedaPersona(@PathVariable(value="id") String id) {
         appName = consultas.getGrapPerson(id);
-        return new ResponseEntity<String>(appName, HttpStatus.OK);
+        return new ResponseEntity<>(appName, HttpStatus.OK);
     }
 
     @GetMapping("/personperson/{id}")
-    public ResponseEntity<String> busquedaPersonaPersona(@PathVariable(value="id") String id) throws JsonProcessingException {
+    public ResponseEntity<String> busquedaPersonaPersona(@PathVariable(value="id") String id) {
         appName = consultas.getGrapPersonPerson(id);
-        return new ResponseEntity<String>(appName, HttpStatus.OK);
+        return new ResponseEntity<>(appName, HttpStatus.OK);
     }
 
     @GetMapping("/listaBusquedaPersona/{id}")
-    public ResponseEntity<String> ObtenerPersonas(@PathVariable(value="id") String id) throws JsonProcessingException {
+    public ResponseEntity<String> ObtenerPersonas(@PathVariable(value="id") String id) {
         appName = consultas.BusquedaPorNombre(id);
-        return new ResponseEntity<String> (appName, HttpStatus.OK);
+        return new ResponseEntity<>(appName, HttpStatus.OK);
     }
 
     @GetMapping("/listaBusquedaProyecto/{id}")
-    public ResponseEntity<String> ObtenerProyectos(@PathVariable(value="id") String id) throws JsonProcessingException {
+    public ResponseEntity<String> ObtenerProyectos(@PathVariable(value="id") String id) {
         appName = consultas.BusquedaPorProyecto(id);
-        return new ResponseEntity<String> (appName, HttpStatus.OK);
+        return new ResponseEntity<>(appName, HttpStatus.OK);
     }
 
     @GetMapping("/listaBusquedaArea")
-    public ResponseEntity<String> ObtenerAreas() throws JsonProcessingException {
+    public ResponseEntity<String> ObtenerAreas() {
         appName = consultas.BusquedaPorArea();
-        return new ResponseEntity<String> (appName, HttpStatus.OK);
+        return new ResponseEntity<>(appName, HttpStatus.OK);
     }
 
     @GetMapping("/listaBusquedaTipoProyecto")
-    public ResponseEntity<String> ObtenerTipoProyecto() throws JsonProcessingException {
+    public ResponseEntity<String> ObtenerTipoProyecto() {
         appName = consultas.BusquedaPorTipoProyecto();
-        return new ResponseEntity<String> (appName, HttpStatus.OK);
+        return new ResponseEntity<>(appName, HttpStatus.OK);
     }
 
     @GetMapping("/project/{id}")
-    public ResponseEntity<String> busquedaProyecto(@PathVariable(value="id") String id) throws JsonProcessingException {
+    public ResponseEntity<String> busquedaProyecto(@PathVariable(value="id") String id) {
         appName = consultas.getGrapProject(id);
-        return new ResponseEntity<String>(appName, HttpStatus.OK);
+        return new ResponseEntity<>(appName, HttpStatus.OK);
     }
 
     @GetMapping("/projectID/{id}")
-    public ResponseEntity<String> busquedaProyectoID(@PathVariable(value="id") String id) throws JsonProcessingException {
+    public ResponseEntity<String> busquedaProyectoID(@PathVariable(value="id") String id) {
         appName = consultas.getGrapProjectID(id);
-        return new ResponseEntity<String>(appName, HttpStatus.OK);
+        return new ResponseEntity<>(appName, HttpStatus.OK);
     }
 
     @GetMapping("/projectArea/{id}")
-    public ResponseEntity<String> busquedaProyectoArea(@PathVariable(value="id") String id) throws JsonProcessingException {
+    public ResponseEntity<String> busquedaProyectoArea(@PathVariable(value="id") String id) {
         appName = consultas.getGrapAreaProject(id);
-        return new ResponseEntity<String>(appName, HttpStatus.OK);
+        return new ResponseEntity<>(appName, HttpStatus.OK);
     }
 
     @GetMapping("/projectTipo/{id}")
-    public ResponseEntity<String> busquedaProyectoTipo(@PathVariable(value="id") String id) throws JsonProcessingException {
+    public ResponseEntity<String> busquedaProyectoTipo(@PathVariable(value="id") String id) {
         appName = consultas.getGrapTipoProject(id);
-        return new ResponseEntity<String>(appName, HttpStatus.OK);
+        return new ResponseEntity<>(appName, HttpStatus.OK);
     }
 
     @GetMapping("/personID/{id}")
-    public ResponseEntity<String> busquedaPersonaID(@PathVariable(value="id") String id) throws JsonProcessingException {
+    public ResponseEntity<String> busquedaPersonaID(@PathVariable(value="id") String id) {
         String idPerson = consultas.getIDPerson(id);
-        return new ResponseEntity<String>(idPerson, HttpStatus.OK);
+        return new ResponseEntity<>(idPerson, HttpStatus.OK);
     }
 }

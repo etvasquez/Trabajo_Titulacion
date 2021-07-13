@@ -23,36 +23,31 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
+@SuppressWarnings("EqualsBetweenInconvertibleTypes")
 public class consultasBD{
 
-    private static String urlBase = "<http://utpl.edu.ec/data/";
-    private static Logger logger = LoggerFactory.getLogger(conectingGraphDB.class);
+    private static final String urlBase = "<http://utpl.edu.ec/data/";
+    private static final Logger logger = LoggerFactory.getLogger(conectingGraphDB.class);
     private static final Marker WTF_MARKER = MarkerFactory.getMarker("WTF");
-    conectingGraphDB con = new conectingGraphDB();
+    private final conectingGraphDB con = new conectingGraphDB();
 
     public void loadDataSet()
             throws RDFParseException, RepositoryException, IOException {
-        RepositoryConnection repositoryConnection = null;
+        RepositoryConnection repositoryConnection;
         repositoryConnection = con.getRepositoryConnection();
         Repository repository = repositoryConnection.getRepository();
         logger.debug("loading dataset...");
         File dataset = new File("/Users/eriiv/OneDrive/Escritorio/TT/V2/Implementacion/v1/repositorio-rdf.rdf");
         String datasetFile = "/Users/eriiv/OneDrive/Escritorio/TT/V2/Implementacion/v1/repositorio-rdf.rdf";
-        RepositoryConnection con = repository.getConnection();
-        try {
+        try (RepositoryConnection con = repository.getConnection()) {
             con.add(dataset, "http://utpl.edu.ec/data/", Rio.getParserFormatForFileName(datasetFile).
                     orElseThrow(Rio.unsupportedFormat(datasetFile)));
-        } finally {
-            con.close();
         }
         logger.debug("dataset loaded.");
     }
-
+/*
     public String insertNewLike(String idProject){
         int numeroActualLike = getCountLike(idProject) + 1;
         String strInsert =
@@ -71,9 +66,9 @@ public class consultasBD{
         }
         return "";
     }
-
+*/
     public Usuario getUsuario(String identificador, boolean bandera){
-        String strQuery ="";
+        String strQuery;
         Usuario usuario = new Usuario();
         if(bandera){
             strQuery =
@@ -103,7 +98,7 @@ public class consultasBD{
                             "?s schema:extension ?extension . "+
                             "?s j.2:phone ?telefono . ?s j.2:mbox ?email . "+
                             "filter(regex(?email, '"+identificador+"','i')) }";
-            identificador = identificador.concat("@utpl.edu.ec");
+            //identificador = identificador.concat("@utpl.edu.ec");
          }else{
             strQuery =
                     "PREFIX schema: <http://schema.org/> "+
@@ -135,52 +130,48 @@ public class consultasBD{
         }
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral id =
-                        (SimpleLiteral)bindingSet.getValue("id");
+                        (SimpleLiteral) bindingSet.getValue("id");
                 SimpleLiteral nombre =
-                        (SimpleLiteral)bindingSet.getValue("nombre");
+                        (SimpleLiteral) bindingSet.getValue("nombre");
                 SimpleLiteral apellido =
-                        (SimpleLiteral)bindingSet.getValue("apellido");
+                        (SimpleLiteral) bindingSet.getValue("apellido");
                 SimpleLiteral area =
-                        (SimpleLiteral)bindingSet.getValue("area");
+                        (SimpleLiteral) bindingSet.getValue("area");
                 SimpleLiteral departamento =
-                        (SimpleLiteral)bindingSet.getValue("departamento");
+                        (SimpleLiteral) bindingSet.getValue("departamento");
                 SimpleLiteral seccion =
-                        (SimpleLiteral)bindingSet.getValue("seccion");
+                        (SimpleLiteral) bindingSet.getValue("seccion");
                 SimpleLiteral modalidad =
-                        (SimpleLiteral)bindingSet.getValue("modalidad");
+                        (SimpleLiteral) bindingSet.getValue("modalidad");
                 SimpleLiteral tipo =
-                        (SimpleLiteral)bindingSet.getValue("tipo");
+                        (SimpleLiteral) bindingSet.getValue("tipo");
                 SimpleLiteral status =
-                        (SimpleLiteral)bindingSet.getValue("status");
+                        (SimpleLiteral) bindingSet.getValue("status");
                 SimpleLiteral nacionalidad =
-                        (SimpleLiteral)bindingSet.getValue("nacionalidad");
+                        (SimpleLiteral) bindingSet.getValue("nacionalidad");
                 SimpleLiteral extension =
-                        (SimpleLiteral)bindingSet.getValue("extension");
+                        (SimpleLiteral) bindingSet.getValue("extension");
                 SimpleLiteral telefono =
-                        (SimpleLiteral)bindingSet.getValue("telefono");
+                        (SimpleLiteral) bindingSet.getValue("telefono");
                 SimpleLiteral email =
-                        (SimpleLiteral)bindingSet.getValue("email");
+                        (SimpleLiteral) bindingSet.getValue("email");
                 SimpleLiteral image =
-                        (SimpleLiteral)bindingSet.getValue("image");
+                        (SimpleLiteral) bindingSet.getValue("image");
                 String imagen = image.stringValue();
-                if(imagen.equals("n")||imagen==null||image.equals("")){
+                if (imagen.equals("n") || image.equals("")) {
                     imagen = "https://image.ibb.co/jw55Ex/def_face.jpg";
                 }
-                usuario = new Usuario(id.stringValue(),nombre.stringValue().concat(" ").concat(apellido.stringValue()),area.stringValue(),
-                        departamento.stringValue(),seccion.stringValue(),modalidad.stringValue(),tipo.stringValue(),status.stringValue(),
-                        nacionalidad.stringValue(),extension.stringValue(),telefono.stringValue(),email.stringValue(),imagen);
+                usuario = new Usuario(id.stringValue(), nombre.stringValue().concat(" ").concat(apellido.stringValue()), area.stringValue(),
+                        departamento.stringValue(), seccion.stringValue(), modalidad.stringValue(), tipo.stringValue(), status.stringValue(),
+                        nacionalidad.stringValue(), extension.stringValue(), telefono.stringValue(), email.stringValue(), imagen);
             }
-        }catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return usuario;
     }
@@ -216,57 +207,53 @@ public class consultasBD{
                         "filter(regex(?email, '"+xemail+"','i')) }";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral id =
-                        (SimpleLiteral)bindingSet.getValue("id");
+                        (SimpleLiteral) bindingSet.getValue("id");
                 SimpleLiteral nombre =
-                        (SimpleLiteral)bindingSet.getValue("nombre");
+                        (SimpleLiteral) bindingSet.getValue("nombre");
                 SimpleLiteral apellido =
-                        (SimpleLiteral)bindingSet.getValue("apellido");
+                        (SimpleLiteral) bindingSet.getValue("apellido");
                 SimpleLiteral area =
-                        (SimpleLiteral)bindingSet.getValue("area");
+                        (SimpleLiteral) bindingSet.getValue("area");
                 SimpleLiteral departamento =
-                        (SimpleLiteral)bindingSet.getValue("departamento");
+                        (SimpleLiteral) bindingSet.getValue("departamento");
                 SimpleLiteral seccion =
-                        (SimpleLiteral)bindingSet.getValue("seccion");
+                        (SimpleLiteral) bindingSet.getValue("seccion");
                 SimpleLiteral modalidad =
-                        (SimpleLiteral)bindingSet.getValue("modalidad");
+                        (SimpleLiteral) bindingSet.getValue("modalidad");
                 SimpleLiteral tipo =
-                        (SimpleLiteral)bindingSet.getValue("tipo");
+                        (SimpleLiteral) bindingSet.getValue("tipo");
                 SimpleLiteral status =
-                        (SimpleLiteral)bindingSet.getValue("status");
+                        (SimpleLiteral) bindingSet.getValue("status");
                 SimpleLiteral nacionalidad =
-                        (SimpleLiteral)bindingSet.getValue("nacionalidad");
+                        (SimpleLiteral) bindingSet.getValue("nacionalidad");
                 SimpleLiteral extension =
-                        (SimpleLiteral)bindingSet.getValue("extension");
+                        (SimpleLiteral) bindingSet.getValue("extension");
                 SimpleLiteral telefono =
-                        (SimpleLiteral)bindingSet.getValue("telefono");
+                        (SimpleLiteral) bindingSet.getValue("telefono");
                 SimpleLiteral email =
-                        (SimpleLiteral)bindingSet.getValue("email");
+                        (SimpleLiteral) bindingSet.getValue("email");
                 SimpleLiteral image =
-                        (SimpleLiteral)bindingSet.getValue("image");
+                        (SimpleLiteral) bindingSet.getValue("image");
                 String imagen = image.stringValue();
-                if(imagen.equals("n")||imagen==null||image.equals("")){
+                if (imagen.equals("n") || image.equals("")) {
                     imagen = "https://image.ibb.co/jw55Ex/def_face.jpg";
                 }
-                usuario = new Usuario(id.stringValue(),nombre.stringValue().concat(" ").concat(apellido.stringValue()),area.stringValue(),
-                        departamento.stringValue(),seccion.stringValue(),modalidad.stringValue(),tipo.stringValue(),status.stringValue(),
-                        nacionalidad.stringValue(),extension.stringValue(),telefono.stringValue(),email.stringValue(),imagen);
+                usuario = new Usuario(id.stringValue(), nombre.stringValue().concat(" ").concat(apellido.stringValue()), area.stringValue(),
+                        departamento.stringValue(), seccion.stringValue(), modalidad.stringValue(), tipo.stringValue(), status.stringValue(),
+                        nacionalidad.stringValue(), extension.stringValue(), telefono.stringValue(), email.stringValue(), imagen);
             }
-        }catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return usuario;
     }
 
-    public int getCountLike(String idProject){
+    private int getCountLike(String idProject){
         int contador=0;
         String strQuery ="PREFIX schema: <http://schema.org/> " +
                 "SELECT ?total " +
@@ -276,22 +263,17 @@ public class consultasBD{
                 "?tipo schema:likeCount ?total } ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral total =
-                        (SimpleLiteral)bindingSet.getValue("total");
+                        (SimpleLiteral) bindingSet.getValue("total");
                 contador = total.intValue();
 
             }
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return contador;
     }
@@ -309,29 +291,24 @@ public class consultasBD{
                 "?idpro schema:ide_project ?id . } ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idrecurso =
-                        (SimpleLiteral)bindingSet.getValue("id");
+                        (SimpleLiteral) bindingSet.getValue("id");
                 SimpleLiteral descripcion =
-                        (SimpleLiteral)bindingSet.getValue("descripcion");
+                        (SimpleLiteral) bindingSet.getValue("descripcion");
                 SimpleLiteral licencia =
-                        (SimpleLiteral)bindingSet.getValue("licencia");
+                        (SimpleLiteral) bindingSet.getValue("licencia");
                 SimpleLiteral nombrecompleto =
-                        (SimpleLiteral)bindingSet.getValue("nombrecompleto");
+                        (SimpleLiteral) bindingSet.getValue("nombrecompleto");
                 SimpleLiteral nombrereal =
-                        (SimpleLiteral)bindingSet.getValue("nombrereal");
-                recurso = new Recurso(idrecurso.stringValue(),nombrecompleto.stringValue(),nombrereal.stringValue(),descripcion.stringValue(),licencia.stringValue());
+                        (SimpleLiteral) bindingSet.getValue("nombrereal");
+                recurso = new Recurso(idrecurso.stringValue(), nombrecompleto.stringValue(), nombrereal.stringValue(), descripcion.stringValue(), licencia.stringValue());
             }
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return recurso;
     }
@@ -349,30 +326,25 @@ public class consultasBD{
                 "?id schema:nombrereal ?nombrereal . } ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idrecurso =
-                        (SimpleLiteral)bindingSet.getValue("idrecurso");
+                        (SimpleLiteral) bindingSet.getValue("idrecurso");
                 SimpleLiteral descripcion =
-                        (SimpleLiteral)bindingSet.getValue("descripcion");
+                        (SimpleLiteral) bindingSet.getValue("descripcion");
                 SimpleLiteral licencia =
-                        (SimpleLiteral)bindingSet.getValue("licencia");
+                        (SimpleLiteral) bindingSet.getValue("licencia");
                 SimpleLiteral nombrecompleto =
-                        (SimpleLiteral)bindingSet.getValue("nombrecompleto");
+                        (SimpleLiteral) bindingSet.getValue("nombrecompleto");
                 SimpleLiteral nombrereal =
-                        (SimpleLiteral)bindingSet.getValue("nombrereal");
-                Recurso recurso = new Recurso(idrecurso.stringValue(),nombrecompleto.stringValue(),nombrereal.stringValue(),descripcion.stringValue(),licencia.stringValue());
+                        (SimpleLiteral) bindingSet.getValue("nombrereal");
+                Recurso recurso = new Recurso(idrecurso.stringValue(), nombrecompleto.stringValue(), nombrereal.stringValue(), descripcion.stringValue(), licencia.stringValue());
                 listRecource.add(recurso);
             }
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return listRecource;
     }
@@ -385,22 +357,17 @@ public class consultasBD{
                 urlBase+"people/"+email +"> j.2:lastName ?name }";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral nombre =
-                        (SimpleLiteral)bindingSet.getValue("name");
+                        (SimpleLiteral) bindingSet.getValue("name");
                 name = nombre.stringValue();
 
             }
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return name;
     }
@@ -417,30 +384,25 @@ public class consultasBD{
                 "?id schema:date ?date . } ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral dominio =
-                        (SimpleLiteral)bindingSet.getValue("dominio");
+                        (SimpleLiteral) bindingSet.getValue("dominio");
                 SimpleLiteral puerto =
-                        (SimpleLiteral)bindingSet.getValue("puerto");
+                        (SimpleLiteral) bindingSet.getValue("puerto");
                 SimpleLiteral nombreDB =
-                        (SimpleLiteral)bindingSet.getValue("nombreDB");
+                        (SimpleLiteral) bindingSet.getValue("nombreDB");
                 SimpleLiteral user =
-                        (SimpleLiteral)bindingSet.getValue("user");
+                        (SimpleLiteral) bindingSet.getValue("user");
                 SimpleLiteral date =
-                        (SimpleLiteral)bindingSet.getValue("date");
-                Administracion administracion = new Administracion(dominio.stringValue(),puerto.stringValue(),nombreDB.stringValue(),user.stringValue(),date.stringValue());
+                        (SimpleLiteral) bindingSet.getValue("date");
+                Administracion administracion = new Administracion(dominio.stringValue(), puerto.stringValue(), nombreDB.stringValue(), user.stringValue(), date.stringValue());
                 listAdminsitracion.add(administracion);
             }
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return listAdminsitracion;
     }
@@ -463,28 +425,23 @@ public class consultasBD{
                 "filter(regex(?m, '"+correo+"','i')) } ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral id =
-                        (SimpleLiteral)bindingSet.getValue("id");
+                        (SimpleLiteral) bindingSet.getValue("id");
                 SimpleLiteral titulo =
-                        (SimpleLiteral)bindingSet.getValue("titulo");
+                        (SimpleLiteral) bindingSet.getValue("titulo");
                 SimpleLiteral rol =
-                        (SimpleLiteral)bindingSet.getValue("rol");
+                        (SimpleLiteral) bindingSet.getValue("rol");
                 SimpleLiteral tipo =
-                        (SimpleLiteral)bindingSet.getValue("tipo");
-                Proyecto proyecto = new Proyecto(id.stringValue(),titulo.stringValue(),tipo.stringValue(),rol.stringValue());
+                        (SimpleLiteral) bindingSet.getValue("tipo");
+                Proyecto proyecto = new Proyecto(id.stringValue(), titulo.stringValue(), tipo.stringValue(), rol.stringValue());
                 listaProyectos.add(proyecto);
             }
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
 
         return listaProyectos;
@@ -507,32 +464,27 @@ public class consultasBD{
                     "?autor j.2:mbox ?correo . } ";
             TupleQuery tupleQuery = con.getRepositoryConnection()
                     .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-            TupleQueryResult result = null;
-            try {
-                result = tupleQuery.evaluate();
+            try (TupleQueryResult result = tupleQuery.evaluate()) {
                 while (result.hasNext()) {
                     BindingSet bindingSet = result.next();
                     SimpleLiteral com =
-                            (SimpleLiteral)bindingSet.getValue("com");
+                            (SimpleLiteral) bindingSet.getValue("com");
                     SimpleLiteral date =
-                            (SimpleLiteral)bindingSet.getValue("date");
+                            (SimpleLiteral) bindingSet.getValue("date");
                     SimpleLiteral nombre =
-                            (SimpleLiteral)bindingSet.getValue("nombre");
+                            (SimpleLiteral) bindingSet.getValue("nombre");
                     SimpleLiteral correo =
-                            (SimpleLiteral)bindingSet.getValue("correo");
+                            (SimpleLiteral) bindingSet.getValue("correo");
                     SimpleLiteral uuid =
-                            (SimpleLiteral)bindingSet.getValue("uuid");
-                    Comentario comentario1 = new Comentario(uuid.stringValue(),nombre.stringValue(),date.stringValue(),com.stringValue(),correo.stringValue());
+                            (SimpleLiteral) bindingSet.getValue("uuid");
+                    Comentario comentario1 = new Comentario(uuid.stringValue(), nombre.stringValue(), date.stringValue(), com.stringValue(), correo.stringValue());
                     listaComentario.add(comentario1);
                 }
-                ComentarioGlobal comentarioGlobal = new ComentarioGlobal(comentario,listaComentario);
+                ComentarioGlobal comentarioGlobal = new ComentarioGlobal(comentario, listaComentario);
                 listaComentarioGlobal.add(comentarioGlobal);
-            }
-            catch (QueryEvaluationException qee) {
+            } catch (QueryEvaluationException qee) {
                 logger.error(WTF_MARKER,
-                        qee.getStackTrace().toString(), qee);
-            } finally {
-                result.close();
+                        Arrays.toString(qee.getStackTrace()), qee);
             }
         }
         return listaComentarioGlobal;
@@ -554,42 +506,37 @@ public class consultasBD{
                 "?autor j.2:mbox ?correo . } ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral com =
-                        (SimpleLiteral)bindingSet.getValue("com");
+                        (SimpleLiteral) bindingSet.getValue("com");
                 SimpleLiteral date =
-                        (SimpleLiteral)bindingSet.getValue("date");
+                        (SimpleLiteral) bindingSet.getValue("date");
                 SimpleLiteral nombre =
-                        (SimpleLiteral)bindingSet.getValue("nombre");
+                        (SimpleLiteral) bindingSet.getValue("nombre");
                 SimpleLiteral correo =
-                        (SimpleLiteral)bindingSet.getValue("correo");
+                        (SimpleLiteral) bindingSet.getValue("correo");
                 SimpleLiteral uuid =
-                        (SimpleLiteral)bindingSet.getValue("uuid");
-                Comentario comentario = new Comentario(uuid.stringValue(),nombre.stringValue(),date.stringValue(),com.stringValue(),correo.stringValue());
+                        (SimpleLiteral) bindingSet.getValue("uuid");
+                Comentario comentario = new Comentario(uuid.stringValue(), nombre.stringValue(), date.stringValue(), com.stringValue(), correo.stringValue());
                 listComentarios.add(comentario);
             }
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return listComentarios;
     }
 
-    public String getDate(){
+    private String getDate(){
         SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date(System.currentTimeMillis());
         return formatter.format(date);
     }
 
     public String insertResource(Recurso recurso, String id, String fileName) {
-        String strInsert = "";
+        String strInsert;
         String estado="1";
         strInsert =
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
@@ -615,7 +562,7 @@ public class consultasBD{
         return estado;
     }
 
-    public String insertActualizacion(Administracion administracion, String id) {
+    public void insertActualizacion(Administracion administracion, String id) {
         String estado="1";
         String strInsert = "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
                 "PREFIX schema: <http://schema.org/> "+
@@ -637,11 +584,10 @@ public class consultasBD{
             if (repositoryConnection.isActive())
                 repositoryConnection.rollback();
         }
-        return estado;
     }
 
     public String eliminarResource(Recurso recurso, String id) {
-        String strInsert = "";
+        String strInsert;
         String estado="1";
         strInsert =
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
@@ -660,7 +606,6 @@ public class consultasBD{
         try {
             repositoryConnection.commit();
         } catch (Exception e) {
-            estado="error";
             if (repositoryConnection.isActive())
                 repositoryConnection.rollback();
         }
@@ -669,7 +614,7 @@ public class consultasBD{
 
     public String insertComent(Comentario comentario) {
         String uuid = UUID.randomUUID().toString();
-        String strInsert = "";
+        String strInsert;
         String estado="Exito";
         if(getPersonByEmail(comentario.getCorreo()).equals(comentario.getCorreo())){
                 strInsert =
@@ -714,7 +659,7 @@ public class consultasBD{
     }
 
     public String updateProject(Proyecto proyecto) {
-        String strInsert = "";
+        String strInsert;
         String estado="0";
         String consulta = urlBase+"project/"+proyecto.getId()+"> j.2:title ?titleold . "+
                 urlBase+"project/"+proyecto.getId()+"> schema:descripcion ?desold . "+
@@ -774,7 +719,7 @@ public class consultasBD{
 
     public String insertComentComment(Comentario comentario) {
         String uuid = UUID.randomUUID().toString();
-        String strInsert = "";
+        String strInsert;
         String estado="correcto";
         if(getPersonByEmail(comentario.getCorreo()).equals(comentario.getCorreo())){
             strInsert =
@@ -818,7 +763,7 @@ public class consultasBD{
         return estado;
     }
 
-    public String getPersonByEmail(String busqueda) {
+    private String getPersonByEmail(String busqueda) {
         String json="";
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -828,26 +773,21 @@ public class consultasBD{
                 urlBase+"people/"+busqueda+"> j.2:mbox ?correo }";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral correo =
-                        (SimpleLiteral)bindingSet.getValue("correo");
+                        (SimpleLiteral) bindingSet.getValue("correo");
                 json = correo.stringValue();
             }
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
 
-    public String getGrapProjectID(String idProject) {
+    public String getGrapProjectID (String idProject) {
         ArrayList<Nodo> listNodos = new ArrayList<>();
         ArrayList<Relacion> listRelacion = new ArrayList<>();
         ArrayList<NodoRelacion> nodoRelacion = new ArrayList<>();
@@ -876,57 +816,52 @@ public class consultasBD{
                 "} ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             int contador = 0;
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idPersona =
-                        (SimpleLiteral)bindingSet.getValue("idpersona");
+                        (SimpleLiteral) bindingSet.getValue("idpersona");
                 SimpleLiteral nombre =
-                        (SimpleLiteral)bindingSet.getValue("nombre");
+                        (SimpleLiteral) bindingSet.getValue("nombre");
                 SimpleLiteral apellido =
-                        (SimpleLiteral)bindingSet.getValue("apellido");
+                        (SimpleLiteral) bindingSet.getValue("apellido");
                 SimpleLiteral image =
-                        (SimpleLiteral)bindingSet.getValue("image");
+                        (SimpleLiteral) bindingSet.getValue("image");
                 SimpleLiteral area =
-                        (SimpleLiteral)bindingSet.getValue("area");
+                        (SimpleLiteral) bindingSet.getValue("area");
                 SimpleLiteral correo =
-                        (SimpleLiteral)bindingSet.getValue("correo");
+                        (SimpleLiteral) bindingSet.getValue("correo");
                 SimpleLiteral idProyecto =
-                        (SimpleLiteral)bindingSet.getValue("id_project");
+                        (SimpleLiteral) bindingSet.getValue("id_project");
                 SimpleLiteral titulo =
-                        (SimpleLiteral)bindingSet.getValue("titulo");
+                        (SimpleLiteral) bindingSet.getValue("titulo");
                 String titlePersona = nombre.stringValue().concat(" ").concat(apellido.stringValue().concat("<br>").concat("Área: ").
                         concat(area.stringValue()).concat("<br>").concat("Correo: ").concat(correo.stringValue()));
-                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"participante",titlePersona,image.stringValue(),"circularImage");
-                Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),titulo.stringValue(),"projects",titulo.stringValue());
-                Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue());
-                if(contador==0){
+                Nodo nodoPersona = new Nodo(idPersona.stringValue(), nombre.stringValue().concat("\n").concat(apellido.stringValue()), "participante", titlePersona, image.stringValue(), "circularImage");
+                Nodo nodoProyecto = new Nodo(idProyecto.stringValue(), titulo.stringValue(), "projects", titulo.stringValue());
+                Relacion relacion = new Relacion(idPersona.stringValue(), idProyecto.stringValue());
+                if (contador == 0) {
                     listNodos.add(nodoProyecto);
                 }
                 contador++;
                 listNodos.add(nodoPersona);
                 listRelacion.add(relacion);
             }
-            NodoRelacion nr = new NodoRelacion(listNodos,listRelacion);
+            NodoRelacion nr = new NodoRelacion(listNodos, listRelacion);
             nodoRelacion.add(nr);
             json = genson.toJson(nodoRelacion.get(0));
             System.out.println(json);
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
 
     public String InformacionInvolucrados(String idProject) {
         ArrayList<Persona> listapersona = new ArrayList<>();
-        Persona persona = new Persona();
+        Persona persona;
         String json="";
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -948,38 +883,33 @@ public class consultasBD{
                 "} ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral id =
-                        (SimpleLiteral)bindingSet.getValue("idpersona");
+                        (SimpleLiteral) bindingSet.getValue("idpersona");
                 SimpleLiteral rol =
-                        (SimpleLiteral)bindingSet.getValue("rol");
+                        (SimpleLiteral) bindingSet.getValue("rol");
                 SimpleLiteral nombre =
-                        (SimpleLiteral)bindingSet.getValue("nombre");
+                        (SimpleLiteral) bindingSet.getValue("nombre");
                 SimpleLiteral apellido =
-                        (SimpleLiteral)bindingSet.getValue("apellido");
+                        (SimpleLiteral) bindingSet.getValue("apellido");
                 SimpleLiteral area =
-                        (SimpleLiteral)bindingSet.getValue("area");
-                persona = new Persona(id.stringValue(),nombre.stringValue(),apellido.stringValue(),rol.stringValue(),area.stringValue());
+                        (SimpleLiteral) bindingSet.getValue("area");
+                persona = new Persona(id.stringValue(), nombre.stringValue(), apellido.stringValue(), rol.stringValue(), area.stringValue());
                 listapersona.add(persona);
             }
             json = mapper.writeValueAsString(listapersona);
             System.out.println(json);
-        }
-        catch (QueryEvaluationException | JsonProcessingException qee) {
+        } catch (QueryEvaluationException | JsonProcessingException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
 
     public String InformacionProyecto(String idProject) {
-        Proyecto proyecto = new Proyecto();
+        Proyecto proyecto;
         String json="";
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -1013,60 +943,55 @@ public class consultasBD{
                 "} ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral titulo =
-                        (SimpleLiteral)bindingSet.getValue("titulo");
+                        (SimpleLiteral) bindingSet.getValue("titulo");
                 SimpleLiteral descripcion =
-                        (SimpleLiteral)bindingSet.getValue("descripcion");
+                        (SimpleLiteral) bindingSet.getValue("descripcion");
                 SimpleLiteral tipo =
-                        (SimpleLiteral)bindingSet.getValue("tipo");
+                        (SimpleLiteral) bindingSet.getValue("tipo");
                 SimpleLiteral incluye_estudiantes =
-                        (SimpleLiteral)bindingSet.getValue("incluye_estudiantes");
+                        (SimpleLiteral) bindingSet.getValue("incluye_estudiantes");
                 SimpleLiteral cobertura =
-                        (SimpleLiteral)bindingSet.getValue("cobertura");
+                        (SimpleLiteral) bindingSet.getValue("cobertura");
                 SimpleLiteral fechainicio =
-                        (SimpleLiteral)bindingSet.getValue("fechainicio");
+                        (SimpleLiteral) bindingSet.getValue("fechainicio");
                 SimpleLiteral fechafin =
-                        (SimpleLiteral)bindingSet.getValue("fechafin");
+                        (SimpleLiteral) bindingSet.getValue("fechafin");
                 SimpleLiteral ife =
-                        (SimpleLiteral)bindingSet.getValue("ife");
+                        (SimpleLiteral) bindingSet.getValue("ife");
                 SimpleLiteral smartland =
-                        (SimpleLiteral)bindingSet.getValue("smartland");
+                        (SimpleLiteral) bindingSet.getValue("smartland");
                 SimpleLiteral reprogramado =
-                        (SimpleLiteral)bindingSet.getValue("reprogramado");
+                        (SimpleLiteral) bindingSet.getValue("reprogramado");
                 SimpleLiteral avance =
-                        (SimpleLiteral)bindingSet.getValue("avance");
+                        (SimpleLiteral) bindingSet.getValue("avance");
                 SimpleLiteral fu =
-                        (SimpleLiteral)bindingSet.getValue("fu");
+                        (SimpleLiteral) bindingSet.getValue("fu");
                 SimpleLiteral fe =
-                        (SimpleLiteral)bindingSet.getValue("fe");
+                        (SimpleLiteral) bindingSet.getValue("fe");
                 SimpleLiteral tg =
-                        (SimpleLiteral)bindingSet.getValue("tg");
+                        (SimpleLiteral) bindingSet.getValue("tg");
                 SimpleLiteral estado =
-                        (SimpleLiteral)bindingSet.getValue("estado");
+                        (SimpleLiteral) bindingSet.getValue("estado");
                 SimpleLiteral programa =
-                        (SimpleLiteral)bindingSet.getValue("programa");
+                        (SimpleLiteral) bindingSet.getValue("programa");
                 SimpleLiteral objetivo =
-                        (SimpleLiteral)bindingSet.getValue("objetivo");
+                        (SimpleLiteral) bindingSet.getValue("objetivo");
                 SimpleLiteral presupuesto =
-                        (SimpleLiteral)bindingSet.getValue("presupuesto");
-                proyecto = new Proyecto(idProject,titulo.stringValue(),descripcion.stringValue(),tipo.stringValue(),
-                        incluye_estudiantes.stringValue(),cobertura.stringValue(),fechainicio.stringValue(),fechafin.stringValue(),
-                        ife.stringValue(),smartland.stringValue(),reprogramado.stringValue(),avance.stringValue(),fu.stringValue(),
-                        fe.stringValue(),tg.stringValue(),estado.stringValue(),programa.stringValue(),objetivo.stringValue(),presupuesto.stringValue());
+                        (SimpleLiteral) bindingSet.getValue("presupuesto");
+                proyecto = new Proyecto(idProject, titulo.stringValue(), descripcion.stringValue(), tipo.stringValue(),
+                        incluye_estudiantes.stringValue(), cobertura.stringValue(), fechainicio.stringValue(), fechafin.stringValue(),
+                        ife.stringValue(), smartland.stringValue(), reprogramado.stringValue(), avance.stringValue(), fu.stringValue(),
+                        fe.stringValue(), tg.stringValue(), estado.stringValue(), programa.stringValue(), objetivo.stringValue(), presupuesto.stringValue());
                 json = mapper.writeValueAsString(proyecto);
                 System.out.println(json);
             }
-        }
-        catch (QueryEvaluationException | JsonProcessingException qee) {
+        } catch (QueryEvaluationException | JsonProcessingException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
@@ -1094,39 +1019,34 @@ public class consultasBD{
                 "} ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             int contador = 0;
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idProyecto =
-                        (SimpleLiteral)bindingSet.getValue("id");
+                        (SimpleLiteral) bindingSet.getValue("id");
                 SimpleLiteral titulo =
-                        (SimpleLiteral)bindingSet.getValue("titulo");
+                        (SimpleLiteral) bindingSet.getValue("titulo");
                 SimpleLiteral tipo =
-                        (SimpleLiteral)bindingSet.getValue("tipo");
+                        (SimpleLiteral) bindingSet.getValue("tipo");
                 String grupo = clasificacion(tipo.stringValue());
-                Nodo nodoTipo = new Nodo("0",TraduccionTitulo(xtipo).toUpperCase(),"area",TraduccionEspacios(xtipo).toUpperCase());
-                Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),"",grupo,TraduccionEspacios(titulo.stringValue()).toUpperCase());
-                Relacion relacion = new Relacion("0",idProyecto.stringValue());
-                if(contador==0){
+                Nodo nodoTipo = new Nodo("0", TraduccionTitulo(xtipo).toUpperCase(), "area", TraduccionEspacios(xtipo).toUpperCase());
+                Nodo nodoProyecto = new Nodo(idProyecto.stringValue(), "", grupo, TraduccionEspacios(titulo.stringValue()).toUpperCase());
+                Relacion relacion = new Relacion("0", idProyecto.stringValue());
+                if (contador == 0) {
                     listNodos.add(nodoTipo);
                 }
                 contador++;
                 listNodos.add(nodoProyecto);
                 listRelacion.add(relacion);
             }
-            NodoRelacion nr = new NodoRelacion(listNodos,listRelacion);
+            NodoRelacion nr = new NodoRelacion(listNodos, listRelacion);
             nodoRelacion.add(nr);
             json = genson.serialize(nodoRelacion.get(0));
             System.out.println(json);
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
@@ -1154,39 +1074,34 @@ public class consultasBD{
                 "} ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             int contador = 0;
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idProyecto =
-                        (SimpleLiteral)bindingSet.getValue("id");
+                        (SimpleLiteral) bindingSet.getValue("id");
                 SimpleLiteral titulo =
-                        (SimpleLiteral)bindingSet.getValue("titulo");
+                        (SimpleLiteral) bindingSet.getValue("titulo");
                 SimpleLiteral tipo =
-                        (SimpleLiteral)bindingSet.getValue("tipo");
+                        (SimpleLiteral) bindingSet.getValue("tipo");
                 String grupo = clasificacion(tipo.stringValue());
-                Nodo nodoArea = new Nodo("0",TraduccionTitulo(xarea).toUpperCase(),"area",TraduccionEspacios(xarea).toUpperCase());
-                Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),"",grupo,TraduccionEspacios(titulo.stringValue()).toUpperCase());
-                Relacion relacion = new Relacion("0",idProyecto.stringValue());
-                if(contador==0){
+                Nodo nodoArea = new Nodo("0", TraduccionTitulo(xarea).toUpperCase(), "area", TraduccionEspacios(xarea).toUpperCase());
+                Nodo nodoProyecto = new Nodo(idProyecto.stringValue(), "", grupo, TraduccionEspacios(titulo.stringValue()).toUpperCase());
+                Relacion relacion = new Relacion("0", idProyecto.stringValue());
+                if (contador == 0) {
                     listNodos.add(nodoArea);
                 }
                 contador++;
                 listNodos.add(nodoProyecto);
                 listRelacion.add(relacion);
             }
-            NodoRelacion nr = new NodoRelacion(listNodos,listRelacion);
+            NodoRelacion nr = new NodoRelacion(listNodos, listRelacion);
             nodoRelacion.add(nr);
             json = genson.serialize(nodoRelacion.get(0));
             System.out.println(json);
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
@@ -1224,63 +1139,58 @@ public class consultasBD{
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             int contador = 0;
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idPersona =
-                        (SimpleLiteral)bindingSet.getValue("idpersona");
+                        (SimpleLiteral) bindingSet.getValue("idpersona");
                 SimpleLiteral nombre =
-                        (SimpleLiteral)bindingSet.getValue("nombre");
+                        (SimpleLiteral) bindingSet.getValue("nombre");
                 SimpleLiteral apellido =
-                        (SimpleLiteral)bindingSet.getValue("apellido");
+                        (SimpleLiteral) bindingSet.getValue("apellido");
                 SimpleLiteral rol =
-                        (SimpleLiteral)bindingSet.getValue("rol");
+                        (SimpleLiteral) bindingSet.getValue("rol");
                 SimpleLiteral idProyecto =
-                        (SimpleLiteral)bindingSet.getValue("id_project");
+                        (SimpleLiteral) bindingSet.getValue("id_project");
                 SimpleLiteral titulo =
-                        (SimpleLiteral)bindingSet.getValue("titulo");
+                        (SimpleLiteral) bindingSet.getValue("titulo");
                 SimpleLiteral correo =
-                        (SimpleLiteral)bindingSet.getValue("correo");
+                        (SimpleLiteral) bindingSet.getValue("correo");
                 SimpleLiteral area =
-                        (SimpleLiteral)bindingSet.getValue("area");
+                        (SimpleLiteral) bindingSet.getValue("area");
                 SimpleLiteral image =
-                        (SimpleLiteral)bindingSet.getValue("image");
+                        (SimpleLiteral) bindingSet.getValue("image");
                 SimpleLiteral tipo =
-                        (SimpleLiteral)bindingSet.getValue("tipo");
-                String rolP =(rol.stringValue().equalsIgnoreCase("Participación"))?"participante":"director";
+                        (SimpleLiteral) bindingSet.getValue("tipo");
+                String rolP = (rol.stringValue().equalsIgnoreCase("Participación")) ? "participante" : "director";
                 String titlePersona = nombre.stringValue().concat(" ").concat(apellido.stringValue().concat("<br>").concat("Área: ").
                         concat(area.stringValue()).concat("<br>").concat("Correo: ").concat(correo.stringValue()));
                 String grupo = clasificacion(tipo.stringValue());
                 String tituloreducido = TraduccionTitulo(titulo.stringValue());
                 String tituloespacios = TraduccionEspacios(titulo.stringValue());
-                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),rolP,titlePersona,image.stringValue(),"circularImage");
-                Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),tituloreducido.toUpperCase(),grupo,tituloespacios.toUpperCase());
-                Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue());
-                if(contador==0){
+                Nodo nodoPersona = new Nodo(idPersona.stringValue(), nombre.stringValue().concat("\n").concat(apellido.stringValue()), rolP, titlePersona, image.stringValue(), "circularImage");
+                Nodo nodoProyecto = new Nodo(idProyecto.stringValue(), tituloreducido.toUpperCase(), grupo, tituloespacios.toUpperCase());
+                Relacion relacion = new Relacion(idPersona.stringValue(), idProyecto.stringValue());
+                if (contador == 0) {
                     listNodos.add(nodoProyecto);
                 }
                 contador++;
                 listNodos.add(nodoPersona);
                 listRelacion.add(relacion);
             }
-            NodoRelacion nr = new NodoRelacion(listNodos,listRelacion);
+            NodoRelacion nr = new NodoRelacion(listNodos, listRelacion);
             nodoRelacion.add(nr);
             json = genson.toJson(nodoRelacion.get(0));
             System.out.println(json);
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
 
-    public String clasificacion(String tipo){
+    private String clasificacion(String tipo){
             String grupo = "";
         if(tipo.equalsIgnoreCase("Investigación")){
             grupo = "investigacion";
@@ -1302,7 +1212,7 @@ public class consultasBD{
         return grupo;
     }
 
-    public String TraduccionTitulo(String titulo) {
+    private String TraduccionTitulo(String titulo) {
         String tituloreducido = "";
         int contador1 = 0;
         for (int i=0;i<titulo.length();i++){
@@ -1319,7 +1229,7 @@ public class consultasBD{
         return tituloreducido;
     }
 
-    public String TraduccionEspacios(String titulo) {
+    private String TraduccionEspacios(String titulo) {
         String tituloreducido = "";
         int contador1 = 0;
         for (int i=0;i<titulo.length();i++){
@@ -1357,40 +1267,35 @@ public class consultasBD{
                     "} GROUP BY ?idpersona ORDER BY DESC (?total)";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
         Relacion relacion = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idPersona =
-                        (SimpleLiteral)bindingSet.getValue("idpersona");
+                        (SimpleLiteral) bindingSet.getValue("idpersona");
                 SimpleLiteral nombre =
-                        (SimpleLiteral)bindingSet.getValue("nombre");
+                        (SimpleLiteral) bindingSet.getValue("nombre");
                 SimpleLiteral apellido =
-                        (SimpleLiteral)bindingSet.getValue("apellido");
+                        (SimpleLiteral) bindingSet.getValue("apellido");
                 SimpleLiteral correo =
-                        (SimpleLiteral)bindingSet.getValue("correo");
+                        (SimpleLiteral) bindingSet.getValue("correo");
                 SimpleLiteral area =
-                        (SimpleLiteral)bindingSet.getValue("area");
+                        (SimpleLiteral) bindingSet.getValue("area");
                 SimpleLiteral relaciones =
-                        (SimpleLiteral)bindingSet.getValue("relaciones");
+                        (SimpleLiteral) bindingSet.getValue("relaciones");
                 SimpleLiteral image =
-                        (SimpleLiteral)bindingSet.getValue("image");
+                        (SimpleLiteral) bindingSet.getValue("image");
                 String imagen = image.stringValue();
-                if(imagen.equals("n")||imagen==null||image.equals("")){
+                if (imagen.equals("n") || image.equals("")) {
                     imagen = "https://image.ibb.co/jw55Ex/def_face.jpg";
                 }
-                if(idPersona.stringValue().compareTo(id)!=0){
-                    Colaboradores colaboradores = new Colaboradores(idPersona.stringValue(),nombre.stringValue().concat("\n")
-                            .concat(apellido.stringValue()),correo.stringValue(),area.stringValue(),relaciones.stringValue(),imagen);
+                if (idPersona.stringValue().compareTo(id) != 0) {
+                    Colaboradores colaboradores = new Colaboradores(idPersona.stringValue(), nombre.stringValue().concat("\n")
+                            .concat(apellido.stringValue()), correo.stringValue(), area.stringValue(), relaciones.stringValue(), imagen);
                     list.add(colaboradores);
                 }
             }
-        }
-        catch (QueryEvaluationException e) {
-        } finally {
-            result.close();
+        } catch (QueryEvaluationException ignored) {
         }
         return list;
     }
@@ -1414,7 +1319,7 @@ public class consultasBD{
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
         TupleQueryResult result = null;
-        Objeto objeto = null;
+        Objeto objeto;
         String json="";
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -1436,9 +1341,9 @@ public class consultasBD{
             }
             json = mapper.writeValueAsString(list);
         }
-        catch (QueryEvaluationException | JsonProcessingException e) {
+        catch (QueryEvaluationException | JsonProcessingException ignored) {
         } finally {
-            result.close();
+            Objects.requireNonNull(result).close();
         }
         return json;
     }
@@ -1471,61 +1376,56 @@ public class consultasBD{
                 "} GROUP BY ?idpersona";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        Relacion relacion = null;
-        try {
-            result = tupleQuery.evaluate();
+        Relacion relacion;
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idPersona =
-                        (SimpleLiteral)bindingSet.getValue("idpersona");
+                        (SimpleLiteral) bindingSet.getValue("idpersona");
                 SimpleLiteral nombre =
-                        (SimpleLiteral)bindingSet.getValue("nombre");
+                        (SimpleLiteral) bindingSet.getValue("nombre");
                 SimpleLiteral apellido =
-                        (SimpleLiteral)bindingSet.getValue("apellido");
+                        (SimpleLiteral) bindingSet.getValue("apellido");
                 SimpleLiteral correo =
-                        (SimpleLiteral)bindingSet.getValue("correo");
+                        (SimpleLiteral) bindingSet.getValue("correo");
                 SimpleLiteral area =
-                        (SimpleLiteral)bindingSet.getValue("area");
+                        (SimpleLiteral) bindingSet.getValue("area");
                 SimpleLiteral relaciones =
-                        (SimpleLiteral)bindingSet.getValue("relaciones");
+                        (SimpleLiteral) bindingSet.getValue("relaciones");
                 SimpleLiteral image =
-                        (SimpleLiteral)bindingSet.getValue("image");
+                        (SimpleLiteral) bindingSet.getValue("image");
                 Nodo nodoPersona;
                 String titlePersona = nombre.stringValue().concat(" ").concat(apellido.stringValue().concat("<br>").concat("Área: ").
                         concat(area.stringValue()).concat("<br>").concat("Correo: ").concat(correo.stringValue()));
-                if(idPersona.stringValue().equals(id)){
-                    nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"buscado",titlePersona,image.stringValue(),"circularImage");
-                }else{
-                    nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"participante",titlePersona,image.stringValue(),"circularImage");
+                if (idPersona.stringValue().equals(id)) {
+                    nodoPersona = new Nodo(idPersona.stringValue(), nombre.stringValue().concat("\n").concat(apellido.stringValue()), "buscado", titlePersona, image.stringValue(), "circularImage");
+                } else {
+                    nodoPersona = new Nodo(idPersona.stringValue(), nombre.stringValue().concat("\n").concat(apellido.stringValue()), "participante", titlePersona, image.stringValue(), "circularImage");
                 }
                 listNodos.add(nodoPersona);
-                if(idPersona.stringValue().compareTo(id)!=0){
-                    relacion = new Relacion(id,idPersona.stringValue(),relaciones.stringValue(),relaciones.stringValue().concat(" proyectos realizados"));
+                if (idPersona.stringValue().compareTo(id) != 0) {
+                    relacion = new Relacion(id, idPersona.stringValue(), relaciones.stringValue(), relaciones.stringValue().concat(" proyectos realizados"));
                     listRelacion.add(relacion);
                 }
             }
-            NodoRelacion nr = new NodoRelacion(listNodos,listRelacion);
+            NodoRelacion nr = new NodoRelacion(listNodos, listRelacion);
             nodoRelacion.add(nr);
-            ArrayList<Integer> list = new ArrayList<>() ;
-            for(int i=0;i<listRelacion.size();i++){
-                if(list.indexOf(listRelacion.get(i).getValue())!=0){
-                    list.add(Integer.parseInt(listRelacion.get(i).getValue()));
+            ArrayList<Integer> list = new ArrayList<>();
+            for (Relacion value : listRelacion) {
+                if (list.indexOf(value.getValue()) != 0) {
+                    list.add(Integer.parseInt(value.getValue()));
                 }
             }
-            if(list.size()>1){
+            if (list.size() > 1) {
                 json = mapper.writeValueAsString(nodoRelacion.get(0));
-            }else{
-            //iguales
+            } else {
+                //iguales
                 json = genson.toJson(nodoRelacion.get(0));
                 //json = genson.serialize(nodoRelacion.get(0));
             }
-        }
-        catch (QueryEvaluationException | JsonProcessingException qee) {
+        } catch (QueryEvaluationException | JsonProcessingException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
@@ -1579,53 +1479,48 @@ public class consultasBD{
                 "} ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
-            int contador=0;
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
+            int contador = 0;
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idPersona =
-                        (SimpleLiteral)bindingSet.getValue("idpersona");
+                        (SimpleLiteral) bindingSet.getValue("idpersona");
                 SimpleLiteral nombre =
-                        (SimpleLiteral)bindingSet.getValue("nombre");
+                        (SimpleLiteral) bindingSet.getValue("nombre");
                 SimpleLiteral apellido =
-                        (SimpleLiteral)bindingSet.getValue("apellido");
+                        (SimpleLiteral) bindingSet.getValue("apellido");
                 SimpleLiteral image =
-                        (SimpleLiteral)bindingSet.getValue("image");
+                        (SimpleLiteral) bindingSet.getValue("image");
                 SimpleLiteral idProyecto =
-                        (SimpleLiteral)bindingSet.getValue("id");
+                        (SimpleLiteral) bindingSet.getValue("id");
                 SimpleLiteral titulo =
-                        (SimpleLiteral)bindingSet.getValue("title");
+                        (SimpleLiteral) bindingSet.getValue("title");
                 SimpleLiteral tipo =
-                        (SimpleLiteral)bindingSet.getValue("tipo");
+                        (SimpleLiteral) bindingSet.getValue("tipo");
                 SimpleLiteral correo =
-                        (SimpleLiteral)bindingSet.getValue("correo");
+                        (SimpleLiteral) bindingSet.getValue("correo");
                 SimpleLiteral area =
-                        (SimpleLiteral)bindingSet.getValue("area");
+                        (SimpleLiteral) bindingSet.getValue("area");
                 String titlePersona = nombre.stringValue().concat(" ").concat(apellido.stringValue().concat("<br>").concat("Área: ").
                         concat(area.stringValue()).concat("<br>").concat("Correo: ").concat(correo.stringValue()));
-                Nodo nodoPersona = new Nodo(idPersona.stringValue(),nombre.stringValue().concat("\n").concat(apellido.stringValue()),"buscado",titlePersona, image.stringValue(),"circularImage");
-                String grupo=clasificacion(tipo.stringValue());
-                Nodo nodoProyecto = new Nodo(idProyecto.stringValue(),"",grupo,TraduccionEspacios(titulo.stringValue()).toUpperCase());
-                Relacion relacion = new Relacion(idPersona.stringValue(),idProyecto.stringValue());
-                if(contador==0){
+                Nodo nodoPersona = new Nodo(idPersona.stringValue(), nombre.stringValue().concat("\n").concat(apellido.stringValue()), "buscado", titlePersona, image.stringValue(), "circularImage");
+                String grupo = clasificacion(tipo.stringValue());
+                Nodo nodoProyecto = new Nodo(idProyecto.stringValue(), "", grupo, TraduccionEspacios(titulo.stringValue()).toUpperCase());
+                Relacion relacion = new Relacion(idPersona.stringValue(), idProyecto.stringValue());
+                if (contador == 0) {
                     listNodos.add(nodoPersona);
                 }
                 contador++;
                 listNodos.add(nodoProyecto);
                 listRelacion.add(relacion);
             }
-            NodoRelacion nr = new NodoRelacion(listNodos,listRelacion);
+            NodoRelacion nr = new NodoRelacion(listNodos, listRelacion);
             nodoRelacion.add(nr);
             json = builder.toJson(nodoRelacion.get(0));
             System.out.println(json);
-        }
-        catch (QueryEvaluationException  qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
@@ -1640,9 +1535,7 @@ public class consultasBD{
                 "} ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idPersona =
@@ -1650,12 +1543,9 @@ public class consultasBD{
                 json = idPersona.stringValue();
                 System.out.println(json);
             }
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-                result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
@@ -1670,21 +1560,16 @@ public class consultasBD{
                 "} ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idprojecto =
                         (SimpleLiteral) bindingSet.getValue("idprojecto");
                 json = idprojecto.stringValue();
             }
-        }
-        catch (QueryEvaluationException qee) {
+        } catch (QueryEvaluationException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
@@ -1707,29 +1592,23 @@ public class consultasBD{
                 busqueda+"','i')) } ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
-            while (result.hasNext()) {
-                BindingSet bindingSet = result.next();
-                SimpleLiteral idpersona =
-                        (SimpleLiteral) bindingSet.getValue("idpersona");
-                SimpleLiteral nombre =
-                        (SimpleLiteral) bindingSet.getValue("nombre");
-                SimpleLiteral apellido =
-                        (SimpleLiteral) bindingSet.getValue("apellido");
-                Objeto persona = new Objeto(idpersona.stringValue(),nombre.stringValue().concat(" ").concat(apellido.stringValue()).toUpperCase());
-                listaPersona.add(persona);
-            }
-            json = mapper.writeValueAsString(listaPersona);
-        }
-
-        catch (QueryEvaluationException | JsonProcessingException qee) {
-            logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
-        }
+       try (TupleQueryResult result = tupleQuery.evaluate()) {
+           while (result.hasNext()) {
+               BindingSet bindingSet = result.next();
+               SimpleLiteral idpersona =
+                       (SimpleLiteral) bindingSet.getValue("idpersona");
+               SimpleLiteral nombre =
+                       (SimpleLiteral) bindingSet.getValue("nombre");
+               SimpleLiteral apellido =
+                       (SimpleLiteral) bindingSet.getValue("apellido");
+               Objeto persona = new Objeto(idpersona.stringValue(), nombre.stringValue().concat(" ").concat(apellido.stringValue()).toUpperCase());
+               listaPersona.add(persona);
+           }
+           json = mapper.writeValueAsString(listaPersona);
+       } catch (QueryEvaluationException | JsonProcessingException qee) {
+           logger.error(WTF_MARKER,
+                   Arrays.toString(qee.getStackTrace()), qee);
+       }
         return json;
     }
 
@@ -1748,26 +1627,20 @@ public class consultasBD{
                 busqueda+"','i')) }";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idpersona =
                         (SimpleLiteral) bindingSet.getValue("idproyecto");
                 SimpleLiteral titulo =
                         (SimpleLiteral) bindingSet.getValue("titulo");
-                Objeto proyecto = new Objeto(idpersona.stringValue(),titulo.stringValue().toUpperCase());
+                Objeto proyecto = new Objeto(idpersona.stringValue(), titulo.stringValue().toUpperCase());
                 listaPersona.add(proyecto);
             }
             json = mapper.writeValueAsString(listaPersona);
-        }
-
-        catch (QueryEvaluationException | JsonProcessingException qee) {
+        } catch (QueryEvaluationException | JsonProcessingException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
@@ -1785,29 +1658,24 @@ public class consultasBD{
                 "?s rdfs:label ?tipo . } ORDER BY ?tipo ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral tipo =
                         (SimpleLiteral) bindingSet.getValue("tipo");
-                String tipopro = tipo.stringValue().substring(0,5);
-                if(tipopro.compareTo("http:")!=0){
-                    if(tipo.stringValue().compareTo("SIN ASIGNAR")!=0){
-                        Objeto otipo = new Objeto(tipo.stringValue(),tipo.stringValue().toUpperCase());
+                String tipopro = tipo.stringValue().substring(0, 5);
+                if (tipopro.compareTo("http:") != 0) {
+                    if (tipo.stringValue().compareTo("SIN ASIGNAR") != 0) {
+                        Objeto otipo = new Objeto(tipo.stringValue(), tipo.stringValue().toUpperCase());
                         listaTipo.add(otipo);
                     }
                 }
             }
             System.out.println(json);
             json = mapper.writeValueAsString(listaTipo);
-        }
-        catch (QueryEvaluationException | JsonProcessingException qee) {
+        } catch (QueryEvaluationException | JsonProcessingException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
@@ -1826,38 +1694,33 @@ public class consultasBD{
                 "?s rdfs:label ?area . } ORDER BY ?area ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             int contador = 0;
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral area =
                         (SimpleLiteral) bindingSet.getValue("area");
-                String tipoarea = area.stringValue().substring(0,5);
-                if(tipoarea.equalsIgnoreCase("http:")){
+                String tipoarea = area.stringValue().substring(0, 5);
+                if (tipoarea.equalsIgnoreCase("http:")) {
                     //comparar cadenas
-                }else{
-                    Objeto oarea = new Objeto(area.stringValue(),area.stringValue().toUpperCase());
+                } else {
+                    Objeto oarea = new Objeto(area.stringValue(), area.stringValue().toUpperCase());
                     listaArea.add(oarea);
                 }
                 contador++;
             }
             System.out.println(json);
             json = mapper.writeValueAsString(listaArea);
-        }
-        catch (QueryEvaluationException | JsonProcessingException qee) {
+        } catch (QueryEvaluationException | JsonProcessingException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
 
     public String ObtenerTotalTiposProyecto(int identificador) {
         System.out.println("ESTO ES"+identificador);
-        String strQuery="";
+        String strQuery;
         ArrayList<Objeto> listaArea = new ArrayList<>();
         String json="";
         ObjectMapper mapper = new ObjectMapper();
@@ -1886,26 +1749,21 @@ public class consultasBD{
         }
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral label =
                         (SimpleLiteral) bindingSet.getValue("label");
                 SimpleLiteral total =
                         (SimpleLiteral) bindingSet.getValue("total");
-                Objeto oarea = new Objeto(label.stringValue(),total.stringValue());
+                Objeto oarea = new Objeto(label.stringValue(), total.stringValue());
                 listaArea.add(oarea);
 
             }
             json = mapper.writeValueAsString(listaArea);
-        }
-        catch (QueryEvaluationException | JsonProcessingException qee) {
+        } catch (QueryEvaluationException | JsonProcessingException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
@@ -1924,32 +1782,27 @@ public class consultasBD{
                 "} GROUP BY ?tipo ORDER BY ?tipo ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral label =
                         (SimpleLiteral) bindingSet.getValue("label");
                 SimpleLiteral total =
                         (SimpleLiteral) bindingSet.getValue("total");
-                String tipo = label.stringValue().substring(0,5);
+                String tipo = label.stringValue().substring(0, 5);
                 Objeto oarea;
-                if(tipo.compareTo("http:")==0){
-                    oarea = new Objeto("SIN ASIGNAR",total.stringValue());
-                }else{
-                    oarea = new Objeto(label.stringValue(),total.stringValue());
+                if (tipo.compareTo("http:") == 0) {
+                    oarea = new Objeto("SIN ASIGNAR", total.stringValue());
+                } else {
+                    oarea = new Objeto(label.stringValue(), total.stringValue());
                 }
                 listaArea.add(oarea);
             }
             System.out.println(json);
             json = mapper.writeValueAsString(listaArea);
-        }
-        catch (QueryEvaluationException | JsonProcessingException qee) {
+        } catch (QueryEvaluationException | JsonProcessingException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
@@ -1968,9 +1821,7 @@ public class consultasBD{
                 "} GROUP BY ?tipo ORDER BY ?tipo ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             int finalizado = 0;
             Objeto estado = null;
             while (result.hasNext()) {
@@ -1980,33 +1831,34 @@ public class consultasBD{
                 SimpleLiteral total =
                         (SimpleLiteral) bindingSet.getValue("total");
                 String labelEstado = label.stringValue();
-                if(labelEstado.equals("anulado")){
-                    estado = new Objeto("ANULADO",total.stringValue());
-                }else if(labelEstado.equals("dado_de_baja")){
-                    estado = new Objeto("DADO DE BAJA",total.stringValue());
-                }else if(labelEstado.equals("ejecutandose")){
-                    estado = new Objeto("EJECUTÁNDOSE",total.stringValue());
-                }else if(labelEstado.equals("finalizado")){
-                    finalizado = finalizado + total.intValue();
-                }else{
-                    finalizado = finalizado + total.intValue();
+                switch (labelEstado) {
+                    case "anulado":
+                        estado = new Objeto("ANULADO", total.stringValue());
+                        break;
+                    case "dado_de_baja":
+                        estado = new Objeto("DADO DE BAJA", total.stringValue());
+                        break;
+                    case "ejecutandose":
+                        estado = new Objeto("EJECUTÁNDOSE", total.stringValue());
+                        break;
+                    case "finalizado":
+                    default:
+                        finalizado = finalizado + total.intValue();
+                        break;
                 }
-                if(estado!=null){
-                    if (listaEstado.contains(estado)==false){
+                if (estado != null) {
+                    if (!listaEstado.contains(estado)) {
                         listaEstado.add(estado);
                     }
                 }
             }
-            estado = new Objeto("FINALIZADO",String.valueOf(finalizado));
+            estado = new Objeto("FINALIZADO", String.valueOf(finalizado));
             listaEstado.add(estado);
             System.out.println(json);
             json = mapper.writeValueAsString(listaEstado);
-        }
-        catch (QueryEvaluationException | JsonProcessingException qee) {
+        } catch (QueryEvaluationException | JsonProcessingException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
@@ -2024,9 +1876,7 @@ public class consultasBD{
                 "} GROUP BY ?tipo ORDER BY ?tipo ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             Objeto estado = null;
             int estadoproyecto = 0;
             while (result.hasNext()) {
@@ -2036,44 +1886,44 @@ public class consultasBD{
                 SimpleLiteral total =
                         (SimpleLiteral) bindingSet.getValue("total");
                 String labelEstado = label.stringValue();
-                if(labelEstado.equals("Internacional")||labelEstado.equals("Local")||labelEstado.equals("Nacional")){
-                    if(labelEstado.equals("Internacional")){
-                        estado = new Objeto("INTERNACIONAL",total.stringValue());
-                    }else if(labelEstado.equals("Local")){
-                        estado = new Objeto("LOCAL",total.stringValue());
-                    }else if(labelEstado.equals("Nacional")){
-                        estadoproyecto = estadoproyecto + total.intValue();
+                if (labelEstado.equals("Internacional") || labelEstado.equals("Local") || labelEstado.equals("Nacional")) {
+                    switch (labelEstado) {
+                        case "Internacional":
+                            estado = new Objeto("INTERNACIONAL", total.stringValue());
+                            break;
+                        case "Local":
+                            estado = new Objeto("LOCAL", total.stringValue());
+                            break;
+                        case "Nacional":
+                            estadoproyecto = estadoproyecto + total.intValue();
+                            break;
                     }
-                }else{
+                } else {
                     estadoproyecto = estadoproyecto + total.intValue();
                 }
-                if(estado!=null){
-                    if (listaEstado.contains(estado)==false){
+                if (estado != null) {
+                    if (!listaEstado.contains(estado)) {
                         listaEstado.add(estado);
                     }
                 }
             }
-            estado = new Objeto("NACIONAL",String.valueOf(estadoproyecto));
+            estado = new Objeto("NACIONAL", String.valueOf(estadoproyecto));
             listaEstado.add(estado);
             System.out.println(json);
             json = mapper.writeValueAsString(listaEstado);
-        }
-        catch (QueryEvaluationException | JsonProcessingException qee) {
+        } catch (QueryEvaluationException | JsonProcessingException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
 
     public String ObtenerTopDocentes() {
-        String strQuery="";
+        String strQuery;
         ArrayList<Objeto> listaDocentes = new ArrayList<>();
         String json="";
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        strQuery ="";
         strQuery ="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
                 "PREFIX schema: <http://schema.org/> "+
                 "PREFIX j.2: <http://xmlns.com/foaf/0.1/> "+
@@ -2086,27 +1936,22 @@ public class consultasBD{
                 "} GROUP BY ?label ORDER BY DESC (?total) LIMIT 5 ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        try {
-            result = tupleQuery.evaluate();
-            Objeto nodo = null;
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
+            Objeto nodo;
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral label =
                         (SimpleLiteral) bindingSet.getValue("label");
                 SimpleLiteral total =
                         (SimpleLiteral) bindingSet.getValue("total");
-                nodo = new Objeto(label.stringValue(),total.stringValue());
+                nodo = new Objeto(label.stringValue(), total.stringValue());
                 System.out.println(nodo.getNombre());
                 listaDocentes.add(nodo);
             }
             json = mapper.writeValueAsString(listaDocentes);
-        }
-        catch (QueryEvaluationException | JsonProcessingException qee) {
+        } catch (QueryEvaluationException | JsonProcessingException qee) {
             logger.error(WTF_MARKER,
-                    qee.getStackTrace().toString(), qee);
-        } finally {
-            result.close();
+                    Arrays.toString(qee.getStackTrace()), qee);
         }
         return json;
     }
@@ -2126,50 +1971,45 @@ public class consultasBD{
                 "FILTER (!regex(?label, 'Participación','i')) . } ORDER BY DESC (?nombres) ";
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        Nodo nodo = null;
-        try {
-            result = tupleQuery.evaluate();
+        Nodo nodo;
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idproyecto =
-                        (SimpleLiteral)bindingSet.getValue("idproyecto");
+                        (SimpleLiteral) bindingSet.getValue("idproyecto");
                 SimpleLiteral titulo =
-                        (SimpleLiteral)bindingSet.getValue("titulo");
+                        (SimpleLiteral) bindingSet.getValue("titulo");
                 SimpleLiteral nombres =
-                        (SimpleLiteral)bindingSet.getValue("nombres");
+                        (SimpleLiteral) bindingSet.getValue("nombres");
                 SimpleLiteral area =
-                        (SimpleLiteral)bindingSet.getValue("area");
-                String tipoarea = area.stringValue().substring(0,5);
-                if(tipoarea.compareTo("http:")==0){
+                        (SimpleLiteral) bindingSet.getValue("area");
+                String tipoarea = area.stringValue().substring(0, 5);
+                if (tipoarea.compareTo("http:") == 0) {
                     nodo = new Nodo(idproyecto.stringValue(), titulo.stringValue(), nombres.stringValue(), "SIN ASIGNAR");
                     nodolista.add(nodo);
-                }else{
+                } else {
                     nodo = new Nodo(idproyecto.stringValue(), titulo.stringValue(), nombres.stringValue(), area.stringValue());
                     nodolista.add(nodo);
                 }
             }
-            ListaProyecto listaCompleta = null;
-            for(int i=0; i<nodolista.size(); i+=3){
-                Nodo nodo1 = new Nodo("","","","");
-                Nodo nodo2 = new Nodo("","","","");
-                Nodo nodo3 = new Nodo("","","","");
-                if(i<nodolista.size()){
-                    nodo1 = new Nodo(nodolista.get(i).getId(),nodolista.get(i).getLabel(),nodolista.get(i).getGroup(),nodolista.get(i).getTitle());
+            ListaProyecto listaCompleta;
+            for (int i = 0; i < nodolista.size(); i += 3) {
+                Nodo nodo1 = new Nodo("", "", "", "");
+                Nodo nodo2 = new Nodo("", "", "", "");
+                Nodo nodo3 = new Nodo("", "", "", "");
+                if (i < nodolista.size()) {
+                    nodo1 = new Nodo(nodolista.get(i).getId(), nodolista.get(i).getLabel(), nodolista.get(i).getGroup(), nodolista.get(i).getTitle());
                 }
-                if(i+1<nodolista.size()){
-                    nodo2 = new Nodo(nodolista.get(i+1).getId(),nodolista.get(i+1).getLabel(),nodolista.get(i+1).getGroup(),nodolista.get(i+1).getTitle());
+                if (i + 1 < nodolista.size()) {
+                    nodo2 = new Nodo(nodolista.get(i + 1).getId(), nodolista.get(i + 1).getLabel(), nodolista.get(i + 1).getGroup(), nodolista.get(i + 1).getTitle());
                 }
-                if(i+2<nodolista.size()){
-                    nodo3 = new Nodo(nodolista.get(i+2).getId(),nodolista.get(i+2).getLabel(),nodolista.get(i+2).getGroup(),nodolista.get(i+2).getTitle());
+                if (i + 2 < nodolista.size()) {
+                    nodo3 = new Nodo(nodolista.get(i + 2).getId(), nodolista.get(i + 2).getLabel(), nodolista.get(i + 2).getGroup(), nodolista.get(i + 2).getTitle());
                 }
-                listaCompleta = new ListaProyecto(nodo1,nodo2,nodo3);
+                listaCompleta = new ListaProyecto(nodo1, nodo2, nodo3);
                 list.add(listaCompleta);
             }
-        }
-        catch (QueryEvaluationException e) {
-        } finally {
-            result.close();
+        } catch (QueryEvaluationException ignored) {
         }
         return list;
     }
@@ -2192,7 +2032,7 @@ public class consultasBD{
         String strQueryMedio=" && ( ?area IN ( ";
         String strQueryMedio1=" && (regex(?nombres, '"+busqueda+"','i') || regex(?titulo, '"+busqueda+"','i')) ";
         String strQueryFin=" } ORDER BY DESC (?area) ";
-        if(lista.get(0).equals("todo")==false){
+        if(!lista.get(0).equals("todo")){
             for (int i=0; i<lista.size();i++){
                 if(lista.size()==i+1){
                     strQuery = strQuery.concat(strQueryMedio).concat("'").concat(lista.get(i)).concat("'))");
@@ -2201,7 +2041,7 @@ public class consultasBD{
                 }
             }
         }
-        if(busqueda.equals("vacio")==false){
+        if(!busqueda.equals("vacio")){
             strQuery=strQuery.concat(strQueryMedio1);
 
         }
@@ -2209,50 +2049,44 @@ public class consultasBD{
         System.out.println(strQuery);
         TupleQuery tupleQuery = con.getRepositoryConnection()
                 .prepareTupleQuery(QueryLanguage.SPARQL, strQuery);
-        TupleQueryResult result = null;
-        Nodo nodo = null;
-        try {
-            result = tupleQuery.evaluate();
+        Nodo nodo;
+        try (TupleQueryResult result = tupleQuery.evaluate()) {
             while (result.hasNext()) {
                 BindingSet bindingSet = result.next();
                 SimpleLiteral idproyecto =
-                        (SimpleLiteral)bindingSet.getValue("idproyecto");
+                        (SimpleLiteral) bindingSet.getValue("idproyecto");
                 SimpleLiteral titulo =
-                        (SimpleLiteral)bindingSet.getValue("titulo");
+                        (SimpleLiteral) bindingSet.getValue("titulo");
                 SimpleLiteral nombres =
-                        (SimpleLiteral)bindingSet.getValue("nombres");
+                        (SimpleLiteral) bindingSet.getValue("nombres");
                 SimpleLiteral area =
-                        (SimpleLiteral)bindingSet.getValue("area");
-                String tipoarea = area.stringValue().substring(0,5);
-                if(tipoarea.compareTo("http:")==0){
+                        (SimpleLiteral) bindingSet.getValue("area");
+                String tipoarea = area.stringValue().substring(0, 5);
+                if (tipoarea.compareTo("http:") == 0) {
                     nodo = new Nodo(idproyecto.stringValue(), titulo.stringValue(), nombres.stringValue(), "SIN ASIGNAR");
                     nodolista.add(nodo);
-                }else{
+                } else {
                     nodo = new Nodo(idproyecto.stringValue(), titulo.stringValue(), nombres.stringValue(), area.stringValue());
                     nodolista.add(nodo);
                 }
             }
-            ListaProyecto listaCompleta = null;
-            for(int i=0; i<nodolista.size(); i+=3){
-                Nodo nodo1 = new Nodo("","","","");
-                Nodo nodo2 = new Nodo("","","","");
-                Nodo nodo3 = new Nodo("","","","");
-                if(i<nodolista.size()){
-                    nodo1 = new Nodo(nodolista.get(i).getId(),nodolista.get(i).getLabel(),nodolista.get(i).getGroup(),nodolista.get(i).getTitle());
+            ListaProyecto listaCompleta;
+            for (int i = 0; i < nodolista.size(); i += 3) {
+                Nodo nodo1 = new Nodo("", "", "", "");
+                Nodo nodo2 = new Nodo("", "", "", "");
+                Nodo nodo3 = new Nodo("", "", "", "");
+                nodo1 = new Nodo(nodolista.get(i).getId(), nodolista.get(i).getLabel(), nodolista.get(i).getGroup(), nodolista.get(i).getTitle());
+                if (i + 1 < nodolista.size()) {
+                    nodo2 = new Nodo(nodolista.get(i + 1).getId(), nodolista.get(i + 1).getLabel(), nodolista.get(i + 1).getGroup(), nodolista.get(i + 1).getTitle());
                 }
-                if(i+1<nodolista.size()){
-                    nodo2 = new Nodo(nodolista.get(i+1).getId(),nodolista.get(i+1).getLabel(),nodolista.get(i+1).getGroup(),nodolista.get(i+1).getTitle());
+                if (i + 2 < nodolista.size()) {
+                    nodo3 = new Nodo(nodolista.get(i + 2).getId(), nodolista.get(i + 2).getLabel(), nodolista.get(i + 2).getGroup(), nodolista.get(i + 2).getTitle());
                 }
-                if(i+2<nodolista.size()){
-                    nodo3 = new Nodo(nodolista.get(i+2).getId(),nodolista.get(i+2).getLabel(),nodolista.get(i+2).getGroup(),nodolista.get(i+2).getTitle());
-                }
-                listaCompleta = new ListaProyecto(nodo1,nodo2,nodo3);
+                listaCompleta = new ListaProyecto(nodo1, nodo2, nodo3);
                 list.add(listaCompleta);
             }
 
-        }catch (QueryEvaluationException e) {
-        } finally {
-            result.close();
+        } catch (QueryEvaluationException ignored) {
         }
 
         return list;

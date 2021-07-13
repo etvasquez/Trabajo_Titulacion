@@ -23,19 +23,19 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 @Controller
 public class PrivateController {
     private final StorageService storageService;
-    consultasBD consultas = new consultasBD();
-    String localicacion="";
+    private final consultasBD consultas = new consultasBD();
+    private String localicacion="";
 
     @Autowired
     public PrivateController(StorageService storageService) {
@@ -64,7 +64,7 @@ public class PrivateController {
         String appName = consultas.InformacionProyecto(id);
         String tipoProyecto = consultas.BusquedaPorTipoProyecto();
         Gson gson = new Gson();
-        Type listType = new TypeToken<ArrayList<Objeto>>(){}.getType();
+        @SuppressWarnings("UnstableApiUsage") Type listType = new TypeToken<ArrayList<Objeto>>(){}.getType();
         ArrayList<Objeto> objeto = gson.fromJson(tipoProyecto, listType);
         Proyecto proyecto = gson.fromJson(appName, Proyecto.class);
         model.addAttribute("proyecto",proyecto);
@@ -78,9 +78,8 @@ public class PrivateController {
     }
 
     @PostMapping("/proyecto")
-    public String submitForm(@ModelAttribute("proyecto") Proyecto proyecto, Model model) throws IOException {
-        String estado = consultas.updateProject(proyecto);
-        localicacion=estado;
+    public String submitForm(@ModelAttribute("proyecto") Proyecto proyecto, Model model) {
+        localicacion= consultas.updateProject(proyecto);
         return "redirect:/editar_proyecto/"+proyecto.getId();
     }
 
@@ -97,11 +96,11 @@ public class PrivateController {
                                    RedirectAttributes redirectAttributes, @RequestParam("id") String id,
                                    @RequestParam("descripcion") String descripcion, @RequestParam("licencia")
                                                String licencia, Model model) {
-        String filename = StringUtils.cleanPath(file.getOriginalFilename());
+        String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
         int indexPunto = filename.indexOf( '.');
         String extension="";
         if(indexPunto!=-1){
-            extension = filename.substring(indexPunto,filename.length());
+            extension = filename.substring(indexPunto);
         }
         String baseUrl =
                 ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString().concat("/files/").concat(fileName).concat(extension);
